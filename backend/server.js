@@ -52,7 +52,8 @@ app.get('/', (req, res) => {
 });
 
 // remove app.listen completely
-if (process.env.NODE_ENV !== "production") {
+// Only start the server if running locally/directly
+if (require.main === module) {
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
         console.log(`Local server running at http://localhost:${PORT}`);
