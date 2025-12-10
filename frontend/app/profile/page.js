@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import Loader from '../../components/ui/Loader';
 
 export default function Profile() {
     const [user, setUser] = useState(null);
@@ -35,7 +36,7 @@ export default function Profile() {
         fetchProfile();
     }, []);
 
-    if (loading) return <div className="container" style={{ paddingTop: '40px' }}>Loading profile...</div>;
+    if (loading) return <Loader />;
     if (!user) return <div className="container" style={{ paddingTop: '40px' }}>User not found</div>;
 
     return (

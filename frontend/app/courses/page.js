@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import Loader from '../../components/ui/Loader';
 
 export default function Courses() {
     const [courses, setCourses] = useState([]);
@@ -22,7 +23,7 @@ export default function Courses() {
             });
     }, []);
 
-    if (loading) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Loading courses...</div>;
+    if (loading) return <Loader />;
 
     return (
         <div className="container" style={{ paddingTop: '40px' }}>

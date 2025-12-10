@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import Loader from '../../components/ui/Loader';
 import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
@@ -50,7 +51,7 @@ export default function Dashboard() {
         fetchProfile();
     }, [router]);
 
-    if (loading) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Loading...</div>;
+    if (loading) return <Loader />;
 
     if (!user) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Please <Link href="/login" style={{ color: 'var(--primary)' }}>login</Link> to view dashboard.</div>;
 

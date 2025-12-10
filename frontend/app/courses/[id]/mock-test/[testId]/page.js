@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
+import Loader from '../../../../../components/ui/Loader';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
@@ -156,7 +157,7 @@ export default function MockTestPage() {
         setPreviousResult(null);
     };
 
-    if (loading) return <div className="container" style={{ paddingTop: '40px' }}>Loading test...</div>;
+    if (loading) return <Loader />;
     if (!test) return <div className="container" style={{ paddingTop: '40px' }}>Test not found</div>;
 
     // Previous Result View

@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
 
         {/* Floating Query Button */}
         <a
-          href="https://forms.google.com/your-form-link"
+          href="https://forms.gle/nJFxEnBbGK3m8LtcA"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:scale-105 floating-query-btn"

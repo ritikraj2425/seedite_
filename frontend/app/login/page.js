@@ -6,10 +6,11 @@ import Link from 'next/link';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
+import Loader from '../../components/ui/Loader';
 
 export default function Login() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Loader />}>
             <LoginContent />
         </Suspense>
     );

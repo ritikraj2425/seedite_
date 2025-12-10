@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
+import Loader from '../../../../../components/ui/Loader';
+import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 import { ArrowLeft, PlayCircle } from 'lucide-react';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
 
@@ -74,7 +76,7 @@ export default function LecturePlayer() {
         router.push(`/courses/${courseId}/lecture/${newLectureId}`);
     };
 
-    if (loading) return <div className="container" style={{ paddingTop: '40px' }}>Loading lecture...</div>;
+    if (loading) return <Loader />;
     if (!course || !currentLecture) return <div className="container" style={{ paddingTop: '40px' }}>Lecture not found</div>;
 
     return (
@@ -107,14 +109,11 @@ export default function LecturePlayer() {
                                 title={currentLecture.title || 'Lecture Video'}
                             />
                         ) : (
-                            <video
-                                key={currentLecture._id}
-                                src={`${currentLecture.videoUrl}?token=${JSON.parse(localStorage.getItem('user') || '{}').token}`}
-                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                controls
-                                controlsList="nodownload"
-                                onContextMenu={(e) => e.preventDefault()}
-                            />
+                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                <VideoPlayer
+                                    src={`${currentLecture.videoUrl}?token=${JSON.parse(localStorage.getItem('user') || '{}').token}`}
+                                />
+                            </div>
                         )}
                     </div>
                 </Card>

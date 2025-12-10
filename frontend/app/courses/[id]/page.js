@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
+import Loader from '../../../components/ui/Loader';
 
 export default function CourseDetails() {
     const params = useParams();
@@ -75,7 +76,7 @@ export default function CourseDetails() {
         router.push(`/payment/${id}`);
     };
 
-    if (loading) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Loading course...</div>;
+    if (loading) return <Loader />;
     if (!course) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Course not found</div>;
 
     return (

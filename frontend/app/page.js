@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import Loader from '../components/ui/Loader';
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
@@ -11,7 +12,7 @@ export default function Home() {
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses`)
       .then(res => res.json())
-      .then(data => setCourses(data))
+      .then(data => setCourses(data.reverse()))
       .catch(err => console.error('Failed to fetch courses', err));
   }, []);
 
@@ -55,7 +56,7 @@ export default function Home() {
               </Card>
             ))
           ) : (
-            <p>Loading courses...</p>
+            <Loader />
           )}
         </div>
       </section>
