@@ -47,6 +47,16 @@ app.use('/api/payment', paymentRoutes);
 // Serve uploaded videos
 app.use('/uploads', express.static('uploads'));
 
+// Global Error Handler for Vercel Debugging
+app.use((err, req, res, next) => {
+    console.error('Global Error Handler:', err);
+    res.status(500).json({
+        message: 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
+
 app.get('/', (req, res) => {
     res.send('Seedite Education Platform API is running');
 });
