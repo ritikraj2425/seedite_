@@ -9,7 +9,7 @@ export default function Home() {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/courses')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses`)
       .then(res => res.json())
       .then(data => setCourses(data))
       .catch(err => console.error('Failed to fetch courses', err));

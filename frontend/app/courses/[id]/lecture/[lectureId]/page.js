@@ -31,7 +31,7 @@ export default function LecturePlayer() {
             }
 
             try {
-                const res = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses/${courseId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

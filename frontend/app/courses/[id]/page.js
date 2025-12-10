@@ -31,7 +31,7 @@ export default function CourseDetails() {
 
             try {
                 // First fetch user profile to check enrollment
-                const profileRes = await fetch('http://localhost:5000/api/users/profile', {
+                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -48,7 +48,7 @@ export default function CourseDetails() {
                 }
 
                 // Fetch course details
-                const res = await fetch(`http://localhost:5000/api/courses/${id}`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

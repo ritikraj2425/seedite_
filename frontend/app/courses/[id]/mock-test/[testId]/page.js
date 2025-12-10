@@ -32,7 +32,7 @@ export default function MockTestPage() {
 
             try {
                 // Fetch test
-                const testRes = await fetch(`http://localhost:5000/api/mock-tests/${testId}`, {
+                const testRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/mock-tests/${testId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!testRes.ok) throw new Error('Failed to fetch test');
@@ -40,7 +40,7 @@ export default function MockTestPage() {
                 setTest(testData);
 
                 // Check for previous result
-                const resultRes = await fetch(`http://localhost:5000/api/users/me/mock-test-results/${testId}`, {
+                const resultRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/me/mock-test-results/${testId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -127,7 +127,7 @@ export default function MockTestPage() {
         const token = savedUser.token;
 
         try {
-            await fetch(`http://localhost:5000/api/mock-tests/${testId}/submit`, {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/mock-tests/${testId}/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
