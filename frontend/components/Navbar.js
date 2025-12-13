@@ -14,11 +14,18 @@ const Navbar = () => {
     const dropdownRef = useRef(null);
 
     useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(savedUser));
-        }
+        const checkAuth = () => {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                setIsLoggedIn(true);
+                setUser(JSON.parse(savedUser));
+            } else {
+                setIsLoggedIn(false);
+                setUser(null);
+            }
+        };
+
+        checkAuth();
 
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -28,7 +35,7 @@ const Navbar = () => {
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [pathname]);
 
     const handleLogout = () => {
         localStorage.removeItem('user');

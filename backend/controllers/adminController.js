@@ -216,7 +216,7 @@ const updateMockTest = async (req, res) => {
             return res.status(404).json({ message: 'Mock Test not found' });
         }
 
-        const { title, duration, totalQuestions, passingScore, correctMarks, incorrectMarks, questions } = req.body;
+        const { title, duration, totalQuestions, passingScore, correctMarks, incorrectMarks, questions, videoSolutionKey } = req.body;
 
         mockTest.title = title || mockTest.title;
         mockTest.duration = duration || mockTest.duration;
@@ -225,6 +225,7 @@ const updateMockTest = async (req, res) => {
         mockTest.correctMarks = correctMarks !== undefined ? correctMarks : mockTest.correctMarks;
         mockTest.incorrectMarks = incorrectMarks !== undefined ? incorrectMarks : mockTest.incorrectMarks;
         if (questions) mockTest.questions = questions;
+        if (videoSolutionKey !== undefined) mockTest.videoSolutionKey = videoSolutionKey;
 
         const updatedMockTest = await mockTest.save();
         res.json(updatedMockTest);

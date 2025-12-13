@@ -1,29 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function CreateMockTestPage() {
+export default function EditMockTestPage() {
     const router = useRouter();
     const params = useParams();
     const courseId = params.id;
+    const testId = params.testId;
 
-    // Test Details
+    const [loading, setLoading] = useState(true);
     const [title, setTitle] = useState('');
-    const [duration, setDuration] = useState('180'); // minutes
-    const [totalQuestions, setTotalQuestions] = useState('10');
-    const [passingScore, setPassingScore] = useState('30');
-    const [correctMarks, setCorrectMarks] = useState('4');
-    const [incorrectMarks, setIncorrectMarks] = useState('-1');
-
-    // Video Solution - Using CloudFront video key
+    const [duration, setDuration] = useState('');
+    const [totalQuestions, setTotalQuestions] = useState('');
+    const [passingScore, setPassingScore] = useState('');
+    const [correctMarks, setCorrectMarks] = useState('');
+    const [incorrectMarks, setIncorrectMarks] = useState('');
     const [videoSolutionKey, setVideoSolutionKey] = useState('');
+    const [questions, setQuestions] = useState<any[]>([]);
 
-    // Questions
-    const [questions, setQuestions] = useState<any[]>([
-        { text: '', options: ['', '', '', ''], correctOption: 0, marks: 4 }
-    ]);
+    useEffect(() => {
+        fetchTestDetails();
+    }, [testId, router]);
+
+    const fetchTestDetails = async () => {
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+        if (!adminUser.token) {
+            router.push('/login');
+            return;
+        }
+
+        try {
+            // Note: Currently fetching from main API, assuming admin access works or using admin specific route if needed.
+            // Adjust URL if there is a specific admin route for fetching single test details
+            const res = await fetch(`http://localhost:5000/api/mock-tests/${testId}`, {
+                headers: { 'Authorization': `Bearer ${adminUser.token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setTitle(data.title);
+                setDuration(data.duration.toString());
+                setTotalQuestions(data.totalQuestions.toString());
+                setPassingScore(data.passingScore.toString());
+                setCorrectMarks(data.correctMarks.toString());
+                setIncorrectMarks(data.incorrectMarks.toString());
+                setVideoSolutionKey(data.videoSolutionKey || ''); // Assuming this field exists or needs key extraction from URL
+
+                // Ensure questions have at least 4 options structure
+                const formattedQuestions = (data.questions || []).map((q: any) => ({
+                    ...q,
+                    options: q.options || ['', '', '', ''],
+                    correctOption: q.correctOptionIndex !== undefined ? q.correctOptionIndex : 0,
+                    marks: q.marks || 4
+                }));
+                setQuestions(formattedQuestions);
+            } else {
+                console.error('Failed to fetch test details');
+                // Create a basic fallback or error state if needed
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleQuestionChange = (index: number, field: string, value: any) => {
         const newQuestions = [...questions];
@@ -60,8 +102,8 @@ export default function CreateMockTestPage() {
         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
         try {
-            const res = await fetch('http://localhost:5000/api/admin/mock-tests', {
-                method: 'POST',
+            const res = await fetch(`http://localhost:5000/api/admin/mock-tests/${testId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${adminUser.token}`
@@ -73,22 +115,26 @@ export default function CreateMockTestPage() {
                     passingScore: parseInt(passingScore),
                     correctMarks: parseInt(correctMarks),
                     incorrectMarks: parseInt(incorrectMarks),
-                    videoSolutionKey,  // CloudFront file key
-                    courseId,
-                    questions
+                    videoSolutionKey,
+                    questions: questions.map(q => ({
+                        ...q,
+                        correctOptionIndex: q.correctOption // Map back to backend expected field
+                    }))
                 })
             });
 
             if (res.ok) {
-                alert('Mock Test created successfully!');
+                alert('Mock Test updated successfully!');
                 router.push(`/courses/${courseId}`);
             } else {
-                alert('Failed to create mock test');
+                alert('Failed to update mock test');
             }
         } catch (error) {
-            alert('Error creating mock test');
+            alert('Error updating mock test');
         }
     };
+
+    if (loading) return <div className="p-8 bg-black text-white">Loading...</div>;
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -97,7 +143,7 @@ export default function CreateMockTestPage() {
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center space-x-4">
                             <Link href={`/courses/${courseId}`} className="text-gray-400 hover:text-white">← Back</Link>
-                            <h1 className="text-2xl font-bold">Create Mock Test</h1>
+                            <h1 className="text-2xl font-bold">Edit Mock Test</h1>
                         </div>
                     </div>
                 </div>
@@ -133,6 +179,8 @@ export default function CreateMockTestPage() {
                                 <label className="block text-sm font-medium mb-1">Passing Score</label>
                                 <input
                                     type="number"
+                                    value={passingScore}
+                                    onChange={(e) => setPassingScore(e.target.value)}
                                     className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                     required
                                 />
@@ -160,7 +208,7 @@ export default function CreateMockTestPage() {
                         </div>
                     </div>
 
-                    {/* Video Solution - CloudFront Key */}
+                    {/* Video Solution Details - CloudFront Key */}
                     <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
                         <h2 className="text-xl font-bold mb-4">Video Solution (Optional)</h2>
                         <p className="text-gray-400 text-sm mb-4">Enter CloudFront video key for the solution video shown after test completion</p>
@@ -207,7 +255,7 @@ export default function CreateMockTestPage() {
                                     <input
                                         type="text"
                                         placeholder="Enter question text..."
-                                        value={q.text}
+                                        value={q.text || q.questionText} // Handle differences in fetch vs state
                                         onChange={(e) => handleQuestionChange(qIndex, 'text', e.target.value)}
                                         className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white"
                                         required
@@ -301,7 +349,7 @@ export default function CreateMockTestPage() {
                                     : 'bg-white text-black hover:bg-gray-200'
                                 }`}
                         >
-                            {uploading ? 'Uploading Images...' : 'Create Mock Test'}
+                            {uploading ? 'Uploading Images...' : 'Update Mock Test'}
                         </button>
                     </div>
                 </form>

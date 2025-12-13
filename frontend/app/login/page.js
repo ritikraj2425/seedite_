@@ -53,7 +53,7 @@ function LoginContent() {
             localStorage.setItem('user', JSON.stringify(data));
 
             router.push(redirectUrl);
-            setTimeout(() => window.location.reload(), 100);
+            router.refresh();
         } catch (err) {
             setError(err.message);
         }

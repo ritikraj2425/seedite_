@@ -7,6 +7,7 @@ import Card from '../../../../../components/ui/Card';
 import Loader from '../../../../../components/ui/Loader';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 
 export default function MockTestPage() {
     const params = useParams();
@@ -160,56 +161,226 @@ export default function MockTestPage() {
     if (loading) return <Loader />;
     if (!test) return <div className="container" style={{ paddingTop: '40px' }}>Test not found</div>;
 
-    // Previous Result View
-    if (viewMode === 'previousResult' && previousResult) {
+    // Review Mode (Reuse similar layout to Test view but with answers shown)
+    if (viewMode === 'previousResult' || (viewMode === 'result' && submitted)) {
+        const currentQ = test.questions[currentQuestion];
+        const resultToDisplay = viewMode === 'previousResult' ? previousResult : {
+            score: score,
+            normalizedScore: normalizedScore,
+            answers: answers
+        };
+
+        const userAnswerIndex = (resultToDisplay.answers || {})[currentQuestion];
+        const isCorrect = userAnswerIndex === currentQ.correctOptionIndex;
+        const isSkipped = userAnswerIndex === undefined;
+
         return (
-            <div className="container" style={{ paddingTop: '40px', maxWidth: '900px' }}>
-                <Card style={{ padding: '32px', marginBottom: '24px', textAlign: 'center', background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(236, 72, 153, 0.1))' }}>
-                    <h2 style={{ fontSize: '2rem', marginBottom: '16px' }}>You've already taken this test</h2>
-                    <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '8px' }}>
-                        {previousResult.normalizedScore || 0} / 10
+            <div className="container" style={{ paddingTop: '40px', maxWidth: '1200px' }}>
+                <div style={{ marginBottom: '24px' }}>
+                    <Button variant="outline" onClick={() => router.push(`/courses/${id}`)}>
+                        Back to Course
+                    </Button>
+                </div>
+
+                {/* Score Card Summary */}
+                <Card style={{ padding: '32px', marginBottom: '32px', borderLeft: '4px solid #6366f1' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
+                        <div>
+                            <h2 style={{ fontSize: '1.8rem', marginBottom: '8px', fontWeight: 'bold' }}>Test Results</h2>
+                            <p style={{ color: '#64748b' }}>{test.title}</p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#6366f1' }}>
+                                {resultToDisplay.normalizedScore} / 10
+                            </div>
+                            <p style={{ color: '#64748b' }}>Raw Score: {resultToDisplay.score}</p>
+                        </div>
                     </div>
-                    <p style={{ fontSize: '1.2rem', color: '#64748b', marginBottom: '24px' }}>
-                        Raw Score: {previousResult.score} | Normalized Score: {previousResult.normalizedScore}
-                    </p>
-                    <p style={{ color: '#64748b', marginBottom: '24px' }}>
-                        Taken on: {new Date(previousResult.completedAt).toLocaleDateString()}
-                    </p>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                        <Button onClick={handleRetake}>
-                            🔄 Retake Test
-                        </Button>
-                        <Button variant="outline" onClick={() => router.push(`/courses/${id}`)}>
-                            ← Back to Course
-                        </Button>
-                    </div>
+                    {viewMode === 'result' && (
+                        <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+                            <Button onClick={handleRetake}>Retake Test</Button>
+                        </div>
+                    )}
+                    {viewMode === 'previousResult' && (
+                        <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+                            <Button onClick={handleRetake}>Retake Test</Button>
+                        </div>
+                    )}
                 </Card>
 
-                {test.videoSolutionUrl && (
-                    <Card style={{ padding: '24px' }}>
-                        <h3 style={{ fontSize: '1.5rem', marginBottom: '16px', color: '#2563eb' }}>📹 Video Solution</h3>
-                        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', background: '#000', borderRadius: '12px' }}>
-                            {test.videoSolutionUrl.includes('youtube.com') || test.videoSolutionUrl.includes('youtu.be') ? (
-                                <iframe
-                                    src={convertToYouTubeEmbed(test.videoSolutionUrl)}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    title="Video Solution"
-                                />
-                            ) : (
-                                <video
-                                    src={`${test.videoSolutionUrl}?token=${JSON.parse(localStorage.getItem('user') || '{}').token}`}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                    controls
-                                    controlsList="nodownload"
-                                    onContextMenu={(e) => e.preventDefault()}
-                                />
+                <div className="responsive-grid" style={{ gridTemplateColumns: '3fr 1fr' }}>
+                    {/* Main Question Review Area */}
+                    <div>
+                        <Card style={{ padding: '32px', marginBottom: '24px' }}>
+                            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ background: '#f1f5f9', padding: '4px 12px', borderRadius: '4px', fontSize: '0.9rem', fontWeight: 500 }}>
+                                    Question {currentQuestion + 1} of {test.questions.length}
+                                </span>
+                                <span style={{
+                                    padding: '4px 12px',
+                                    borderRadius: '4px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 'bold',
+                                    background: isCorrect ? '#dcfce7' : isSkipped ? '#f3f4f6' : '#fee2e2',
+                                    color: isCorrect ? '#166534' : isSkipped ? '#4b5563' : '#991b1b'
+                                }}>
+                                    {isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Incorrect'}
+                                </span>
+                            </div>
+
+                            <div style={{ marginBottom: '32px' }}>
+                                {currentQ.image && (
+                                    <div style={{ marginBottom: '24px' }}>
+                                        <img src={currentQ.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px' }} />
+                                    </div>
+                                )}
+                                <h2 style={{ fontSize: '1.25rem', marginBottom: '24px', lineHeight: '1.6' }}>
+                                    {currentQ.questionText}
+                                </h2>
+
+                                <div style={{ display: 'grid', gap: '12px' }}>
+                                    {currentQ.options.map((option, optIndex) => {
+                                        const isSelected = userAnswerIndex === optIndex;
+                                        const isCorrectOption = currentQ.correctOptionIndex === optIndex;
+
+                                        let borderColor = '#e2e8f0';
+                                        let bgColor = 'white';
+                                        let icon = null;
+
+                                        if (isCorrectOption) {
+                                            borderColor = '#22c55e'; // Green
+                                            bgColor = 'rgba(34, 197, 94, 0.1)';
+                                            icon = <CheckCircle size={18} color="#16a34a" />;
+                                        } else if (isSelected && !isCorrectOption) {
+                                            borderColor = '#ef4444'; // Red
+                                            bgColor = 'rgba(239, 68, 68, 0.1)';
+                                            icon = <XCircle size={18} color="#dc2626" />;
+                                        } else if (isSelected) {
+                                            // Selected and correct (handled above generally, but safeguard)
+                                            borderColor = '#22c55e';
+                                            bgColor = 'rgba(34, 197, 94, 0.1)';
+                                            icon = <CheckCircle size={18} color="#16a34a" />;
+                                        }
+
+                                        return (
+                                            <div
+                                                key={optIndex}
+                                                style={{
+                                                    padding: '16px',
+                                                    border: `2px solid ${borderColor}`,
+                                                    background: bgColor,
+                                                    borderRadius: '8px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '12px'
+                                                }}
+                                            >
+                                                <div style={{ flex: 1 }}>{option}</div>
+                                                {icon}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {currentQ.explanation && (
+                                <div style={{ marginTop: '24px', padding: '20px', background: '#f8fafc', borderRadius: '8px', borderLeft: '4px solid #3b82f6' }}>
+                                    <h4 style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: '8px', color: '#1e3a8a' }}>Explanation</h4>
+                                    <p style={{ color: '#334155', lineHeight: '1.6' }}>{currentQ.explanation}</p>
+                                </div>
                             )}
+                        </Card>
+
+                        {/* Navigation */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
+                                disabled={currentQuestion === 0}
+                            >
+                                Previous
+                            </Button>
+                            <Button
+                                onClick={() => setCurrentQuestion(Math.min(test.questions.length - 1, currentQuestion + 1))}
+                                disabled={currentQuestion === test.questions.length - 1}
+                            >
+                                Next
+                            </Button>
                         </div>
+                    </div>
+
+                    {/* Question Palette for Review */}
+                    <Card style={{ padding: '20px', maxHeight: 'calc(100vh - 100px)', overflowY: 'auto', position: 'sticky', top: '100px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Questions</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                            {test.questions.map((q, index) => {
+                                const ans = resultToDisplay.answers[index];
+                                const isCorr = ans === q.correctOptionIndex;
+                                const isSkip = ans === undefined;
+                                const isCurr = index === currentQuestion;
+
+                                return (
+                                    <div
+                                        key={index}
+                                        onClick={() => setCurrentQuestion(index)}
+                                        style={{
+                                            width: '100%',
+                                            aspectRatio: '1',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            fontWeight: 500,
+                                            background: isCurr ? '#3b82f6' : isSkip ? '#f1f5f9' : isCorr ? '#dcfce7' : '#fee2e2',
+                                            color: isCurr ? 'white' : isSkip ? '#64748b' : isCorr ? '#166534' : '#991b1b',
+                                            border: isCurr ? '2px solid #2563eb' : '1px solid transparent'
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div style={{ marginTop: '24px', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '12px', height: '12px', borderRadius: '2px', background: '#dcfce7' }}></div> Correct
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '12px', height: '12px', borderRadius: '2px', background: '#fee2e2' }}></div> Incorrect
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '12px', height: '12px', borderRadius: '2px', background: '#f1f5f9' }}></div> Skipped
+                            </div>
+                        </div>
+
+
+                        {/* Video Solution moved to main area */}
+                        {test.videoSolutionUrl && (
+                            <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e2e8f0' }}>
+                                <h4 style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '12px' }}>Video Solution</h4>
+                                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', background: '#000', borderRadius: '8px' }}>
+                                    {test.videoSolutionUrl.includes('youtube.com') || test.videoSolutionUrl.includes('youtu.be') ? (
+                                        <iframe
+                                            src={convertToYouTubeEmbed(test.videoSolutionUrl)}
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                            frameBorder="0"
+                                            allowFullScreen
+                                        />
+                                    ) : (
+                                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                            <VideoPlayer
+                                                src={`${test.videoSolutionUrl}?token=${JSON.parse(localStorage.getItem('user') || '{}').token}`}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </Card>
-                )}
+                </div>
             </div>
         );
     }
@@ -221,10 +392,10 @@ export default function MockTestPage() {
             <div className="container" style={{ paddingTop: '40px', maxWidth: '1200px' }}>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <h1>{test.title}</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: timeRemaining < 600 ? '#fee2e2' : '#f8fafc', padding: '12px 24px', borderRadius: '8px', border: `2px solid ${timeRemaining < 600 ? '#ef4444' : '#e2e8f0'}` }}>
-                        <Clock size={20} color={timeRemaining < 600 ? '#ef4444' : '#64748b'} />
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: timeRemaining < 600 ? '#ef4444' : '#0f172a' }}>
+                    <h1 style={{ fontSize: '1.5rem' }}>{test.title}</h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: timeRemaining < 300 ? '#fee2e2' : 'white', padding: '8px 16px', borderRadius: '6px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                        <Clock size={18} color={timeRemaining < 300 ? '#ef4444' : '#64748b'} />
+                        <span style={{ fontSize: '1.1rem', fontWeight: 600, color: timeRemaining < 300 ? '#ef4444' : '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
                             {formatTime(timeRemaining)}
                         </span>
                     </div>
@@ -235,14 +406,21 @@ export default function MockTestPage() {
                     <div>
                         <Card style={{ padding: '32px', marginBottom: '24px' }}>
                             <div style={{ marginBottom: '24px' }}>
-                                <span style={{ background: '#2563eb', color: 'white', padding: '4px 12px', borderRadius: '4px', fontSize: '0.9rem' }}>
+                                <span style={{ background: '#e0e7ff', color: '#4338ca', padding: '4px 12px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
                                     Question {currentQuestion + 1} of {test.questions.length}
                                 </span>
                             </div>
-                            <h2 style={{ fontSize: '1.3rem', marginBottom: '24px', lineHeight: '1.6' }}>
+
+                            {currentQ.image && (
+                                <div style={{ marginBottom: '24px' }}>
+                                    <img src={currentQ.image} alt="Question" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px' }} />
+                                </div>
+                            )}
+
+                            <h2 style={{ fontSize: '1.25rem', marginBottom: '32px', lineHeight: '1.6', fontWeight: 500 }}>
                                 {currentQ.questionText}
                             </h2>
-                            <div style={{ display: 'grid', gap: '12px' }}>
+                            <div style={{ display: 'grid', gap: '16px' }}>
                                 {currentQ.options.map((option, optIndex) => {
                                     const isSelected = answers[currentQuestion] === optIndex;
                                     return (
@@ -250,33 +428,32 @@ export default function MockTestPage() {
                                             key={optIndex}
                                             onClick={() => handleOptionSelect(currentQuestion, optIndex)}
                                             style={{
-                                                padding: '16px',
-                                                border: `2px solid ${isSelected ? '#2563eb' : '#e2e8f0'}`,
-                                                background: isSelected ? 'rgba(37, 99, 235, 0.1)' : 'white',
-                                                borderRadius: '10px',
+                                                padding: '16px 20px',
+                                                border: `2px solid ${isSelected ? '#6366f1' : '#e2e8f0'}`,
+                                                background: isSelected ? '#eef2ff' : 'white',
+                                                borderRadius: '8px',
                                                 cursor: 'pointer',
-                                                transition: 'all 0.2s',
+                                                transition: 'all 0.2s ease',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '12px'
+                                                gap: '16px'
                                             }}
+                                            className="hover:border-indigo-300"
                                         >
                                             <div style={{
-                                                width: '24px',
-                                                height: '24px',
+                                                width: '20px',
+                                                height: '20px',
                                                 borderRadius: '50%',
-                                                border: `2px solid ${isSelected ? '#2563eb' : '#cbd5e1'}`,
-                                                background: isSelected ? '#2563eb' : 'white',
+                                                border: `2px solid ${isSelected ? '#6366f1' : '#cbd5e1'}`,
+                                                background: isSelected ? '#6366f1' : 'white',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                color: 'white',
-                                                fontSize: '12px',
-                                                fontWeight: 'bold'
+                                                flexShrink: 0
                                             }}>
-                                                {isSelected && '✓'}
+                                                {isSelected && <div style={{ width: '8px', height: '8px', background: 'white', borderRadius: '50%' }}></div>}
                                             </div>
-                                            <span style={{ fontWeight: isSelected ? 500 : 400 }}>{option}</span>
+                                            <span style={{ fontSize: '1rem', color: isSelected ? '#312e81' : '#334155' }}>{option}</span>
                                         </div>
                                     );
                                 })}
@@ -289,26 +466,28 @@ export default function MockTestPage() {
                                 variant="outline"
                                 onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
                                 disabled={currentQuestion === 0}
-                                style={{ opacity: currentQuestion === 0 ? 0.5 : 1 }}
                             >
-                                ← Previous
+                                Previous
                             </Button>
-                            <Button onClick={handleSubmit} style={{ background: '#16a34a' }}>
-                                Submit Test
-                            </Button>
-                            <Button
-                                onClick={() => setCurrentQuestion(Math.min(test.questions.length - 1, currentQuestion + 1))}
-                                disabled={currentQuestion === test.questions.length - 1}
-                                style={{ opacity: currentQuestion === test.questions.length - 1 ? 0.5 : 1 }}
-                            >
-                                Next →
-                            </Button>
+
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <Button
+                                    onClick={() => setCurrentQuestion(Math.min(test.questions.length - 1, currentQuestion + 1))}
+                                    disabled={currentQuestion === test.questions.length - 1}
+                                    variant="outline"
+                                >
+                                    Next
+                                </Button>
+                                <Button onClick={handleSubmit} style={{ background: '#10b981', border: 'none' }}>
+                                    Submit Test
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
                     {/* Question Palette */}
-                    <Card style={{ padding: '16px', maxHeight: '600px', overflowY: 'auto', position: 'sticky', top: '100px' }}>
-                        <h3 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>Questions</h3>
+                    <Card style={{ padding: '20px', maxHeight: 'calc(100vh - 100px)', overflowY: 'auto', position: 'sticky', top: '100px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Test Overview</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                             {test.questions.map((_, index) => {
                                 const answered = answers[index] !== undefined;
@@ -318,18 +497,18 @@ export default function MockTestPage() {
                                         key={index}
                                         onClick={() => setCurrentQuestion(index)}
                                         style={{
-                                            width: '40px',
-                                            height: '40px',
+                                            width: '100%',
+                                            aspectRatio: '1',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            borderRadius: '8px',
+                                            borderRadius: '6px',
                                             cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                            fontSize: '0.9rem',
-                                            background: isCurrent ? '#2563eb' : answered ? '#16a34a' : '#e2e8f0',
+                                            fontWeight: 500,
+                                            fontSize: '0.85rem',
+                                            background: isCurrent ? '#4f46e5' : answered ? '#10b981' : '#f1f5f9',
                                             color: isCurrent || answered ? 'white' : '#64748b',
-                                            border: `2px solid ${isCurrent ? '#1e40af' : 'transparent'}`
+                                            transition: 'all 0.2s'
                                         }}
                                     >
                                         {index + 1}
@@ -337,24 +516,19 @@ export default function MockTestPage() {
                                 );
                             })}
                         </div>
-                        <div style={{ marginTop: '16px', fontSize: '0.85rem' }}>
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                <div style={{ width: '16px', height: '16px', background: '#16a34a', borderRadius: '4px' }}></div>
+                        <div style={{ marginTop: '20px', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <div style={{ width: '12px', height: '12px', background: '#10b981', borderRadius: '3px' }}></div>
                                 <span>Answered</span>
                             </div>
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                <div style={{ width: '16px', height: '16px', background: '#e2e8f0', borderRadius: '4px' }}></div>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <div style={{ width: '12px', height: '12px', background: '#f1f5f9', borderRadius: '3px' }}></div>
                                 <span>Not Answered</span>
                             </div>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <div style={{ width: '16px', height: '16px', background: '#2563eb', borderRadius: '4px', border: '2px solid #1e40af' }}></div>
+                                <div style={{ width: '12px', height: '12px', background: '#4f46e5', borderRadius: '3px' }}></div>
                                 <span>Current</span>
                             </div>
-                        </div>
-                        <div style={{ marginTop: '16px', padding: '12px', background: '#fef3c7', borderRadius: '8px' }}>
-                            <p style={{ fontSize: '0.85rem', color: '#92400e' }}>
-                                <strong>Marking:</strong> +4 correct, -1 incorrect, 0 unanswered
-                            </p>
                         </div>
                     </Card>
                 </div>
@@ -362,119 +536,6 @@ export default function MockTestPage() {
         );
     }
 
-    // Results View (after submission)
-    if (viewMode === 'result' && submitted) {
-        return (
-            <div className="container" style={{ paddingTop: '40px', maxWidth: '900px' }}>
-                <Card style={{ textAlign: 'center', padding: '48px', marginBottom: '32px', background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(236, 72, 153, 0.1))', borderColor: '#2563eb', borderWidth: '2px' }}>
-                    <h2 style={{ fontSize: '2rem', marginBottom: '16px' }}>Test Completed! 🎉</h2>
-                    <div style={{ fontSize: '3.5rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '8px' }}>
-                        {normalizedScore} / 10
-                    </div>
-                    <p style={{ fontSize: '1.2rem', color: '#64748b', marginBottom: '8px' }}>
-                        Raw Score: {score} points
-                    </p>
-                    <p style={{ fontSize: '1rem', color: '#64748b', marginBottom: '32px' }}>
-                        Answered: {Object.keys(answers).length} / {test.questions.length}
-                    </p>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                        <Button onClick={handleRetake}>
-                            🔄 Retake Test
-                        </Button>
-                        <Button variant="outline" onClick={() => router.push(`/courses/${id}`)}>
-                            ← Back to Course
-                        </Button>
-                    </div>
-                </Card>
-
-                {/* Video Solution */}
-                {test.videoSolutionUrl && (
-                    <Card style={{ padding: '24px', marginBottom: '32px' }}>
-                        <h3 style={{ fontSize: '1.5rem', marginBottom: '16px', color: '#2563eb' }}>📹 Video Solution</h3>
-                        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', background: '#000', borderRadius: '12px' }}>
-                            {test.videoSolutionUrl.includes('youtube.com') || test.videoSolutionUrl.includes('youtu.be') ? (
-                                <iframe
-                                    src={convertToYouTubeEmbed(test.videoSolutionUrl)}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    title="Video Solution"
-                                />
-                            ) : (
-                                <video
-                                    src={`${test.videoSolutionUrl}?token=${JSON.parse(localStorage.getItem('user') || '{}').token}`}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                    controls
-                                    controlsList="nodownload"
-                                    onContextMenu={(e) => e.preventDefault()}
-                                />
-                            )}
-                        </div>
-                    </Card>
-                )}
-
-                {/* Answer Review */}
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '20px' }}>📝 Review Your Answers</h3>
-                {test.questions.map((q, index) => {
-                    const userAnswer = answers[index];
-                    const isCorrect = userAnswer === q.correctOptionIndex;
-                    const wasAnswered = userAnswer !== undefined;
-
-                    return (
-                        <Card key={index} style={{
-                            marginBottom: '20px',
-                            padding: '20px',
-                            borderLeft: `4px solid ${!wasAnswered ? '#f59e0b' : isCorrect ? '#4ade80' : '#f87171'}`
-                        }}>
-                            <h4 style={{ marginBottom: '16px', fontSize: '1.1rem' }}>
-                                Question {index + 1}: {q.questionText}
-                            </h4>
-                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '12px' }}>
-                                {wasAnswered ? (
-                                    <>
-                                        <div style={{ marginBottom: '8px' }}>
-                                            <strong style={{ color: isCorrect ? '#16a34a' : '#dc2626' }}>
-                                                Your Answer:
-                                            </strong>
-                                            <span style={{ marginLeft: '8px', color: isCorrect ? '#16a34a' : '#dc2626' }}>
-                                                {q.options[userAnswer]}
-                                                {isCorrect ? ' ✓' : ' ✗'}
-                                            </span>
-                                        </div>
-                                        {!isCorrect && (
-                                            <div>
-                                                <strong style={{ color: '#16a34a' }}>
-                                                    Correct Answer:
-                                                </strong>
-                                                <span style={{ marginLeft: '8px', color: '#16a34a' }}>
-                                                    {q.options[q.correctOptionIndex]} ✓
-                                                </span>
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <div style={{ color: '#f59e0b' }}>
-                                        <strong>Not Answered</strong>
-                                        <div style={{ marginTop: '8px' }}>
-                                            <strong style={{ color: '#16a34a' }}>Correct Answer: </strong>
-                                            <span style={{ color: '#16a34a' }}>{q.options[q.correctOptionIndex]}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            {q.explanation && (
-                                <div style={{ background: '#fef3c7', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #f59e0b' }}>
-                                    <strong style={{ color: '#92400e' }}>💡 Explanation: </strong>
-                                    <span style={{ color: '#78350f' }}>{q.explanation}</span>
-                                </div>
-                            )}
-                        </Card>
-                    );
-                })}
-            </div>
-        );
-    }
-
     return null;
+
 }

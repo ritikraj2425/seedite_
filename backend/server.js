@@ -42,6 +42,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/mock-tests', mockTestRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/upload', require('./routes/upload'));
 app.use('/api/payment', paymentRoutes);
 
 // Serve uploaded videos

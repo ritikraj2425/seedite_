@@ -95,17 +95,56 @@ export default function VideoPlayer({ src, poster }) {
         }
     };
 
-    const toggleFullscreen = () => {
-        if (!containerRef.current) return;
+    const toggleFullscreen = async () => {
+        const video = videoRef.current;
+        const container = containerRef.current;
 
-        if (!document.fullscreenElement) {
-            containerRef.current.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable fullscreen: ${err.message}`);
-            });
-            setIsFullscreen(true);
-        } else {
-            document.exitFullscreen();
-            setIsFullscreen(false);
+        if (!video || !container) return;
+
+        try {
+            // Standard Fullscreen (Desktop / Android)
+            if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    // Enter Fullscreen
+                    if (container.requestFullscreen) {
+                        await container.requestFullscreen();
+                    } else if (container.webkitRequestFullscreen) {
+                        await container.webkitRequestFullscreen();
+                    }
+
+                    setIsFullscreen(true);
+
+                    // Attempt Landscape Lock (Android)
+                    if (screen.orientation && screen.orientation.lock) {
+                        try {
+                            await screen.orientation.lock('landscape');
+                        } catch (err) {
+                            // Orientation lock might fail on some devices/browsers, safe to ignore
+                            console.log('Orientation lock not supported or blocked');
+                        }
+                    }
+                } else {
+                    // Exit Fullscreen
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        await document.webkitExitFullscreen();
+                    }
+                    setIsFullscreen(false);
+
+                    // Unlock Orientation
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                }
+            }
+            // iOS Fallback (Use Native Player)
+            else if (video.webkitEnterFullscreen) {
+                video.webkitEnterFullscreen();
+                // iOS native player handles controls and orientation automatically
+            }
+        } catch (err) {
+            console.error(`Error attempting to enable fullscreen: ${err.message}`);
         }
         setShowSettings(false);
     };
@@ -166,6 +205,7 @@ export default function VideoPlayer({ src, poster }) {
                 onClick={togglePlay}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onContextMenu={(e) => e.preventDefault()}
+                playsInline
             />
 
             {/* Controls Overlay */}
@@ -181,7 +221,7 @@ export default function VideoPlayer({ src, poster }) {
                 pointerEvents: showControls ? 'auto' : 'none',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px'
+                gap: '12px',
             }}>
                 {/* Progress Bar */}
                 <div style={{ position: 'relative', width: '100%', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', cursor: 'pointer' }}>
@@ -216,31 +256,29 @@ export default function VideoPlayer({ src, poster }) {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'white' }}>
 
                     {/* Left Controls */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                         <button onClick={togglePlay} className="hover-scale" style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                            {isPlaying ? <Pause size={28} fill="white" /> : <Play size={28} fill="white" />}
+                            {isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" />}
                         </button>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <button onClick={() => skipTime(-10)} title="-10s" style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                                <RotateCcw size={20} />
-                                <span style={{ fontSize: '10px', marginLeft: '2px', fontWeight: 'bold' }}>10</span>
+                                <RotateCcw size={18} />
                             </button>
                             <button onClick={() => skipTime(10)} title="+10s" style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                                <RotateCw size={20} />
-                                <span style={{ fontSize: '10px', marginLeft: '2px', fontWeight: 'bold' }}>10</span>
+                                <RotateCw size={18} />
                             </button>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontFamily: 'monospace', color: '#e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontFamily: 'monospace', color: '#e2e8f0' }}>
                             <span>{formatTime(currentTime)}</span>
                             <span style={{ opacity: 0.5 }}>/</span>
                             <span>{formatTime(duration)}</span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }} className="volume-control">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '4px' }} className="volume-control mobile-hide">
                             <button onClick={toggleMute} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
-                                {isMuted || volume === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
+                                {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                             </button>
                             <input
                                 type="range"
@@ -249,7 +287,7 @@ export default function VideoPlayer({ src, poster }) {
                                 step="0.1"
                                 value={volume}
                                 onChange={handleVolumeChange}
-                                style={{ width: '80px', accentColor: 'white', height: '4px', cursor: 'pointer' }}
+                                style={{ width: '60px', accentColor: 'white', height: '4px', cursor: 'pointer' }}
                             />
                         </div>
                     </div>
@@ -283,28 +321,54 @@ export default function VideoPlayer({ src, poster }) {
                                     minWidth: '120px',
                                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                                 }}>
-                                    <span style={{ fontSize: '12px', color: '#94a3b8', padding: '4px 8px' }}>Playback Speed</span>
-                                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+                                    {/* Playback Speed */}
+                                    <div style={{ marginBottom: '8px' }}>
+                                        <span style={{ fontSize: '12px', color: '#94a3b8', padding: '4px 8px', display: 'block' }}>Speed</span>
+                                        {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+                                            <button
+                                                key={rate}
+                                                onClick={() => changePlaybackRate(rate)}
+                                                style={{
+                                                    background: playbackRate === rate ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                                                    color: playbackRate === rate ? '#818cf8' : 'white',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    textAlign: 'left',
+                                                    fontSize: '13px',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    width: '100%'
+                                                }}
+                                            >
+                                                {rate}x
+                                                {playbackRate === rate && <span>✓</span>}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Quality Placeholder (Requires Transcoding) */}
+                                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px' }}>
+                                        <span style={{ fontSize: '12px', color: '#94a3b8', padding: '4px 8px', display: 'block' }}>Quality</span>
                                         <button
-                                            key={rate}
-                                            onClick={() => changePlaybackRate(rate)}
                                             style={{
-                                                background: playbackRate === rate ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                                                color: playbackRate === rate ? '#818cf8' : 'white',
+                                                background: 'rgba(99, 102, 241, 0.2)',
+                                                color: '#818cf8',
                                                 border: 'none',
-                                                padding: '8px',
+                                                padding: '4px 8px',
                                                 borderRadius: '4px',
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
-                                                fontSize: '14px',
+                                                fontSize: '13px',
                                                 display: 'flex',
-                                                justifyContent: 'space-between'
+                                                justifyContent: 'space-between',
+                                                width: '100%'
                                             }}
                                         >
-                                            {rate}x
-                                            {playbackRate === rate && <span>✓</span>}
+                                            Auto (1080p) <span>✓</span>
                                         </button>
-                                    ))}
+                                    </div>
                                 </div>
                             )}
                         </div>

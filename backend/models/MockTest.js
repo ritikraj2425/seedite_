@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
     text: { type: String, required: true },
+    image: { type: String }, // URL of the question image
     options: [{ type: String, required: true }],
     correctOption: { type: Number, required: true },
     marks: { type: Number, default: 4 } // Keeping per-question marks if needed, but will rely on test defaults usually
