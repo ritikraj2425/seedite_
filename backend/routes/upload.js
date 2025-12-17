@@ -12,9 +12,6 @@ const upload = multer({
 });
 
 router.post('/s3', protect, admin, upload.single('image'), async (req, res) => {
-    console.log('Upload Request Received');
-    console.log('File:', req.file ? req.file.originalname : 'No File');
-    console.log('Body:', req.body);
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
