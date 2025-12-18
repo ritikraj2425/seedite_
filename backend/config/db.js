@@ -15,6 +15,10 @@ async function connectDB() {
         console.log('Connecting to MongoDB...');
         console.log('URI Defined:', !!process.env.MONGODB_URI);
 
+        if (!process.env.MONGODB_URI && process.env.NODE_ENV === 'production') {
+            throw new Error('MONGODB_URI is not defined in environment variables');
+        }
+
         const opts = {
             bufferCommands: false, // Disable Mongoose buffering
         };
