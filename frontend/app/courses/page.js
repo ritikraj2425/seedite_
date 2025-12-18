@@ -14,7 +14,7 @@ export default function Courses() {
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses`)
             .then(res => res.json())
             .then(data => {
-                setCourses(data);
+                setCourses(data.reverse());
                 setLoading(false);
             })
             .catch(err => {

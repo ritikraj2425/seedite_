@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function CoursesPage() {
     const router = useRouter();
@@ -37,9 +38,10 @@ export default function CoursesPage() {
 
             if (res.ok) {
                 setCourses(courses.filter(c => c._id !== id));
+                toast.success('Course deleted');
             }
         } catch (error) {
-            alert('Failed to delete course');
+            toast.error('Failed to delete course');
         }
     };
 

@@ -8,6 +8,7 @@ export default function VideoPlayer({ src, poster }) {
     const progressRef = useRef(null);
     const containerRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [progress, setProgress] = useState(0);
     const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
@@ -206,7 +207,36 @@ export default function VideoPlayer({ src, poster }) {
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onContextMenu={(e) => e.preventDefault()}
                 playsInline
+                onWaiting={() => setIsLoading(true)}
+                onCanPlay={() => setIsLoading(false)}
             />
+
+            {/* Loading Overlay */}
+            {isLoading && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10,
+                    pointerEvents: 'none'
+                }}>
+                    <div className="video-loader"></div>
+                    <style jsx>{`
+                        .video-loader {
+                            width: 48px;
+                            height: 48px;
+                            border: 5px solid rgba(255, 255, 255, 0.3);
+                            border-radius: 50%;
+                            border-top-color: #6366f1;
+                            animation: spin 1s ease-in-out infinite;
+                        }
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            )}
 
             {/* Controls Overlay */}
             <div style={{

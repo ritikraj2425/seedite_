@@ -6,6 +6,9 @@ const User = require('../models/User');
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/stats
 // @access  Admin
+// @desc    Get admin dashboard stats
+// @route   GET /api/admin/stats
+// @access  Admin
 const getAdminStats = async (req, res) => {
     try {
         const totalCourses = await Course.countDocuments();
@@ -16,15 +19,59 @@ const getAdminStats = async (req, res) => {
         const recentCourses = await Course.find().sort({ createdAt: -1 }).limit(5);
         const recentUsers = await User.find().sort({ createdAt: -1 }).limit(5).select('-password');
 
+        // Advanced Analytics per Course
+        const courses = await Course.find().populate('mockTests');
+        const courseAnalytics = [];
+
+        for (const course of courses) {
+            // Find users enrolled in this course
+            const enrolledUsers = await User.find({ enrolledCourses: course._id }).select('email mockTestResults');
+
+            const enrolledCount = enrolledUsers.length;
+            const totalRevenue = enrolledCount * course.price;
+            const studentEmails = enrolledUsers.map(u => u.email);
+
+            // Calculate Mock Test Stats for this course
+            let totalTestsTaken = 0;
+            let totalScoreSum = 0;
+
+            // Get IDs of mock tests belonging to this course
+            const courseMockTestIds = course.mockTests.map(mt => mt._id.toString());
+
+            enrolledUsers.forEach(user => {
+                user.mockTestResults.forEach(result => {
+                    if (result.test && courseMockTestIds.includes(result.test.toString())) {
+                        totalTestsTaken++;
+                        totalScoreSum += (result.normalizedScore || 0);
+                    }
+                });
+            });
+
+            const avgMockScore = totalTestsTaken > 0 ? (totalScoreSum / totalTestsTaken).toFixed(1) : 0;
+
+            courseAnalytics.push({
+                _id: course._id,
+                title: course.title,
+                price: course.price,
+                enrolledCount,
+                totalRevenue,
+                studentEmails,
+                totalTestsTaken,
+                avgMockScore
+            });
+        }
+
         res.json({
             totalCourses,
             totalUsers,
             totalLectures,
             totalMockTests,
             recentCourses,
-            recentUsers
+            recentUsers,
+            courseAnalytics
         });
     } catch (error) {
+        console.error('Stats Error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };
@@ -34,7 +81,7 @@ const getAdminStats = async (req, res) => {
 // @access  Admin
 const createCourse = async (req, res) => {
     try {
-        const { title, description, price, thumbnail, category, courseDetails } = req.body;
+        const { title, description, price, thumbnail, category, instructor, courseDetails } = req.body;
 
         const course = await Course.create({
             title,
@@ -42,6 +89,7 @@ const createCourse = async (req, res) => {
             price,
             thumbnail,
             category,
+            instructor: instructor || 'Ritik Raj',
             courseDetails: courseDetails || []
         });
 
@@ -62,13 +110,14 @@ const updateCourse = async (req, res) => {
             return res.status(404).json({ message: 'Course not found' });
         }
 
-        const { title, description, price, thumbnail, category, courseDetails } = req.body;
+        const { title, description, price, thumbnail, category, instructor, courseDetails } = req.body;
 
         course.title = title || course.title;
         course.description = description || course.description;
         course.price = price !== undefined ? price : course.price;
         course.thumbnail = thumbnail || course.thumbnail;
         course.category = category || course.category;
+        course.instructor = instructor || course.instructor;
         if (courseDetails) course.courseDetails = courseDetails;
 
         const updatedCourse = await course.save();

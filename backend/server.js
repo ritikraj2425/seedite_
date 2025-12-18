@@ -45,6 +45,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/payment', paymentRoutes);
+app.use('/api/feedback', require('./routes/feedbackRoutes'));
+app.use('/api/announcements', require('./routes/announcementRoutes'));
 
 // Serve uploaded videos
 app.use('/uploads', express.static('uploads'));

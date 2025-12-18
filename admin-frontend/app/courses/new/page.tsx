@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function NewCoursePage() {
     const router = useRouter();
@@ -40,10 +41,10 @@ export default function NewCoursePage() {
 
             const course = await courseRes.json();
 
-            alert('Course created successfully! You can now add lectures from the edit page.');
+            toast.success('Course created successfully! You can now add lectures.');
             router.push(`/courses/${course._id}`);
         } catch (error) {
-            alert('Failed to create course');
+            toast.error('Failed to create course');
         } finally {
             setSubmitting(false);
         }

@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
             ref: 'MockTest'
         },
         score: Number,
+        totalMarks: Number,
         normalizedScore: Number,
         totalQuestions: Number,
         answers: Object,

@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { uploadFile } from '@/lib/upload';
+import toast from 'react-hot-toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function EditMockTestPage() {
     const router = useRouter();
@@ -19,6 +23,24 @@ export default function EditMockTestPage() {
     const [incorrectMarks, setIncorrectMarks] = useState('');
     const [videoSolutionKey, setVideoSolutionKey] = useState('');
     const [questions, setQuestions] = useState<any[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const [uploadingVideo, setUploadingVideo] = useState(false);
+
+    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+
+        try {
+            setUploadingVideo(true);
+            const { key } = await uploadFile(file);
+            setVideoSolutionKey(key);
+            toast.success('Video solution uploaded successfully!');
+        } catch (error) {
+            toast.error('Failed to upload video solution');
+        } finally {
+            setUploadingVideo(false);
+        }
+    };
 
     useEffect(() => {
         fetchTestDetails();
@@ -34,7 +56,7 @@ export default function EditMockTestPage() {
         try {
             // Note: Currently fetching from main API, assuming admin access works or using admin specific route if needed.
             // Adjust URL if there is a specific admin route for fetching single test details
-            const res = await fetch(`http://localhost:5000/api/mock-tests/${testId}`, {
+            const res = await fetch(`${API_URL}/api/mock-tests/${testId}`, {
                 headers: { 'Authorization': `Bearer ${adminUser.token}` }
             });
 
@@ -91,18 +113,18 @@ export default function EditMockTestPage() {
         setQuestions(newQuestions);
     };
 
-    const [uploading, setUploading] = useState(false);
+    // const [uploading, setUploading] = useState(false); // Removed duplicate
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (uploading) {
-            alert('Please wait for images to finish uploading');
+        if (uploading || uploadingVideo) {
+            toast.error('Please wait for uploads to finish');
             return;
         }
         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/mock-tests/${testId}`, {
+            const res = await fetch(`${API_URL}/api/admin/mock-tests/${testId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,13 +146,13 @@ export default function EditMockTestPage() {
             });
 
             if (res.ok) {
-                alert('Mock Test updated successfully!');
+                toast.success('Mock Test updated successfully!');
                 router.push(`/courses/${courseId}`);
             } else {
-                alert('Failed to update mock test');
+                toast.error('Failed to update mock test');
             }
         } catch (error) {
-            alert('Error updating mock test');
+            toast.error('Error updating mock test');
         }
     };
 
@@ -211,18 +233,19 @@ export default function EditMockTestPage() {
                     {/* Video Solution Details - CloudFront Key */}
                     <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
                         <h2 className="text-xl font-bold mb-4">Video Solution (Optional)</h2>
-                        <p className="text-gray-400 text-sm mb-4">Enter CloudFront video key for the solution video shown after test completion</p>
-
-                        <div>
-                            <label className="block text-xs text-gray-400 mb-1">CloudFront Video Key</label>
+                        <div className="mb-4">
+                            <label className="block text-xs text-gray-400 mb-1">Solution Video</label>
+                            {videoSolutionKey && (
+                                <p className="text-xs text-green-400 mb-2">✓ Video Uploaded: {videoSolutionKey}</p>
+                            )}
                             <input
-                                type="text"
-                                placeholder="e.g., mock_test_solution_202510011654.mp4"
-                                value={videoSolutionKey}
-                                onChange={(e) => setVideoSolutionKey(e.target.value)}
+                                type="file"
+                                accept="video/*"
+                                onChange={handleVideoUpload}
+                                disabled={uploadingVideo}
                                 className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                             />
-                            <span className="text-xs text-gray-500">URL will be: https://dr6ydg7wb58lc.cloudfront.net/{videoSolutionKey || 'your-video-key'}</span>
+                            {uploadingVideo && <p className="text-sm text-blue-400 mt-1">Uploading video solution...</p>}
                         </div>
                     </div>
 
@@ -278,7 +301,7 @@ export default function EditMockTestPage() {
 
                                                         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
                                                         try {
-                                                            const res = await fetch('http://localhost:5000/api/upload/s3', {
+                                                            const res = await fetch(`${API_URL}/api/upload/s3`, {
                                                                 method: 'POST',
                                                                 headers: {
                                                                     'Authorization': `Bearer ${adminUser.token}`
@@ -288,13 +311,13 @@ export default function EditMockTestPage() {
                                                             const data = await res.json();
                                                             if (res.ok) {
                                                                 handleQuestionChange(qIndex, 'image', data.url);
-                                                                alert('Image uploaded successfully!');
+                                                                toast.success('Image uploaded successfully!');
                                                             } else {
-                                                                alert('Upload failed: ' + data.message);
+                                                                toast.error('Upload failed: ' + data.message);
                                                             }
                                                         } catch (err) {
                                                             console.error(err);
-                                                            alert('Upload failed');
+                                                            toast.error('Upload failed');
                                                         } finally {
                                                             setUploading(false);
                                                         }
@@ -345,8 +368,8 @@ export default function EditMockTestPage() {
                             type="submit"
                             disabled={uploading}
                             className={`px-8 py-3 rounded-lg font-bold text-lg ${uploading
-                                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
-                                    : 'bg-white text-black hover:bg-gray-200'
+                                ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                                : 'bg-white text-black hover:bg-gray-200'
                                 }`}
                         >
                             {uploading ? 'Uploading Images...' : 'Update Mock Test'}

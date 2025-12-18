@@ -19,11 +19,14 @@ export default function Home() {
   return (
     <div className="container">
       <header style={{ textAlign: 'center', padding: '80px 0 60px' }}>
-        <h1 className="animate-fade-in" style={{ fontSize: '3.5rem', marginBottom: '16px' }}>Master Your Future with Seedite</h1>
+        <h1 className="hero-title animate-fade-in">
+          Master Your Future with Seedite
+        </h1>
+
         <p className="animate-fade-in" style={{ fontSize: '1.25rem', color: '#94a3b8', maxWidth: '600px', margin: '0 auto 32px' }}>
           Access premium courses, mock tests, and video solutions tailored for your success.
         </p>
-        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="animate-fade-in" >
           <Link href="/courses">
             <Button style={{ fontSize: '1.1rem', padding: '16px 32px' }}>Explore Courses</Button>
           </Link>

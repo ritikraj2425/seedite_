@@ -180,6 +180,11 @@ h3 {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
+.hero-title {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+}
+
 /* Responsive Utilities */
 .mobile-only {
   display: none;
@@ -190,6 +195,11 @@ h3 {
 }
 
 @media (max-width: 768px) {
+  .hero-title {
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+
   .mobile-only {
     display: flex;
   }
@@ -226,7 +236,38 @@ h3 {
   .floating-query-btn {
     bottom: 20px !important;
     right: 20px !important;
-    padding: 10px 20px !important;
-    font-size: 0.9rem;
+  }
+}
+
+/* Lecture Page Layout */
+.lecture-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+@media (min-width: 1024px) {
+  .lecture-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    align-items: start;
+  }
+}
+
+/* Custom Scrollbar - Invisible but functional on desktop, native on mobile */
+@media (min-width: 768px) {
+  .custom-scrollbar {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
   }
 }

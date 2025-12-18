@@ -5,14 +5,17 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Seedite Education Platform',
+  title: 'Seedite',
   description: 'Learn and grow with Seedite',
 };
+
+import ToastProvider from '../components/providers/ToastProvider';
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
+        <ToastProvider />
         <Navbar />
         <main style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
           {children}
@@ -30,7 +33,7 @@ export default function RootLayout({ children }) {
             right: '30px',
             backgroundColor: '#2563eb',
             color: 'white',
-            padding: '12px 24px',
+            padding: '8px 20px',
             borderRadius: '50px',
             boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
             textDecoration: 'none',
@@ -42,7 +45,7 @@ export default function RootLayout({ children }) {
             transition: 'transform 0.2s ease'
           }}
         >
-          <span>💬</span> Have a query?
+          <span>Query?</span>
         </a>
       </body>
     </html>

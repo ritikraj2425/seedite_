@@ -48,7 +48,7 @@ const getMockTestById = async (req, res) => {
 // @access  Private
 const submitMockTest = async (req, res) => {
     try {
-        const { score, normalizedScore, totalQuestions, answers } = req.body;
+        const { score, totalMarks, normalizedScore, totalQuestions, answers } = req.body;
         const user = await User.findById(req.user._id);
 
         if (user) {
@@ -60,6 +60,7 @@ const submitMockTest = async (req, res) => {
             const result = {
                 test: req.params.id,
                 score,
+                totalMarks: totalMarks || (totalQuestions * 4), // Fallback if not sent
                 normalizedScore: normalizedScore || 0,
                 totalQuestions,
                 answers: answers || {},

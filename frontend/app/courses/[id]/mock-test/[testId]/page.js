@@ -137,6 +137,7 @@ export default function MockTestPage() {
                 },
                 body: JSON.stringify({
                     score: raw,
+                    totalMarks: test.questions.length * 4,
                     normalizedScore: normalized,
                     totalQuestions: test.questions.length,
                     answers: answers
@@ -191,9 +192,9 @@ export default function MockTestPage() {
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#6366f1' }}>
-                                {resultToDisplay.normalizedScore} / 10
+                                {resultToDisplay.score} / {resultToDisplay.totalMarks || (resultToDisplay.totalQuestions * 4)}
                             </div>
-                            <p style={{ color: '#64748b' }}>Raw Score: {resultToDisplay.score}</p>
+                            <p style={{ color: '#64748b' }}>Marks Obtained</p>
                         </div>
                     </div>
                     {viewMode === 'result' && (

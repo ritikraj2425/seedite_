@@ -1,61 +1,40 @@
 'use client';
+import Skeleton from './Skeleton';
 
-export default function Loader({ text = 'Seedite' }) {
+export default function Loader() {
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-            minHeight: '300px',
-            gap: '16px'
-        }}>
-            <div className="loader-ring">
-                <div></div><div></div><div></div><div></div>
+        <div className="container" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
+            {/* Navbar Skeleton */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                <Skeleton width="150px" height="40px" />
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <Skeleton width="80px" height="36px" />
+                    <Skeleton width="80px" height="36px" />
+                </div>
             </div>
-            <h2 className="animate-pulse" style={{
-                color: '#6366f1',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                letterSpacing: '2px'
-            }}>
-                {text}
-            </h2>
-            <style jsx>{`
-                .loader-ring {
-                    display: inline-block;
-                    position: relative;
-                    width: 80px;
-                    height: 80px;
-                }
-                .loader-ring div {
-                    box-sizing: border-box;
-                    display: block;
-                    position: absolute;
-                    width: 64px;
-                    height: 64px;
-                    margin: 8px;
-                    border: 8px solid #6366f1;
-                    border-radius: 50%;
-                    animation: loader-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-                    border-color: #6366f1 transparent transparent transparent;
-                }
-                .loader-ring div:nth-child(1) { animation-delay: -0.45s; }
-                .loader-ring div:nth-child(2) { animation-delay: -0.3s; }
-                .loader-ring div:nth-child(3) { animation-delay: -0.15s; }
-                @keyframes loader-ring {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .animate-pulse {
-                    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: .5; }
-                }
-            `}</style>
+
+            {/* Hero / Content Skeleton */}
+            <div style={{ display: 'grid', gap: '32px' }}>
+                <Skeleton width="100%" height="200px" borderRadius="12px" />
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
+                    <div style={{ padding: '20px', border: '1px solid #1e293b', borderRadius: '12px', background: '#0f172a' }}>
+                        <Skeleton width="100%" height="160px" borderRadius="8px" style={{ marginBottom: '16px' }} />
+                        <Skeleton width="70%" height="24px" style={{ marginBottom: '12px' }} />
+                        <Skeleton width="40%" height="20px" />
+                    </div>
+                    <div style={{ padding: '20px', border: '1px solid #1e293b', borderRadius: '12px', background: '#0f172a' }}>
+                        <Skeleton width="100%" height="160px" borderRadius="8px" style={{ marginBottom: '16px' }} />
+                        <Skeleton width="70%" height="24px" style={{ marginBottom: '12px' }} />
+                        <Skeleton width="40%" height="20px" />
+                    </div>
+                    <div style={{ padding: '20px', border: '1px solid #1e293b', borderRadius: '12px', background: '#0f172a' }}>
+                        <Skeleton width="100%" height="160px" borderRadius="8px" style={{ marginBottom: '16px' }} />
+                        <Skeleton width="70%" height="24px" style={{ marginBottom: '12px' }} />
+                        <Skeleton width="40%" height="20px" />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

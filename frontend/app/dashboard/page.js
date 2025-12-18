@@ -64,7 +64,7 @@ export default function Dashboard() {
 
             {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                    {user.enrolledCourses.map(course => (
+                    {[...user.enrolledCourses].reverse().map(course => (
                         <Card key={course._id} style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ height: '160px', background: '#334155', borderRadius: '8px', marginBottom: '16px', overflow: 'hidden' }}>
                                 <img src={course.thumbnail} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

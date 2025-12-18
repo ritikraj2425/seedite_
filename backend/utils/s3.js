@@ -10,32 +10,42 @@ const s3Client = new S3Client({
     }
 });
 
-const generateFileName = (originalName) => {
+const fs = require('fs');
+
+const generateFileName = (originalName, folder = 'uploads') => {
     const timestamp = Date.now();
     const random = crypto.randomBytes(8).toString('hex');
     const extension = path.extname(originalName);
-    return `mock-test-images/${timestamp}-${random}${extension}`;
+    return `${folder}/${timestamp}-${random}${extension}`;
 };
 
 const uploadFile = async (file) => {
-    const fileName = generateFileName(file.originalname);
-    const contentType = file.mimetype;
+    // Determine folder based on mimetype
+    let folder = 'others';
+    if (file.mimetype.startsWith('image/')) folder = 'images';
+    else if (file.mimetype.startsWith('video/')) folder = 'videos';
+
+    const fileName = generateFileName(file.originalname, folder);
+
+    // Create read stream from local temp file
+    const fileStream = fs.createReadStream(file.path);
+
     const command = new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: fileName,
-        Body: file.buffer,
-        ContentType: contentType,
-        // ACL: 'public-read' // Uncomment if bucket is not public by policy but you want object to be public
+        Body: fileStream,
+        ContentType: file.mimetype,
+        // ACL: 'public-read' 
     });
 
     await s3Client.send(command);
 
-    // Return the URL
-    if (process.env.CLOUDFRONT_DOMAIN) {
-        return `https://${process.env.CLOUDFRONT_DOMAIN}/${fileName}`;
-    }
+    // Return the URL and Key
+    const url = process.env.CLOUDFRONT_DOMAIN
+        ? `https://${process.env.CLOUDFRONT_DOMAIN}/${fileName}`
+        : `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION || 'ap-south-1'}.amazonaws.com/${fileName}`;
 
-    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION || 'ap-south-1'}.amazonaws.com/${fileName}`;
+    return { url, key: fileName };
 };
 
 module.exports = {

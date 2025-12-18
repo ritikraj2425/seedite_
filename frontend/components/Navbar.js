@@ -62,7 +62,12 @@ const Navbar = () => {
                 <div className="desktop-only" style={{ alignItems: 'center', gap: '40px', width: '100%', justifyContent: 'space-between', marginLeft: '40px' }}>
                     <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
                         <Link href="/courses" style={{ color: pathname === '/courses' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Courses</Link>
-                        {isLoggedIn && <Link href="/dashboard" style={{ color: pathname === '/dashboard' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Dashboard</Link>}
+                        {isLoggedIn && (
+                            <>
+                                <Link href="/dashboard" style={{ color: pathname === '/dashboard' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Dashboard</Link>
+                                <Link href="/dashboard/announcements" style={{ color: pathname === '/dashboard/announcements' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Announcements</Link>
+                            </>
+                        )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -129,7 +134,12 @@ const Navbar = () => {
                     }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', background: 'white', backdropFilter: 'blur(12px)', padding: '8px 12px', borderRadius: '6px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
                             <Link href="/courses" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Courses</Link>
-                            {isLoggedIn && <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Dashboard</Link>}
+                            {isLoggedIn && (
+                                <>
+                                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Dashboard</Link>
+                                    <Link href="/dashboard/announcements" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Announcements</Link>
+                                </>
+                            )}
 
                             <div style={{ width: '100%', height: '1px', background: '#e2e8f0' }}></div>
 

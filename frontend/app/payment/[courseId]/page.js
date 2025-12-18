@@ -8,6 +8,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import { ShieldCheck, Lock, CreditCard } from 'lucide-react';
 import { API_URL } from '../../../lib/api';
+import toast from 'react-hot-toast';
 
 export default function PaymentPage() {
     const params = useParams();
@@ -92,14 +93,14 @@ export default function PaymentPage() {
                         });
 
                         if (verifyRes.ok) {
-                            alert('Payment Successful! 🎉 You are now enrolled.');
+                            toast.success('Payment Successful! 🎉 You are now enrolled.');
                             router.push(`/courses/${courseId}`);
                         } else {
-                            alert('Payment verification failed. Please contact support.');
+                            toast.error('Payment verification failed. Please contact support.');
                         }
                     } catch (error) {
                         console.error('Verification error:', error);
-                        alert('Payment verification failed');
+                        toast.error('Payment verification failed');
                     }
                 },
                 prefill: {
@@ -113,13 +114,13 @@ export default function PaymentPage() {
 
             const rzp1 = new window.Razorpay(options);
             rzp1.on('payment.failed', function (response) {
-                alert(`Payment Failed: ${response.error.description}`);
+                toast.error(`Payment Failed: ${response.error.description}`);
             });
             rzp1.open();
 
         } catch (error) {
             console.error('Payment initiation failed:', error);
-            alert(error.message || 'Something went wrong. Please try again.');
+            toast.error(error.message || 'Something went wrong. Please try again.');
         } finally {
             setProcessing(false);
         }
