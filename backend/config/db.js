@@ -12,6 +12,9 @@ async function connectDB() {
     }
 
     if (!cached.promise) {
+        console.log('Connecting to MongoDB...');
+        console.log('URI Defined:', !!process.env.MONGODB_URI);
+
         const opts = {
             bufferCommands: false, // Disable Mongoose buffering
         };
@@ -19,6 +22,9 @@ async function connectDB() {
         cached.promise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ritik-platform', opts).then((mongoose) => {
             console.log('New MongoDB Connection Established');
             return mongoose;
+        }).catch(err => {
+            console.error('MongoDB Connection Failed:', err);
+            throw err;
         });
     }
 

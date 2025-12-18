@@ -37,6 +37,15 @@ const adminRoutes = require('./routes/adminRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
+// Health Check (DB-independent)
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        time: new Date().toISOString(),
+        env: process.env.NODE_ENV
+    });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/users', userRoutes);
