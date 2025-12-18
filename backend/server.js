@@ -24,9 +24,9 @@ app.use(cors({
 }));
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ritik-platform')
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+// Database Connection is handled in index.js for Vercel
+// or in the local start block below
+const connectDB = require('./config/db');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -69,8 +69,11 @@ app.get('/', (req, res) => {
 // Only start the server if running locally/directly
 if (require.main === module) {
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-        console.log(`Local server running at http://localhost:${PORT}`);
+    // Connect to DB before starting local server
+    connectDB().then(() => {
+        app.listen(PORT, () => {
+            console.log(`Local server running at http://localhost:${PORT}`);
+        });
     });
 }
 

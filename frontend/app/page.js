@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Loader from '../components/ui/Loader';
+import CourseCardSkeleton from '../components/ui/CourseCardSkeleton';
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
@@ -59,7 +60,7 @@ export default function Home() {
               </Card>
             ))
           ) : (
-            <Loader />
+            Array(3).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)
           )}
         </div>
       </section>
