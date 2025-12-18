@@ -7,11 +7,15 @@ if (!cached) {
 }
 
 async function connectDB() {
-    if (cached.conn) {
+    // Check if we have a connection and it's ready (state 1 = connected)
+    if (cached.conn && mongoose.connection.readyState === 1) {
         return cached.conn;
     }
 
-    if (!cached.promise) {
+    // If existing promise but not connected, maybe we are connecting?
+    // If readyState is 0 (disconnected) or 3 (disconnecting), we should retry.
+    // Safe bet: if not READY, just start over.
+    if (!cached.promise || mongoose.connection.readyState === 0) {
         console.log('Connecting to MongoDB...');
         console.log('URI Defined:', !!process.env.MONGODB_URI);
 
@@ -21,13 +25,18 @@ async function connectDB() {
 
         const opts = {
             bufferCommands: false, // Disable Mongoose buffering
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s if IP is blocked
+            socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
         };
 
-        cached.promise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ritik-platform', opts).then((mongoose) => {
+        const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ritik-platform';
+
+        cached.promise = mongoose.connect(uri, opts).then((mongoose) => {
             console.log('New MongoDB Connection Established');
             return mongoose;
         }).catch(err => {
             console.error('MongoDB Connection Failed:', err);
+            cached.promise = null; // Reset promise on failure
             throw err;
         });
     }
