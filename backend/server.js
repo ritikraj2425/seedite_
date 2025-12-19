@@ -10,7 +10,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 app.use(cors({
     origin: [
@@ -23,66 +24,67 @@ app.use(cors({
     credentials: true
 }));
 
-// Database Connection
-// Database Connection is handled in index.js for Vercel
-// or in the local start block below
-const connectDB = require('./config/db');
-
-// Routes
-const authRoutes = require('./routes/authRoutes');
-const courseRoutes = require('./routes/courseRoutes');
-const userRoutes = require('./routes/userRoutes');
-const mockTestRoutes = require('./routes/mockTestRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const videoRoutes = require('./routes/videoRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-
-// Health Check (DB-independent)
+// Health Check
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         time: new Date().toISOString(),
-        env: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/courses', courseRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/mock-tests', mockTestRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/videos', videoRoutes);
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/courses', require('./routes/courseRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/mock-tests', require('./routes/mockTestRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/videos', require('./routes/videoRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/upload', require('./routes/upload'));
-app.use('/api/payment', paymentRoutes);
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
 
-// Serve uploaded videos
-app.use('/uploads', express.static('uploads'));
-
-// Global Error Handler for Vercel Debugging
-app.use((err, req, res, next) => {
-    console.error('Global Error Handler:', err);
-    res.status(500).json({
-        message: 'Internal Server Error',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+// Root endpoint
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Seedite Education Platform API',
+        version: '1.0.0',
+        status: 'running',
+        mongooseVersion: mongoose.version
     });
 });
 
-app.get('/', (req, res) => {
-    res.send('Seedite Education Platform API is running');
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: `Route not found: ${req.method} ${req.originalUrl}`,
+        timestamp: new Date().toISOString()
+    });
 });
 
-// remove app.listen completely
-// Only start the server if running locally/directly
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('Global Error Handler:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// For local development only
 if (require.main === module) {
-    const PORT = process.env.PORT || 5000;
-    // Connect to DB before starting local server
+    const connectDB = require('./config/db');
     connectDB().then(() => {
         app.listen(PORT, () => {
             console.log(`Local server running at http://localhost:${PORT}`);
         });
+    }).catch(error => {
+        console.error('Failed to start server:', error);
+        process.exit(1);
     });
 }
 
