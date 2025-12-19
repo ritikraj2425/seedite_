@@ -41,6 +41,37 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+
+// Add this in server.js after your other routes
+
+// MongoDB debug endpoint
+// MongoDB debug endpoint - add this after health check
+app.get('/api/debug/db', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+
+    // Test if we can actually query the database
+    mongoose.connection.db?.admin().ping((err, result) => {
+        res.json({
+            db: {
+                state: states[dbState],
+                stateCode: dbState,
+                connected: dbState === 1,
+                ping: err ? 'failed' : 'ok',
+                error: err?.message,
+                models: Object.keys(mongoose.models || {}),
+                hasConnectionString: !!process.env.MONGODB_URI,
+                connectionStringLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
+                env: process.env.NODE_ENV
+            },
+            server: {
+                time: new Date().toISOString(),
+                region: process.env.VERCEL_REGION || 'local'
+            }
+        });
+    });
+});
+
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
