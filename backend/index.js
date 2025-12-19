@@ -1,107 +1,35 @@
+// index.js - For Vercel deployment only
 const serverless = require('serverless-http');
-const app = require('./server');
 const mongoose = require('mongoose');
 
-// Cache MongoDB connection
-let cachedDb = null;
-
-const connectToDatabase = async () => {
-    // If we have a cached connection and it's healthy, return it
-    if (cachedDb && mongoose.connection.readyState === 1) {
-        console.log('Using cached database connection');
-        return cachedDb;
-    }
-
-    // If no cached connection or connection is broken, create a new one
+// Simple connection for Vercel
+const connectDB = async () => {
     try {
-        console.log('Creating new database connection...');
+        if (mongoose.connection.readyState === 1) {
+            return;
+        }
 
-        // Configure mongoose for serverless
-        mongoose.set('bufferCommands', false);
-        mongoose.set('strictQuery', true);
-
-        // Connect with updated options (no deprecated options)
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 45000,
-            maxPoolSize: 10,
-            minPoolSize: 2,
+        console.log('Connecting to MongoDB on Vercel...');
+        await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 3000,
+            socketTimeoutMS: 10000,
         });
-
-        // Cache the connection
-        cachedDb = conn;
-
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-
-        // Handle connection events
-        mongoose.connection.on('error', (err) => {
-            console.error('MongoDB connection error:', err);
-            cachedDb = null;
-        });
-
-        mongoose.connection.on('disconnected', () => {
-            console.log('MongoDB disconnected');
-            cachedDb = null;
-        });
-
-        return conn;
+        console.log('MongoDB connected on Vercel');
     } catch (error) {
-        console.error('MongoDB connection failed:', error);
-        cachedDb = null;
-        throw error;
+        console.error('Vercel MongoDB connection error:', error.message);
+        // Don't throw - let the app handle requests without DB
     }
 };
 
-// Initialize connection for cold starts (non-blocking)
-let initPromise = null;
+// Try to connect
+connectDB();
 
-const initDatabase = async () => {
-    if (!initPromise) {
-        initPromise = connectToDatabase().catch(err => {
-            console.error('Initial DB connection attempt failed:', err.message);
-            // Don't throw here - we'll retry on first request
-            initPromise = null;
-            return null;
-        });
-    }
-    return initPromise;
-};
-
-// Try to initialize on cold start
-initDatabase().then(() => {
-    console.log('Database initialization attempted');
-}).catch(() => { });
+// Import app AFTER mongoose is configured
+const app = require('./server');
 
 const handler = serverless(app);
 
 module.exports.handler = async (event, context) => {
-    // Important for Vercel
     context.callbackWaitsForEmptyEventLoop = false;
-
-    try {
-        // Ensure DB is connected before handling request
-        await initDatabase();
-
-        // Process the request
-        const response = await handler(event, context);
-
-        return response;
-    } catch (error) {
-        console.error('Handler error:', error);
-
-        return {
-            statusCode: error.statusCode || 500,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true
-            },
-            body: JSON.stringify({
-                success: false,
-                message: 'Internal Server Error',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-                timestamp: new Date().toISOString()
-            })
-        };
-    }
+    return handler(event, context);
 };

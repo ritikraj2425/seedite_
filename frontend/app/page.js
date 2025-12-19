@@ -13,7 +13,7 @@ export default function Home() {
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses`)
       .then(res => res.json())
-      .then(data => setCourses(data.reverse()))
+      .then(data => setCourses(data?.reverse()))
       .catch(err => console.error('Failed to fetch courses', err));
   }, []);
 

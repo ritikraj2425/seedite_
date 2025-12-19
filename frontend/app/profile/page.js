@@ -61,7 +61,7 @@ export default function Profile() {
                     <h3 style={{ marginBottom: '16px' }}>Enrolled Courses ({user.enrolledCourses ? user.enrolledCourses.length : 0})</h3>
                     {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
                         <div style={{ display: 'grid', gap: '16px', marginBottom: '40px' }}>
-                            {[...user.enrolledCourses].reverse().map(course => (
+                            {[...user.enrolledCourses]?.reverse().map(course => (
                                 <Card key={course._id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px' }}>
                                     <img src={course.thumbnail} alt={course.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
                                     <div style={{ flex: 1 }}>
@@ -78,7 +78,7 @@ export default function Profile() {
                     <h3 style={{ marginBottom: '16px' }}>Mock Test History ({user.mockTestResults ? user.mockTestResults.length : 0})</h3>
                     {user.mockTestResults && user.mockTestResults.length > 0 ? (
                         <div style={{ display: 'grid', gap: '16px' }}>
-                            {[...user.mockTestResults].reverse().map((result, index) => (
+                            {[...user.mockTestResults]?.reverse().map((result, index) => (
                                 <Card key={index} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
                                         <h4 style={{ marginBottom: '4px', fontSize: '1rem' }}>
