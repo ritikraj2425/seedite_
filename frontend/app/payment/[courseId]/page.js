@@ -76,6 +76,8 @@ export default function PaymentPage() {
                 description: `Enrollment for ${course.title}`,
                 order_id: order.id,
                 handler: async function (response) {
+                    // Payment was successful on Razorpay's end
+                    // Even if client verification fails, webhook will handle enrollment
                     try {
                         // 3. Verify Payment
                         const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
@@ -96,25 +98,45 @@ export default function PaymentPage() {
                             toast.success('Payment Successful! 🎉 You are now enrolled.');
                             router.push(`/courses/${courseId}`);
                         } else {
-                            toast.error('Payment verification failed. Please contact support.');
+                            // Verification failed but payment was successful
+                            // Webhook will handle enrollment
+                            toast.success('Payment received! ✅ Your enrollment is being processed.');
+                            console.log('Client verification failed, but payment was successful. Webhook will handle enrollment.');
+                            // Still redirect to course page - they should have access soon
+                            setTimeout(() => {
+                                router.push(`/courses/${courseId}`);
+                            }, 2000);
                         }
                     } catch (error) {
+                        // Network error during verification, but payment was successful
                         console.error('Verification error:', error);
-                        toast.error('Payment verification failed');
+                        toast.success('Payment received! ✅ Your enrollment is being processed.');
+                        // Redirect anyway - webhook will handle enrollment
+                        setTimeout(() => {
+                            router.push(`/courses/${courseId}`);
+                        }, 2000);
                     }
                 },
                 prefill: {
                     name: savedUser.name || '',
                     email: savedUser.email || '',
+                    contact: savedUser.phone || ''
                 },
                 theme: {
                     color: '#2563eb'
+                },
+                modal: {
+                    ondismiss: function () {
+                        setProcessing(false);
+                        toast.error('Payment cancelled');
+                    }
                 }
             };
 
             const rzp1 = new window.Razorpay(options);
             rzp1.on('payment.failed', function (response) {
                 toast.error(`Payment Failed: ${response.error.description}`);
+                setProcessing(false);
             });
             rzp1.open();
 
