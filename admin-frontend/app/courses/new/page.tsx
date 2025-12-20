@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function NewCoursePage() {
@@ -25,7 +26,7 @@ export default function NewCoursePage() {
 
         try {
             // Create course (without lectures - add lectures later from edit page)
-            const courseRes = await fetch('http://localhost:5000/api/admin/courses', {
+            const courseRes = await fetch(`${API_URL}/api/admin/courses`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

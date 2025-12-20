@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
@@ -14,6 +15,7 @@ export default function Signup() {
         email: '',
         password: ''
     });
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const handleChange = (e) => {
@@ -23,9 +25,10 @@ export default function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/signup`, {
+            const res = await fetch(`${API_URL}/api/auth/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,6 +52,8 @@ export default function Signup() {
             setTimeout(() => window.location.reload(), 100);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -84,7 +89,9 @@ export default function Signup() {
                         onChange={handleChange}
                         required
                     />
-                    <Button type="submit" style={{ width: '100%', marginTop: '8px' }}>Create Account</Button>
+                    <Button type="submit" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
+                        {loading ? 'Loading...' : 'Create Account'}
+                    </Button>
                 </form>
                 <p style={{ marginTop: '16px', textAlign: 'center', color: '#94a3b8' }}>
                     Already have an account? <Link href="/login" style={{ color: '#6366f1' }}>Login</Link>

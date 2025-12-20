@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
@@ -25,6 +26,7 @@ function LoginContent() {
         email: '',
         password: ''
     });
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const handleChange = (e) => {
@@ -34,9 +36,10 @@ function LoginContent() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/login`, {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,6 +59,8 @@ function LoginContent() {
             router.refresh();
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -83,7 +88,9 @@ function LoginContent() {
                         onChange={handleChange}
                         required
                     />
-                    <Button type="submit" style={{ width: '100%', marginTop: '8px' }}>Login</Button>
+                    <Button type="submit" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
+                        {loading ? 'Loading...' : 'Login'}
+                    </Button>
                 </form>
                 <p style={{ marginTop: '16px', textAlign: 'center', color: '#94a3b8' }}>
                     Don't have an account? <Link href="/signup" style={{ color: '#6366f1' }}>Sign up</Link>

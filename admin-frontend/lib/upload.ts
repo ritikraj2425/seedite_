@@ -1,4 +1,6 @@
 
+import { API_URL } from '@/lib/api';
+
 export const uploadFile = async (file: File): Promise<{ url: string; key: string }> => {
     const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
     const token = adminUser.token;
@@ -10,7 +12,7 @@ export const uploadFile = async (file: File): Promise<{ url: string; key: string
     const formData = new FormData();
     formData.append('file', file);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const apiUrl = API_URL;
 
     try {
         const response = await fetch(`${apiUrl}/api/upload/s3`, {

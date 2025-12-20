@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { uploadFile } from '@/lib/upload';
+import { API_URL } from '@/lib/api';
 import toast from 'react-hot-toast';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Removed local API_URL definition
 
 export default function EditMockTestPage() {
     const router = useRouter();

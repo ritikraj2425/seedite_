@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Loader from '../../components/ui/Loader';
@@ -30,7 +31,7 @@ export default function Dashboard() {
             const token = savedUser.token;
 
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/profile`, {
+                const res = await fetch(`${API_URL}/api/users/profile`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

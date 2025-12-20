@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { uploadFile } from '@/lib/upload';
+import { API_URL } from '@/lib/api';
 import toast from 'react-hot-toast';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Removed local API_URL definition
 
 export default function EditCoursePage() {
     const router = useRouter();
@@ -22,6 +23,7 @@ export default function EditCoursePage() {
         courseDetails: ''
     });
     const [lectures, setLectures] = useState<any[]>([]);
+    const [sections, setSections] = useState<any[]>([]); // New state for sections
     const [mockTests, setMockTests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
@@ -31,6 +33,8 @@ export default function EditCoursePage() {
     const [newLectureVideoKey, setNewLectureVideoKey] = useState('');
     const [newLectureDuration, setNewLectureDuration] = useState('');
     const [newLectureIsFree, setNewLectureIsFree] = useState(false);
+    const [selectedSectionId, setSelectedSectionId] = useState(''); // New: Selection for adding lecture
+    const [newSectionTitle, setNewSectionTitle] = useState(''); // New: For creating section
     const [submitting, setSubmitting] = useState(false);
     const [uploadingLecture, setUploadingLecture] = useState(false);
 
@@ -67,6 +71,7 @@ export default function EditCoursePage() {
                     courseDetails: data.courseDetails ? data.courseDetails.join('\n') : ''
                 });
                 setLectures(data.lectures || []);
+                setSections(data.sections || []); // Set sections
                 setMockTests(data.mockTests || []);
                 setLoading(false);
             })
@@ -185,6 +190,49 @@ export default function EditCoursePage() {
         }
     };
 
+    const handleAddSection = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newSectionTitle.trim()) return;
+
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+        try {
+            const res = await fetch(`${API_URL}/api/admin/courses/${courseId}/sections`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminUser.token}`
+                },
+                body: JSON.stringify({ title: newSectionTitle })
+            });
+
+            if (res.ok) {
+                toast.success('Section created');
+                setNewSectionTitle('');
+                fetchCourseData();
+            } else {
+                toast.error('Failed to create section');
+            }
+        } catch (error) {
+            toast.error('Error creating section');
+        }
+    };
+
+    const handleDeleteSection = async (sectionId: string) => {
+        if (!confirm('Delete this section? Lectures inside will need to be reassigned manually if needed.')) return;
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+
+        try {
+            await fetch(`${API_URL}/api/admin/courses/${courseId}/sections/${sectionId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${adminUser.token}` }
+            });
+            fetchCourseData();
+            toast.success('Section deleted');
+        } catch (error) {
+            toast.error('Failed to delete section');
+        }
+    };
+
     const handleAddLecture = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newLectureVideoKey || !newLectureTitle) {
@@ -208,7 +256,8 @@ export default function EditCoursePage() {
                     videoKey: newLectureVideoKey,
                     duration: newLectureDuration,
                     isFree: newLectureIsFree,
-                    courseId: courseId
+                    courseId: courseId,
+                    sectionId: selectedSectionId || null // Pass sectionId if selected
                 })
             });
 
@@ -218,7 +267,8 @@ export default function EditCoursePage() {
                 setNewLectureVideoKey('');
                 setNewLectureDuration('');
                 setNewLectureIsFree(false);
-                fetchCourseData(); // Refresh list
+                // No need to reset selectedSectionId so user can add multiple to same section
+                fetchCourseData();
             } else {
                 const error = await lectureRes.json();
                 toast.error('Failed to add lecture: ' + error.message);
@@ -383,19 +433,74 @@ export default function EditCoursePage() {
                     <h2 className="text-xl font-bold mb-4">Lectures</h2>
 
                     {/* List */}
-                    <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
-                        {lectures.map((lecture) => (
-                            <div key={lecture._id} className="flex justify-between items-center p-3 bg-black rounded border border-gray-800">
-                                <span className="truncate">{lecture.title || 'Untitled Lecture'}</span>
-                                <button
-                                    onClick={() => handleDeleteLecture(lecture._id)}
-                                    className="text-red-500 hover:text-red-400 text-sm"
-                                >
-                                    Delete
-                                </button>
+                    <div className="space-y-6 mb-6 max-h-[600px] overflow-y-auto">
+
+                        {/* 1. Sections List */}
+                        {sections.map(section => (
+                            <div key={section._id} className="bg-black/50 border border-gray-800 rounded-lg p-4">
+                                <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-800">
+                                    <h3 className="font-bold text-lg text-blue-400">{section.title}</h3>
+                                    <button
+                                        onClick={() => handleDeleteSection(section._id)}
+                                        className="text-xs text-red-500 hover:text-red-400"
+                                    >
+                                        Delete Section
+                                    </button>
+                                </div>
+                                <div className="space-y-2 pl-2">
+                                    {section.lectures && section.lectures.length > 0 ? section.lectures.map((lecture: any) => (
+                                        <div key={lecture._id} className="flex justify-between items-center p-2 bg-gray-900 rounded border border-gray-800/50">
+                                            <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
+                                            <button
+                                                onClick={() => handleDeleteLecture(lecture._id)}
+                                                className="text-red-500 hover:text-red-400 text-xs"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )) : <p className="text-xs text-gray-500 italic">No lectures in this section</p>}
+                                </div>
                             </div>
                         ))}
-                        {lectures.length === 0 && <p className="text-gray-500">No lectures yet.</p>}
+
+                        {/* 2. Ungrouped Lectures */}
+                        <div className="bg-black/50 border border-gray-800 rounded-lg p-4">
+                            <div className="mb-3 pb-2 border-b border-gray-800">
+                                <h3 className="font-bold text-lg text-gray-400">Ungrouped Lectures</h3>
+                            </div>
+                            <div className="space-y-2 pl-2">
+                                {lectures.map((lecture) => (
+                                    <div key={lecture._id} className="flex justify-between items-center p-2 bg-gray-900 rounded border border-gray-800/50">
+                                        <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
+                                        <button
+                                            onClick={() => handleDeleteLecture(lecture._id)}
+                                            className="text-red-500 hover:text-red-400 text-xs"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                ))}
+                                {lectures.length === 0 && <p className="text-xs text-gray-500 italic">No ungrouped lectures.</p>}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* Add Section Form */}
+                    <div className="mb-6 p-4 bg-black border border-gray-700 rounded-lg">
+                        <h3 className="font-semibold mb-3 text-sm text-gray-300">Create New Section</h3>
+                        <form onSubmit={handleAddSection} className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="Section Title (e.g. Module 1)"
+                                value={newSectionTitle}
+                                onChange={(e) => setNewSectionTitle(e.target.value)}
+                                className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded text-sm text-white"
+                            />
+                            <button type="submit" className="px-4 py-2 bg-gray-800 text-white text-sm rounded hover:bg-gray-700 border border-gray-600">
+                                Create
+                            </button>
+                        </form>
                     </div>
 
                     {/* Add Lecture Form */}
@@ -410,6 +515,21 @@ export default function EditCoursePage() {
                                 className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                 required
                             />
+
+                            {/* Section Selector */}
+                            <div>
+                                <select
+                                    value={selectedSectionId}
+                                    onChange={(e) => setSelectedSectionId(e.target.value)}
+                                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                >
+                                    <option value="">Ungrouped (Default)</option>
+                                    {sections.map(s => (
+                                        <option key={s._id} value={s._id}>{s.title}</option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-gray-500 mt-1">Select where this lecture belongs</p>
+                            </div>
                             <div>
                                 <label className="block text-xs text-gray-400 mb-1">Lecture Video</label>
                                 {newLectureVideoKey && (

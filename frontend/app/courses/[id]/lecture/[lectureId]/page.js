@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
 import Loader from '../../../../../components/ui/Loader';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
-import { ArrowLeft, PlayCircle } from 'lucide-react';
+import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
 
 export default function LecturePlayer() {
@@ -17,8 +18,9 @@ export default function LecturePlayer() {
 
     const [course, setCourse] = useState(null);
     const [currentLecture, setCurrentLecture] = useState(null);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [allLectures, setAllLectures] = useState([]); // Flattened list for easy navigation
     const [loading, setLoading] = useState(true);
+    const [expandedSections, setExpandedSections] = useState({});
 
     useEffect(() => {
         if (!courseId) return;
@@ -33,7 +35,7 @@ export default function LecturePlayer() {
             }
 
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses/${courseId}`, {
+                const res = await fetch(`${API_URL}/api/courses/${courseId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -41,15 +43,26 @@ export default function LecturePlayer() {
                     const data = await res.json();
                     setCourse(data);
 
-                    // Find current lecture
-                    if (data.lectures && data.lectures.length > 0) {
-                        const index = lectureId === 'undefined' || !lectureId
-                            ? 0
-                            : data.lectures.findIndex(l => l._id?.toString() === lectureId);
+                    // Flatten lectures: Sections first (ordered), then Ungrouped
+                    // OR: Ungrouped first? Usually sections are the main content.
+                    // Let's do: Sections... then Ungrouped.
+                    let flattened = [];
 
-                        const actualIndex = index >= 0 ? index : parseInt(lectureId) || 0;
-                        setCurrentIndex(actualIndex);
-                        setCurrentLecture(data.lectures[actualIndex]);
+                    if (data.sections) {
+                        data.sections.forEach(section => {
+                            if (section.lectures) flattened.push(...section.lectures);
+                        });
+                    }
+                    if (data.lectures) {
+                        flattened.push(...data.lectures);
+                    }
+
+                    setAllLectures(flattened);
+
+                    // Find current lecture
+                    if (flattened.length > 0) {
+                        const found = flattened.find(l => l._id?.toString() === lectureId);
+                        setCurrentLecture(found || flattened[0]);
                     }
                 }
             } catch (error) {
@@ -60,8 +73,18 @@ export default function LecturePlayer() {
         };
 
         fetchCourse();
-        fetchCourse();
+
     }, [courseId, lectureId, router]);
+
+    // Expand section containing current lecture when loaded
+    useEffect(() => {
+        if (currentLecture && course?.sections) {
+            const activeSection = course.sections.find(s => s.lectures?.some(l => l._id === currentLecture._id));
+            if (activeSection) {
+                setExpandedSections(prev => ({ ...prev, [activeSection._id]: true }));
+            }
+        }
+    }, [currentLecture, course]);
 
     // Scroll to top when lecture changes
     useEffect(() => {
@@ -69,17 +92,31 @@ export default function LecturePlayer() {
     }, [lectureId]);
 
     const navigateLecture = (direction) => {
-        if (!course || !course.lectures) return;
+        if (!allLectures.length || !currentLecture) return;
+
+        const currentIndex = allLectures.findIndex(l => l._id === currentLecture._id);
+        if (currentIndex === -1) return;
 
         const newIndex = direction === 'next'
-            ? Math.min(currentIndex + 1, course.lectures.length - 1)
+            ? Math.min(currentIndex + 1, allLectures.length - 1)
             : Math.max(currentIndex - 1, 0);
 
-        setCurrentIndex(newIndex);
-        setCurrentLecture(course.lectures[newIndex]);
+        const nextLecture = allLectures[newIndex];
+        setCurrentLecture(nextLecture);
+        router.push(`/courses/${courseId}/lecture/${nextLecture._id}`);
+    };
 
-        const newLectureId = course.lectures[newIndex]._id || newIndex;
-        router.push(`/courses/${courseId}/lecture/${newLectureId}`);
+    // Helper to get index for UI
+    const getCurrentIndex = () => {
+        if (!allLectures.length || !currentLecture) return 0;
+        return allLectures.findIndex(l => l._id === currentLecture._id);
+    };
+
+    const toggleSection = (sectionId) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [sectionId]: !prev[sectionId]
+        }));
     };
 
     if (loading) return <Loader />;
@@ -128,7 +165,7 @@ export default function LecturePlayer() {
 
                     <div style={{ marginTop: '20px' }}>
                         <h2 style={{ fontSize: '1.8rem', marginBottom: '8px', color: 'white' }}>{currentLecture.title || 'Untitled Lecture'}</h2>
-                        <p style={{ color: '#aaa' }}>Lecture {currentIndex + 1} of {course.lectures.length}</p>
+                        <p style={{ color: '#aaa' }}>Lecture {getCurrentIndex() + 1} of {allLectures.length}</p>
                     </div>
                 </div>
 
@@ -142,15 +179,15 @@ export default function LecturePlayer() {
                             <Button
                                 variant="outline"
                                 onClick={() => navigateLecture('prev')}
-                                disabled={currentIndex === 0}
-                                style={{ flex: 1, opacity: currentIndex === 0 ? 0.5 : 1 }}
+                                disabled={getCurrentIndex() === 0}
+                                style={{ flex: 1, opacity: getCurrentIndex() === 0 ? 0.5 : 1 }}
                             >
                                 ← Prev
                             </Button>
                             <Button
                                 onClick={() => navigateLecture('next')}
-                                disabled={currentIndex === course.lectures.length - 1}
-                                style={{ flex: 1, opacity: currentIndex === course.lectures.length - 1 ? 0.5 : 1 }}
+                                disabled={getCurrentIndex() === allLectures.length - 1}
+                                style={{ flex: 1, opacity: getCurrentIndex() === allLectures.length - 1 ? 0.5 : 1 }}
                             >
                                 Next →
                             </Button>
@@ -163,36 +200,117 @@ export default function LecturePlayer() {
                             <h3 style={{ fontSize: '1.1rem', color: 'white', margin: 0 }}>Course Content</h3>
                         </div>
                         <div style={{ padding: '12px' }}>
-                            {course.lectures.map((lecture, index) => (
-                                <div
-                                    key={index}
-                                    onClick={() => {
-                                        setCurrentIndex(index);
-                                        setCurrentLecture(lecture);
-                                        router.push(`/courses/${courseId}/lecture/${lecture._id || index}`);
-                                    }}
-                                    style={{
-                                        padding: '12px',
-                                        marginBottom: '8px',
-                                        background: index === currentIndex ? '#2563eb' : 'rgba(255,255,255,0.05)',
-                                        color: index === currentIndex ? 'white' : '#cbd5e1',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        transition: 'all 0.2s',
-                                        border: index === currentIndex ? 'none' : '1px solid rgba(255,255,255,0.1)'
-                                    }}
-                                >
-                                    <PlayCircle size={16} style={{ flexShrink: 0 }} />
-                                    <div style={{ flex: 1 }}>
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.4', display: 'block' }}>
-                                            {index + 1}. {lecture.title || 'Untitled Lecture'}
-                                        </span>
+                            {/* Sections */}
+                            {course.sections && course.sections.map(section => {
+                                const isExpanded = !!expandedSections[section._id];
+                                return (
+                                    <div key={section._id} style={{ marginBottom: '8px' }}>
+                                        {/* Section Header - Acts like a Dropdown Trigger */}
+                                        <div
+                                            onClick={() => toggleSection(section._id)}
+                                            style={{
+                                                padding: '10px 12px',
+                                                marginBottom: '4px',
+                                                background: 'transparent',
+                                                color: '#cbd5e1',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                transition: 'all 0.2s',
+                                            }}
+                                            className="hover:bg-gray-800"
+                                        >
+                                            <div style={{ marginRight: '8px', color: '#94a3b8' }}>
+                                                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                            </div>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 600, lineHeight: '1.4', textTransform: 'uppercase' }}>
+                                                {section.title}
+                                            </span>
+                                        </div>
+
+                                        {/* Section Content */}
+                                        {isExpanded && (
+                                            <div style={{ paddingLeft: '12px' }}>
+                                                {section.lectures && section.lectures.map((lecture) => {
+                                                    const isActive = currentLecture?._id === lecture._id;
+                                                    return (
+                                                        <div
+                                                            key={lecture._id}
+                                                            onClick={() => {
+                                                                setCurrentLecture(lecture);
+                                                                router.push(`/courses/${courseId}/lecture/${lecture._id}`);
+                                                            }}
+                                                            style={{
+                                                                padding: '10px 12px',
+                                                                marginBottom: '4px',
+                                                                background: isActive ? '#2563eb' : 'transparent',
+                                                                color: isActive ? 'white' : '#cbd5e1',
+                                                                borderRadius: '6px',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '12px',
+                                                                transition: 'all 0.2s',
+                                                            }}
+                                                            className={!isActive ? "hover:bg-gray-800" : ""}
+                                                        >
+                                                            <PlayCircle size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.4' }}>
+                                                                {lecture.title}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
+                                );
+                            })}
+
+                            {/* Ungrouped Lectures */}
+                            {course.lectures && course.lectures.length > 0 && (
+                                <div style={{ marginTop: '16px' }}>
+                                    {course.sections && course.sections.length > 0 && (
+                                        <h4 style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', paddingLeft: '8px' }}>
+                                            Additional
+                                        </h4>
+                                    )}
+                                    {course.lectures.map((lecture) => {
+                                        const isActive = currentLecture?._id === lecture._id;
+                                        return (
+                                            <div
+                                                key={lecture._id}
+                                                onClick={() => {
+                                                    setCurrentLecture(lecture);
+                                                    router.push(`/courses/${courseId}/lecture/${lecture._id}`);
+                                                }}
+                                                style={{
+                                                    padding: '10px 12px',
+                                                    marginBottom: '4px',
+                                                    background: isActive ? '#2563eb' : 'transparent',
+                                                    color: isActive ? 'white' : '#cbd5e1',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '12px',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                                className={!isActive ? "hover:bg-gray-800" : ""}
+                                            >
+                                                <PlayCircle size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.4' }}>
+                                                    {lecture.title}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            ))}
+                            )}
+
+
                         </div>
                     </Card>
                 </div>

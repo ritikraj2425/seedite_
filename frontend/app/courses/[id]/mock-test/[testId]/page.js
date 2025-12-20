@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { API_URL } from '@/lib/api';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
 import Loader from '../../../../../components/ui/Loader';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
-import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, Maximize, Minimize } from 'lucide-react';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 
 export default function MockTestPage() {
@@ -26,6 +27,8 @@ export default function MockTestPage() {
     const [submitted, setSubmitted] = useState(false);
     const [score, setScore] = useState(0);
     const [normalizedScore, setNormalizedScore] = useState(0);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const testContainerRef = useRef(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,7 +37,7 @@ export default function MockTestPage() {
 
             try {
                 // Fetch test
-                const testRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/mock-tests/${testId}`, {
+                const testRes = await fetch(`${API_URL}/api/mock-tests/${testId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!testRes.ok) throw new Error('Failed to fetch test');
@@ -42,7 +45,7 @@ export default function MockTestPage() {
                 setTest(testData);
 
                 // Check for previous result
-                const resultRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/me/mock-test-results/${testId}`, {
+                const resultRes = await fetch(`${API_URL}/api/users/me/mock-test-results/${testId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -68,6 +71,23 @@ export default function MockTestPage() {
     useEffect(() => {
         if (viewMode !== 'test' || submitted) return;
 
+        // Auto-enter fullscreen
+        const enterFullScreen = async () => {
+            try {
+                if (testContainerRef.current && !document.fullscreenElement) {
+                    await testContainerRef.current.requestFullscreen();
+                }
+            } catch (err) {
+                console.log("Full screen request failed (likely needs user interaction):", err);
+            }
+        };
+        enterFullScreen();
+
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+
         const timer = setInterval(() => {
             setTimeRemaining(prev => {
                 if (prev <= 1) {
@@ -78,8 +98,21 @@ export default function MockTestPage() {
             });
         }, 1000);
 
-        return () => clearInterval(timer);
+        return () => {
+            clearInterval(timer);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
     }, [viewMode, submitted]);
+
+    const toggleFullScreen = () => {
+        if (!document.fullscreenElement) {
+            testContainerRef.current?.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
     const formatTime = (seconds) => {
         const hrs = Math.floor(seconds / 3600);
@@ -129,7 +162,7 @@ export default function MockTestPage() {
         const token = savedUser.token;
 
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/mock-tests/${testId}/submit`, {
+            await fetch(`${API_URL}/api/mock-tests/${testId}/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -192,7 +225,7 @@ export default function MockTestPage() {
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#6366f1' }}>
-                                {resultToDisplay.score} / {resultToDisplay.totalMarks || (resultToDisplay.totalQuestions * 4)}
+                                {resultToDisplay.score} / {resultToDisplay.totalMarks || (test?.questions?.length * 4) || 0}
                             </div>
                             <p style={{ color: '#64748b' }}>Marks Obtained</p>
                         </div>
@@ -390,15 +423,21 @@ export default function MockTestPage() {
     if (viewMode === 'test' && !submitted) {
         const currentQ = test.questions[currentQuestion];
         return (
-            <div className="container" style={{ paddingTop: '40px', maxWidth: '1200px' }}>
+            <div ref={testContainerRef} className="container" style={{ paddingTop: '40px', maxWidth: '1200px', background: isFullscreen ? 'white' : 'transparent', minHeight: isFullscreen ? '100vh' : 'auto', overflowY: isFullscreen ? 'auto' : 'visible' }}>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h1 style={{ fontSize: '1.5rem' }}>{test.title}</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: timeRemaining < 300 ? '#fee2e2' : 'white', padding: '8px 16px', borderRadius: '6px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                        <Clock size={18} color={timeRemaining < 300 ? '#ef4444' : '#64748b'} />
-                        <span style={{ fontSize: '1.1rem', fontWeight: 600, color: timeRemaining < 300 ? '#ef4444' : '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
-                            {formatTime(timeRemaining)}
-                        </span>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                        <Button variant="outline" onClick={toggleFullScreen} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+                            {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+                        </Button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: timeRemaining < 300 ? '#fee2e2' : 'white', padding: '8px 16px', borderRadius: '6px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                            <Clock size={18} color={timeRemaining < 300 ? '#ef4444' : '#64748b'} />
+                            <span style={{ fontSize: '1.1rem', fontWeight: 600, color: timeRemaining < 300 ? '#ef4444' : '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatTime(timeRemaining)}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

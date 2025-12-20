@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function CoursesPage() {
@@ -17,7 +18,7 @@ export default function CoursesPage() {
             return;
         }
 
-        fetch('http://localhost:5000/api/courses')
+        fetch(`${API_URL}/api/courses`)
             .then(res => res.json())
             .then(data => {
                 setCourses(data);
@@ -31,7 +32,7 @@ export default function CoursesPage() {
         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
         try {
-            const res = await fetch(`http://localhost:5000/api/admin/courses/${id}`, {
+            const res = await fetch(`${API_URL}/api/admin/courses/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${adminUser.token}` }
             });

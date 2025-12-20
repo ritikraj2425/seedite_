@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/lib/api';
 import Card from '../../../components/ui/Card';
 import Loader from '../../../components/ui/Loader';
 import { format } from 'date-fns';
@@ -22,7 +23,7 @@ export default function AnnouncementsPage() {
             }
 
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/announcements/my-announcements`, {
+                const res = await fetch(`${API_URL}/api/announcements/my-announcements`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

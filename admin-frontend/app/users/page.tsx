@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_URL } from '@/lib/api';
 
 export default function UsersPage() {
     const router = useRouter();
@@ -17,7 +18,7 @@ export default function UsersPage() {
         }
 
         // Fetch all users
-        fetch('http://localhost:5000/api/admin/users', {
+        fetch(`${API_URL}/api/admin/users`, {
             headers: { 'Authorization': `Bearer ${adminUser.token}` }
         })
             .then(res => res.json())

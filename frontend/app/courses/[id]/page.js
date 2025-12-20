@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
+import { API_URL } from '@/lib/api';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Loader from '../../../components/ui/Loader';
 import toast from 'react-hot-toast';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 export default function CourseDetails() {
     const params = useParams();
@@ -33,7 +35,7 @@ export default function CourseDetails() {
 
             try {
                 // First fetch user profile to check enrollment
-                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/profile`, {
+                const profileRes = await fetch(`${API_URL}/api/users/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -50,7 +52,7 @@ export default function CourseDetails() {
                 }
 
                 // Fetch course details
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/courses/${id}`, {
+                const res = await fetch(`${API_URL}/api/courses/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -79,6 +81,14 @@ export default function CourseDetails() {
 
     const [feedbackText, setFeedbackText] = useState('');
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
+    const [expandedSections, setExpandedSections] = useState({});
+
+    const toggleSection = (sectionId) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [sectionId]: !prev[sectionId]
+        }));
+    };
 
     const handleFeedbackSubmit = async () => {
         if (!feedbackText.trim()) return;
@@ -91,7 +101,7 @@ export default function CourseDetails() {
 
         setSubmittingFeedback(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/feedback`, {
+            const res = await fetch(`${API_URL}/api/feedback`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,22 +159,65 @@ export default function CourseDetails() {
                             <h2 style={{ marginBottom: '20px' }}>Course Content</h2>
 
                             <div style={{ marginBottom: '32px' }}>
-                                <h3 style={{ fontSize: '1.4rem', color: '#6366f1' }}>Lectures</h3>
-                                {course.lectures && course.lectures.length > 0 ? (
-                                    <div style={{ display: 'grid', gap: '16px' }}>
-                                        {course.lectures.map((lecture, index) => (
-                                            <Card key={index} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
-                                                    <span style={{ fontWeight: 500 }}>{lecture.title}</span>
-                                                </div>
-                                                <Link href={`/courses/${id}/lecture/${lecture._id || index}`}>
-                                                    <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Watch</Button>
-                                                </Link>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                ) : (
+                                <h3 style={{ fontSize: '1.4rem', color: '#6366f1', marginBottom: '16px' }}>Lectures</h3>
+
+                                <div style={{ display: 'grid', gap: '16px' }}>
+                                    {/* Sections as Dropdown Rows */}
+                                    {course.sections && course.sections.map((section) => {
+                                        const isExpanded = !!expandedSections[section._id];
+                                        return (
+                                            <div key={section._id}>
+                                                {/* Section Row */}
+                                                <Card style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <span style={{ fontWeight: 500 }}>{section.title}</span>
+                                                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', marginLeft: '12px' }}>({section.lectures?.length || 0} lectures)</span>
+                                                    </div>
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => toggleSection(section._id)}
+                                                        style={{ fontSize: '0.9rem', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                    >
+                                                        {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                                        {isExpanded ? 'Hide' : 'Show'}
+                                                    </Button>
+                                                </Card>
+
+                                                {/* Expanded Lectures */}
+                                                {isExpanded && section.lectures && section.lectures.length > 0 && (
+                                                    <div style={{ paddingLeft: '24px', marginTop: '12px', display: 'grid', gap: '12px' }}>
+                                                        {section.lectures.map((lecture, index) => (
+                                                            <Card key={lecture._id} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <div>
+                                                                    <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
+                                                                    <span style={{ fontWeight: 500 }}>{lecture.title}</span>
+                                                                </div>
+                                                                <Link href={`/courses/${id}/lecture/${lecture._id}`}>
+                                                                    <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Watch</Button>
+                                                                </Link>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* Ungrouped Lectures */}
+                                    {course.lectures && course.lectures.map((lecture, index) => (
+                                        <Card key={lecture._id || index} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
+                                                <span style={{ fontWeight: 500 }}>{lecture.title}</span>
+                                            </div>
+                                            <Link href={`/courses/${id}/lecture/${lecture._id || index}`}>
+                                                <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Watch</Button>
+                                            </Link>
+                                        </Card>
+                                    ))}
+                                </div>
+
+                                {(!course.lectures?.length && !course.sections?.length) && (
                                     <p style={{ color: '#94a3b8' }}>No lectures available yet.</p>
                                 )}
                             </div>
