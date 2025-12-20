@@ -253,7 +253,7 @@ export default function CreateMockTestPage() {
 
                                                         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
                                                         try {
-                                                            const res = await fetch(`${API_URL}/api/upload/s3`, {
+                                                            const res = await fetch(`${API_URL}/api/upload/s3/image`, {
                                                                 method: 'POST',
                                                                 headers: {
                                                                     'Authorization': `Bearer ${adminUser.token}`
