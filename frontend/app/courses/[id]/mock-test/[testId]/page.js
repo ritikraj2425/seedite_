@@ -42,6 +42,7 @@ export default function MockTestPage() {
                 });
                 if (!testRes.ok) throw new Error('Failed to fetch test');
                 const testData = await testRes.json();
+                console.log('Mock test data received:', testData); // Debug log
                 setTest(testData);
 
                 // Check for previous result
@@ -151,6 +152,11 @@ export default function MockTestPage() {
     const handleSubmit = async () => {
         if (!test) return;
 
+        // Exit fullscreen before showing results to fix scrolling issue
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(err => console.log('Exit fullscreen error:', err));
+        }
+
         const { raw, normalized } = calculateScore();
         setScore(raw);
         setNormalizedScore(normalized);
@@ -194,6 +200,16 @@ export default function MockTestPage() {
 
     if (loading) return <Loader />;
     if (!test) return <div className="container" style={{ paddingTop: '40px' }}>Test not found</div>;
+    if (!test.questions || !Array.isArray(test.questions) || test.questions.length === 0) {
+        return (
+            <div className="container" style={{ paddingTop: '40px' }}>
+                <p>No questions available for this test. Please check if the test data is valid.</p>
+                <Button variant="outline" onClick={() => router.push(`/courses/${id}`)}>
+                    Back to Course
+                </Button>
+            </div>
+        );
+    }
 
     // Review Mode (Reuse similar layout to Test view but with answers shown)
     if (viewMode === 'previousResult' || (viewMode === 'result' && submitted)) {
