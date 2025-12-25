@@ -43,6 +43,8 @@ export default function MockTestPage() {
                 if (!testRes.ok) throw new Error('Failed to fetch test');
                 const testData = await testRes.json();
                 console.log('Mock test data received:', testData); // Debug log
+                console.log('Questions array:', testData.questions); // Debug questions specifically
+                console.log('Questions type:', typeof testData.questions, Array.isArray(testData.questions)); // Check type
                 setTest(testData);
 
                 // Check for previous result
@@ -220,8 +222,8 @@ export default function MockTestPage() {
             answers: answers
         };
 
-        const userAnswerIndex = (resultToDisplay.answers || {})[currentQuestion];
-        const isCorrect = userAnswerIndex === currentQ.correctOptionIndex;
+        const userAnswerIndex = (resultToDisplay?.answers || {})[currentQuestion];
+        const isCorrect = currentQ && userAnswerIndex === currentQ.correctOptionIndex;
         const isSkipped = userAnswerIndex === undefined;
 
         return (
@@ -364,7 +366,7 @@ export default function MockTestPage() {
                         <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Questions</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                             {test.questions.map((q, index) => {
-                                const ans = resultToDisplay.answers[index];
+                                const ans = (resultToDisplay?.answers || {})[index];
                                 const isCorr = ans === q.correctOptionIndex;
                                 const isSkip = ans === undefined;
                                 const isCurr = index === currentQuestion;
