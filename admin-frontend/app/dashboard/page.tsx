@@ -68,7 +68,7 @@ export default function Dashboard() {
                 {/* Quick Actions */}
                 <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-8">
                     <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <Link href="/courses/new">
                             <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
                                 <div className="text-4xl mb-2">➕</div>
@@ -85,6 +85,12 @@ export default function Dashboard() {
                             <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
                                 <div className="text-4xl mb-2">👥</div>
                                 <h3 className="font-semibold">View Users</h3>
+                            </div>
+                        </Link>
+                        <Link href="/coupons">
+                            <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
+                                <div className="text-4xl mb-2">🎟️</div>
+                                <h3 className="font-semibold">Manage Coupons</h3>
                             </div>
                         </Link>
                         <Link href="/analytics">

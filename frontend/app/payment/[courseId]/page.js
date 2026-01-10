@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
-import { ShieldCheck, Lock, CreditCard } from 'lucide-react';
+import { ShieldCheck, Lock, CreditCard, Tag, X, Check } from 'lucide-react';
 import { API_URL } from '../../../lib/api';
 import toast from 'react-hot-toast';
 
@@ -18,6 +18,11 @@ export default function PaymentPage() {
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
+
+    // Coupon state
+    const [couponCode, setCouponCode] = useState('');
+    const [couponApplied, setCouponApplied] = useState(null);
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
 
     useEffect(() => {
         if (!courseId) return;
@@ -39,6 +44,57 @@ export default function PaymentPage() {
         fetchCourse();
     }, [courseId]);
 
+    const applyCoupon = async () => {
+        if (!couponCode.trim()) {
+            toast.error('Please enter a coupon code');
+            return;
+        }
+
+        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = savedUser.token;
+
+        if (!token) {
+            toast.error('Please login to apply coupon');
+            return;
+        }
+
+        setValidatingCoupon(true);
+        try {
+            const res = await fetch(`${API_URL}/api/coupons/validate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    code: couponCode.toUpperCase(),
+                    courseId
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.valid) {
+                setCouponApplied(data);
+                toast.success(data.message || 'Coupon applied successfully!');
+            } else {
+                toast.error(data.message || 'Invalid coupon code');
+                setCouponApplied(null);
+            }
+        } catch (error) {
+            console.error('Error validating coupon:', error);
+            toast.error('Error validating coupon');
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setCouponApplied(null);
+        setCouponCode('');
+        toast.success('Coupon removed');
+    };
+
     const handlePayment = async () => {
         setProcessing(true);
         const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -50,14 +106,17 @@ export default function PaymentPage() {
         }
 
         try {
-            // 1. Create Order
+            // 1. Create Order (with coupon if applied)
             const orderRes = await fetch(`${API_URL}/api/payment/create-order`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ courseId })
+                body: JSON.stringify({
+                    courseId,
+                    couponCode: couponApplied ? couponApplied.code : null
+                })
             });
 
             if (!orderRes.ok) {
@@ -65,7 +124,7 @@ export default function PaymentPage() {
                 throw new Error(errData.message || 'Failed to create order');
             }
 
-            const { order, key } = await orderRes.json();
+            const { order, key, discountApplied } = await orderRes.json();
 
             // 2. Initialize Razorpay
             const options = {
@@ -151,6 +210,9 @@ export default function PaymentPage() {
     if (loading) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Loading...</div>;
     if (!course) return <div className="container" style={{ paddingTop: '40px', textAlign: 'center' }}>Course not found</div>;
 
+    const finalPrice = couponApplied ? couponApplied.finalPrice : course.price;
+    const discountAmount = couponApplied ? couponApplied.discountAmount : 0;
+
     return (
         <>
             <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
@@ -177,18 +239,131 @@ export default function PaymentPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Coupon Input Section */}
+                        <div style={{
+                            background: '#f8fafc',
+                            borderRadius: '8px',
+                            padding: '16px',
+                            marginBottom: '16px',
+                            border: '1px dashed #cbd5e1'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                <Tag size={18} color="#2563eb" />
+                                <span style={{ fontWeight: 600, color: '#1e293b' }}>Have a coupon code?</span>
+                            </div>
+
+                            {couponApplied ? (
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    background: '#dcfce7',
+                                    padding: '12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #86efac'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Check size={18} color="#16a34a" />
+                                        <span style={{ fontWeight: 600, color: '#166534' }}>{couponApplied.code}</span>
+                                        <span style={{ color: '#16a34a', fontSize: '0.9rem' }}>
+                                            ({couponApplied.discountType === 'percentage'
+                                                ? `${couponApplied.discountValue}% off`
+                                                : `₹${couponApplied.discountValue} off`})
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={removeCoupon}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '4px'
+                                        }}
+                                    >
+                                        <X size={18} color="#dc2626" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        type="text"
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                        placeholder="Enter coupon code"
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px 12px',
+                                            border: '1px solid #cbd5e1',
+                                            borderRadius: '6px',
+                                            fontSize: '0.95rem',
+                                            fontFamily: 'monospace',
+                                            textTransform: 'uppercase'
+                                        }}
+                                        onKeyPress={(e) => e.key === 'Enter' && applyCoupon()}
+                                    />
+                                    <button
+                                        onClick={applyCoupon}
+                                        disabled={validatingCoupon || !couponCode.trim()}
+                                        style={{
+                                            padding: '10px 20px',
+                                            background: validatingCoupon || !couponCode.trim() ? '#94a3b8' : '#2563eb',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            fontWeight: 600,
+                                            cursor: validatingCoupon || !couponCode.trim() ? 'not-allowed' : 'pointer'
+                                        }}
+                                    >
+                                        {validatingCoupon ? 'Checking...' : 'Apply'}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Price Breakdown */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                             <span style={{ color: '#64748b' }}>Course Price</span>
                             <span style={{ fontWeight: 600 }}>₹{course.price}</span>
                         </div>
+
+                        {couponApplied && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span style={{ color: '#16a34a' }}>Coupon Discount</span>
+                                <span style={{ fontWeight: 600, color: '#16a34a' }}>-₹{discountAmount}</span>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                             <span style={{ color: '#64748b' }}>Platform Fee</span>
                             <span style={{ fontWeight: 600 }}>₹0</span>
                         </div>
+
                         <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Total</span>
-                            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2563eb' }}>₹{course.price}</span>
+                            <div style={{ textAlign: 'right' }}>
+                                {couponApplied && (
+                                    <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through', marginRight: '8px' }}>
+                                        ₹{course.price}
+                                    </span>
+                                )}
+                                <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2563eb' }}>₹{finalPrice}</span>
+                            </div>
                         </div>
+
+                        {couponApplied && (
+                            <div style={{
+                                marginTop: '12px',
+                                padding: '8px 12px',
+                                background: '#fef3c7',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem',
+                                color: '#92400e',
+                                textAlign: 'center'
+                            }}>
+                                🎉 You're saving ₹{discountAmount} with this coupon!
+                            </div>
+                        )}
 
                         <div style={{ marginTop: '24px' }}>
                             <Button
@@ -199,7 +374,7 @@ export default function PaymentPage() {
                                 {processing ? 'Processing...' : (
                                     <>
                                         <CreditCard size={20} />
-                                        Pay With Razorpay
+                                        Pay ₹{finalPrice} with Razorpay
                                     </>
                                 )}
                             </Button>
