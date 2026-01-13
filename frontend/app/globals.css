@@ -271,3 +271,61 @@ h3 {
     /* Chrome/Safari */
   }
 }
+
+/* Modern Clean UI Utilities */
+.modern-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+}
+
+.modern-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+  /* Softer, larger shadow */
+  border-color: #cbd5e1;
+}
+
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: inline-block;
+}
+
+.footer-link:hover {
+  color: var(--foreground);
+  /* Darker on hover instead of primary */
+  transform: translateX(2px);
+}
+
+.section-title {
+  font-size: 2.25rem;
+  /* Slightly smaller, tighter */
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #0f172a;
+  /* Solid dark color */
+  letter-spacing: -0.02em;
+}
+
+.icon-box {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease;
+  background-color: #f8fafc;
+  /* Subtle gray background by default */
+}
+
+.modern-card:hover .icon-box {
+  transform: scale(1.05);
+}

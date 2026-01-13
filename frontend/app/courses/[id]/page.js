@@ -275,6 +275,31 @@ export default function CourseDetails() {
                                     <span style={{ color: '#94a3b8' }}>Instructor</span>
                                     <span style={{ fontWeight: 500 }}>{course.instructor}</span>
                                 </div>
+
+                                {isEnrolled && (
+                                    <a
+                                        href={course.telegramUrl || "https://t.me/+xiJsaZjnDf02YWY1"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ textDecoration: 'none' }}
+                                    >
+                                        <Button
+                                            style={{
+                                                width: '100%',
+                                                marginBottom: '16px',
+                                                background: '#0088cc', // Telegram Blue
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '8px'
+                                            }}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-8.609 3.33c-2.068.8-4.133 1.598-5.724 2.21a405.15 405.15 0 0 1-2.863 1.13c-1.197.501-1.642 1.298-1.584 1.846a1.95 1.95 0 0 0 1.218 1.626c1.27.514 3.794 1.258 4.755 1.705.408.19.923.498 1.492 1.859l1.631 3.882c.243.581.565.753.847.753.308 0 .543-.198.718-.382l2.846-3.033 4.888 3.633c.854.636 1.732.484 2.053-.591l3.541-16.712a2.205 2.205 0 0 0-.255-1.928 2.227 2.227 0 0 0-1.782-.962Z" /></svg>
+                                            Join Telegram Group
+                                        </Button>
+                                    </a>
+                                )}
+
                                 {!isEnrolled && (
                                     <Button onClick={handleEnroll} style={{ width: '100%' }}>Enroll Now</Button>
                                 )}
