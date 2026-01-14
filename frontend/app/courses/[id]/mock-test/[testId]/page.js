@@ -201,28 +201,32 @@ export default function MockTestPage() {
     const calculateScore = () => {
         if (!test) return { raw: 0, normalized: 0 };
         let rawScore = 0;
+        const cMarks = test.correctMarks !== undefined ? parseInt(test.correctMarks) : 4;
+        const iMarks = test.incorrectMarks !== undefined ? parseInt(test.incorrectMarks) : -1;
+
         test.questions.forEach((q, index) => {
             if (q.isUnrated) return; // Ignore unrated questions in scoring
 
             if (answers[index] !== undefined) {
-                if (answers[index] === q.correctOptionIndex) {
-                    rawScore += 4;
+                const isCorrect = answers[index] == (q.correctOption || q.correctOptionIndex);
+                if (isCorrect) {
+                    rawScore += (q.marks !== undefined ? parseInt(q.marks) : cMarks);
                 } else {
-                    rawScore -= 1;
+                    rawScore += iMarks; // iMarks is already negative usually (e.g., -1)
                 }
             }
         });
-        const ratedQuestionsCount = test.questions.filter(q => !q.isUnrated).length;
-        const maxPossible = ratedQuestionsCount * 4;
+        const ratedQuestions = test.questions.filter(q => !q.isUnrated);
+        const maxPossible = ratedQuestions.reduce((sum, q) => sum + (q.marks !== undefined ? parseInt(q.marks) : cMarks), 0);
         const normalized = maxPossible > 0 ? Math.max(0, Math.min(10, (rawScore / maxPossible) * 10)) : 0;
-        return { raw: rawScore, normalized: parseFloat(normalized.toFixed(2)) };
+        return { raw: rawScore, normalized: parseFloat(normalized.toFixed(2)), totalMarks: maxPossible };
     };
 
     const handleSubmit = async () => {
         if (!test) return;
         if (document.fullscreenElement) document.exitFullscreen().catch(console.error);
 
-        const { raw, normalized } = calculateScore();
+        const { raw, normalized, totalMarks } = calculateScore();
         setScore(raw);
         setNormalizedScore(normalized);
         setSubmitted(true);
@@ -238,7 +242,7 @@ export default function MockTestPage() {
                 },
                 body: JSON.stringify({
                     score: raw,
-                    totalMarks: (test.questions.filter(q => !q.isUnrated).length) * 4,
+                    totalMarks: totalMarks,
                     normalizedScore: normalized,
                     totalQuestions: test.questions.length,
                     answers: answers
