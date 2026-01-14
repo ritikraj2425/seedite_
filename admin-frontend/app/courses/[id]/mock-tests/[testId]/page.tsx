@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { uploadFile } from '@/lib/upload';
 import { API_URL } from '@/lib/api';
 import toast from 'react-hot-toast';
+import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 
 // Removed local API_URL definition
 
@@ -43,6 +44,32 @@ export default function EditMockTestPage() {
         }
     };
 
+    const renderSmartPreview = (content: any) => {
+        if (content === null || content === undefined || content === '') return '';
+        const str = String(content);
+        // Improved heuristic: keywords+newline OR indentation OR algo symbols
+        const codeKeywords = [
+            'def ', 'class ', 'import ', 'from ', 'public ', 'private ', 'function ', 'var ', 'const ', 'let ',
+            'INPUT', 'OUTPUT', 'IF ', 'ELSE ', 'WHILE ', 'FOR ', 'THEN ', 'DO ', 'END ', 'PRINT ', 'STEP ', 'ALGORITHM'
+        ];
+        const algoSymbols = ['←', '≤', '≥', '≠', '×', '÷', 'mod ', '==', '!=', '>=', '<='];
+
+        const hasCodeKeyword = codeKeywords.some(k => {
+            const kl = k.toLowerCase().trim();
+            const regex = new RegExp(`\\b${kl}\\b`, 'i');
+            return regex.test(str);
+        });
+        const hasAlgoSymbol = algoSymbols.some(s => str.includes(s));
+        const hasIndentation = /^\s{3,}/m.test(str);
+
+        const isCodeLike = (hasCodeKeyword && str.includes('\n')) || hasIndentation || (hasAlgoSymbol && str.length > 5);
+
+        if (isCodeLike && !str.trim().startsWith('```')) {
+            return `\n\n\`\`\`python\n${str}\n\`\`\`\n\n`;
+        }
+        return str;
+    };
+
     useEffect(() => {
         fetchTestDetails();
     }, [testId, router]);
@@ -71,13 +98,24 @@ export default function EditMockTestPage() {
                 setIncorrectMarks(data.incorrectMarks.toString());
                 setVideoSolutionKey(data.videoSolutionKey || ''); // Assuming this field exists or needs key extraction from URL
 
-                // Ensure questions have at least 4 options structure
-                const formattedQuestions = (data.questions || []).map((q: any) => ({
-                    ...q,
-                    options: q.options || ['', '', '', ''],
-                    correctOption: q.correctOptionIndex !== undefined ? q.correctOptionIndex : 0,
-                    marks: q.marks || 4
-                }));
+                // Ensure questions have at least 4 options structure and handle correctOption types
+                const formattedQuestions = (data.questions || []).map((q: any) => {
+                    let correctVal = q.correctOptionIndex !== undefined ? q.correctOptionIndex : q.correctOption;
+                    if ((q.type === 'mcq' || !q.type) && typeof correctVal === 'string' && !isNaN(parseInt(correctVal))) {
+                        correctVal = parseInt(correctVal);
+                    }
+
+                    const unifiedText = q.text || q.questionText || '';
+                    return {
+                        ...q,
+                        type: q.type || 'mcq',
+                        text: unifiedText,
+                        questionText: unifiedText,
+                        options: q.options || ['', '', '', ''],
+                        correctOption: correctVal,
+                        marks: q.marks || 4
+                    };
+                });
                 setQuestions(formattedQuestions);
             } else {
                 console.error('Failed to fetch test details');
@@ -91,21 +129,26 @@ export default function EditMockTestPage() {
     };
 
     const handleQuestionChange = (index: number, field: string, value: any) => {
-        const newQuestions = [...questions];
-        newQuestions[index][field] = value;
-        setQuestions(newQuestions);
+        setQuestions(prev => prev.map((q, i) =>
+            i === index ? { ...q, [field]: value } : q
+        ));
     };
 
     const handleOptionChange = (qIndex: number, optIndex: number, value: string) => {
-        const newQuestions = [...questions];
-        newQuestions[qIndex].options[optIndex] = value;
-        setQuestions(newQuestions);
+        setQuestions(prev => prev.map((q, i) => {
+            if (i === qIndex) {
+                const newOptions = [...(q.options || [])];
+                newOptions[optIndex] = value;
+                return { ...q, options: newOptions };
+            }
+            return q;
+        }));
     };
 
     const addQuestion = () => {
         setQuestions([
             ...questions,
-            { text: '', options: ['', '', '', ''], correctOption: 0, marks: 4 }
+            { type: 'mcq', text: '', options: ['', '', '', ''], correctOption: 0, marks: 4, externalLink: '', isUnrated: false }
         ]);
     };
 
@@ -140,8 +183,15 @@ export default function EditMockTestPage() {
                     incorrectMarks: parseInt(incorrectMarks),
                     videoSolutionKey,
                     questions: questions.map(q => ({
-                        ...q,
-                        correctOptionIndex: q.correctOption // Map back to backend expected field
+                        type: q.type || 'mcq',
+                        questionText: q.text || '', // Primary field for backend
+                        text: q.text || '',         // Legacy field just in case
+                        image: q.image || '',
+                        options: (q.options || []).map((opt: any) => opt || ''),
+                        correctOption: q.correctOption?.toString() || '',
+                        externalLink: q.externalLink || '',
+                        isUnrated: !!q.isUnrated,
+                        marks: parseInt(q.marks?.toString() || '4')
                     }))
                 })
             });
@@ -276,14 +326,58 @@ export default function EditMockTestPage() {
                                 <h3 className="font-semibold mb-3 text-gray-400">Question {qIndex + 1}</h3>
 
                                 <div className="space-y-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter question text..."
-                                        value={q.text || q.questionText} // Handle differences in fetch vs state
-                                        onChange={(e) => handleQuestionChange(qIndex, 'text', e.target.value)}
-                                        className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white"
-                                        required
-                                    />
+                                    <div className="flex gap-4 items-center">
+                                        <div className="flex-1">
+                                            <label className="block text-xs text-gray-400 mb-1">Question Type</label>
+                                            <select
+                                                value={q.type || 'mcq'}
+                                                onChange={(e) => handleQuestionChange(qIndex, 'type', e.target.value)}
+                                                className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                            >
+                                                <option value="mcq">Multiple Choice (MCQ)</option>
+                                                <option value="code">Coding Question</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="block text-xs text-gray-400 mb-1">External Link (LeetCode/Github)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="https://leetcode.com/problems/..."
+                                                value={q.externalLink || ''}
+                                                onChange={(e) => handleQuestionChange(qIndex, 'externalLink', e.target.value)}
+                                                className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                            />
+                                        </div>
+                                        <div className="flex items-center space-x-2 pt-4">
+                                            <input
+                                                type="checkbox"
+                                                id={`unrated-${qIndex}`}
+                                                checked={q.isUnrated || false}
+                                                onChange={(e) => handleQuestionChange(qIndex, 'isUnrated', e.target.checked)}
+                                                className="w-4 h-4 text-blue-600 rounded bg-black border-gray-700"
+                                            />
+                                            <label htmlFor={`unrated-${qIndex}`} className="text-sm font-medium text-gray-300">Unrated</label>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-4">
+                                            <label className="block text-xs text-gray-400 mb-1">Question Content (Markdown/LaTeX supported)</label>
+                                            <textarea
+                                                placeholder="Enter question text..."
+                                                value={q.text || ''}
+                                                onChange={(e) => handleQuestionChange(qIndex, 'text', e.target.value)}
+                                                className="w-full h-32 px-4 py-3 bg-black border border-gray-700 rounded-lg text-white font-mono text-sm"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-xs text-gray-400 mb-1">Live Preview</label>
+                                            <div className="w-full h-32 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg overflow-auto">
+                                                <MarkdownRenderer content={renderSmartPreview(q.text) || '*No content*'} />
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-2">
@@ -339,25 +433,48 @@ export default function EditMockTestPage() {
                                             </div>
                                         </div>
 
-                                        {q.options.map((opt: string, optIndex: number) => (
-                                            <div key={optIndex} className="flex items-center space-x-2">
-                                                <input
-                                                    type="radio"
-                                                    name={`correct-${qIndex}`}
-                                                    checked={q.correctOption === optIndex}
-                                                    onChange={() => handleQuestionChange(qIndex, 'correctOption', optIndex)}
-                                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 bg-black border-gray-700"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder={`Option ${optIndex + 1}`}
-                                                    value={opt}
-                                                    onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
-                                                    className="flex-1 px-3 py-2 bg-black border border-gray-700 rounded-lg text-white text-sm"
-                                                    required
-                                                />
+                                        {q.type !== 'code' ? (
+                                            q.options.map((opt: string, optIndex: number) => (
+                                                <div key={optIndex} className="space-y-2">
+                                                    <div className="flex items-center space-x-2">
+                                                        <input
+                                                            type="radio"
+                                                            name={`correct-${qIndex}`}
+                                                            checked={String(q.correctOption) === String(optIndex)}
+                                                            onChange={() => handleQuestionChange(qIndex, 'correctOption', optIndex)}
+                                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 bg-black border-gray-700"
+                                                        />
+                                                        <textarea
+                                                            placeholder={`Option ${optIndex + 1}`}
+                                                            value={opt}
+                                                            onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
+                                                            className="flex-1 px-3 py-2 bg-black border border-gray-700 rounded-lg text-white text-sm"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="ml-6 p-2 bg-gray-800 rounded">
+                                                        <MarkdownRenderer content={renderSmartPreview(opt) || '*Option preview*'} />
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-2 space-y-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-1">Model Solution / Correct Code (Markdown Block encouraged)</label>
+                                                    <textarea
+                                                        placeholder="Enter the model solution code..."
+                                                        value={q.correctOption ?? ''}
+                                                        onChange={(e) => handleQuestionChange(qIndex, 'correctOption', e.target.value)}
+                                                        className="w-full h-48 px-4 py-3 bg-black border border-gray-700 rounded-lg text-white font-mono text-sm"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+                                                    <label className="block text-xs text-gray-400 mb-2">Solution Preview</label>
+                                                    <MarkdownRenderer content={renderSmartPreview(q.correctOption ?? '*No solution key*')} />
+                                                </div>
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
                                 </div>
                             </div>

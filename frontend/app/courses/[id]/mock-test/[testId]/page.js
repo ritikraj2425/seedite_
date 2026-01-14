@@ -13,6 +13,7 @@ import {
     Bookmark, RotateCcw, Flag
 } from 'lucide-react';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
+import MarkdownRenderer from '../../../../../components/ui/MarkdownRenderer';
 
 export default function MockTestPage() {
     const params = useParams();
@@ -150,6 +151,32 @@ export default function MockTestPage() {
         return `${hrs.toString().padStart(2, '0')} : ${mins.toString().padStart(2, '0')} : ${secs.toString().padStart(2, '0')}`;
     };
 
+    const renderSmartPreview = (content) => {
+        if (content === null || content === undefined || content === '') return '';
+        const str = String(content);
+        // Improved heuristic: keywords+newline OR indentation OR algo symbols
+        const codeKeywords = [
+            'def ', 'class ', 'import ', 'from ', 'public ', 'private ', 'function ', 'var ', 'const ', 'let ',
+            'INPUT', 'OUTPUT', 'IF ', 'ELSE ', 'WHILE ', 'FOR ', 'THEN ', 'DO ', 'END ', 'PRINT ', 'STEP ', 'ALGORITHM'
+        ];
+        const algoSymbols = ['←', '≤', '≥', '≠', '×', '÷', 'mod ', '==', '!=', '>=', '<='];
+
+        const hasCodeKeyword = codeKeywords.some(k => {
+            const kl = k.toLowerCase().trim();
+            const regex = new RegExp(`\\b${kl}\\b`, 'i');
+            return regex.test(str);
+        });
+        const hasAlgoSymbol = algoSymbols.some(s => str.includes(s));
+        const hasIndentation = /^\s{3,}/m.test(str);
+
+        const isCodeLike = (hasCodeKeyword && str.includes('\n')) || hasIndentation || (hasAlgoSymbol && str.length > 5);
+
+        if (isCodeLike && !str.trim().startsWith('```')) {
+            return `\n\n\`\`\`python\n${str}\n\`\`\`\n\n`;
+        }
+        return str;
+    };
+
     const handleOptionSelect = (optionIndex) => {
         if (submitted) return;
         setAnswers({ ...answers, [currentQuestion]: optionIndex });
@@ -175,6 +202,8 @@ export default function MockTestPage() {
         if (!test) return { raw: 0, normalized: 0 };
         let rawScore = 0;
         test.questions.forEach((q, index) => {
+            if (q.isUnrated) return; // Ignore unrated questions in scoring
+
             if (answers[index] !== undefined) {
                 if (answers[index] === q.correctOptionIndex) {
                     rawScore += 4;
@@ -183,8 +212,9 @@ export default function MockTestPage() {
                 }
             }
         });
-        const maxPossible = test.questions.length * 4;
-        const normalized = Math.max(0, Math.min(10, (rawScore / maxPossible) * 10));
+        const ratedQuestionsCount = test.questions.filter(q => !q.isUnrated).length;
+        const maxPossible = ratedQuestionsCount * 4;
+        const normalized = maxPossible > 0 ? Math.max(0, Math.min(10, (rawScore / maxPossible) * 10)) : 0;
         return { raw: rawScore, normalized: parseFloat(normalized.toFixed(2)) };
     };
 
@@ -208,7 +238,7 @@ export default function MockTestPage() {
                 },
                 body: JSON.stringify({
                     score: raw,
-                    totalMarks: test.questions.length * 4,
+                    totalMarks: (test.questions.filter(q => !q.isUnrated).length) * 4,
                     normalizedScore: normalized,
                     totalQuestions: test.questions.length,
                     answers: answers
@@ -449,6 +479,14 @@ export default function MockTestPage() {
                             {formatTime(timeRemaining)}
                         </div>
                         <Button
+                            onClick={toggleFullScreen}
+                            variant="outline"
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px' }}
+                        >
+                            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+                            <span className="hidden sm:inline">{isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}</span>
+                        </Button>
+                        <Button
                             onClick={handleSubmit}
                             style={{ background: '#10b981', padding: '8px 16px', fontSize: '0.9rem' }}
                         >
@@ -477,46 +515,87 @@ export default function MockTestPage() {
                         <div style={{ marginBottom: '40px' }}>
                             <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>Question {currentQuestion + 1} / {test.questions.length}</span>
                             <div style={{ marginTop: '16px', fontSize: '1.25rem', lineHeight: '1.6', fontWeight: '500', color: '#1e293b' }}>
-                                {currentQ.questionText}
+                                <MarkdownRenderer content={renderSmartPreview(currentQ.questionText || currentQ.text)} />
                             </div>
                             {currentQ.image && renderQuestionImage(currentQ.image)}
                         </div>
 
                         {/* Options Cards */}
-                        <div style={{ display: 'grid', gap: '16px' }}>
-                            {currentQ.options.map((option, idx) => {
-                                const isSelected = answers[currentQuestion] === idx;
-                                return (
-                                    <div
-                                        key={idx}
-                                        onClick={() => handleOptionSelect(idx)}
-                                        style={{
-                                            padding: '20px',
-                                            borderRadius: '12px',
-                                            border: `2px solid ${isSelected ? '#2563eb' : '#e2e8f0'}`,
-                                            background: isSelected ? '#eff6ff' : 'white',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '20px',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        <div style={{
-                                            width: '32px', height: '32px', borderRadius: '8px',
-                                            background: isSelected ? '#2563eb' : '#f1f5f9',
-                                            color: isSelected ? 'white' : '#64748b',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontWeight: 'bold',
-                                            flexShrink: 0
-                                        }}>
-                                            {String.fromCharCode(65 + idx)}
+                        {currentQ.type !== 'code' && (
+                            <div style={{ display: 'grid', gap: '16px' }}>
+                                {currentQ.options.map((option, idx) => {
+                                    const isSelected = answers[currentQuestion] === idx;
+                                    return (
+                                        <div
+                                            key={idx}
+                                            onClick={() => handleOptionSelect(idx)}
+                                            style={{
+                                                padding: '20px',
+                                                borderRadius: '12px',
+                                                border: `2px solid ${isSelected ? '#2563eb' : '#e2e8f0'}`,
+                                                background: isSelected ? '#eff6ff' : 'white',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'flex-start',
+                                                gap: '20px',
+                                                transition: 'all 0.2s',
+                                                padding: '20px'
+                                            }}
+                                        >
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '8px',
+                                                background: isSelected ? '#2563eb' : '#f1f5f9',
+                                                color: isSelected ? 'white' : '#64748b',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontWeight: 'bold',
+                                                flexShrink: 0,
+                                                marginTop: '4px'
+                                            }}>
+                                                {String.fromCharCode(65 + idx)}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <MarkdownRenderer content={renderSmartPreview(option)} />
+                                            </div>
                                         </div>
-                                        <span style={{ fontSize: '1rem', color: '#334155' }}>{option}</span>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Coding Question Area */}
+                        {currentQ.type === 'code' && (
+                            <div style={{ marginTop: '24px' }}>
+                                {currentQ.externalLink && (
+                                    <div style={{ marginBottom: '20px', padding: '16px', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div>
+                                            <p style={{ fontWeight: 'bold', color: '#0369a1', fontSize: '1rem' }}>Solve on External Platform</p>
+                                            <p style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>Please solve this problem on the linked platform and paste your final solution below.</p>
+                                        </div>
+                                        <a href={currentQ.externalLink} target="_blank" rel="noopener noreferrer" style={{ background: '#0284c7', color: 'white', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            Solve Now <ChevronRight size={18} />
+                                        </a>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                )}
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Write your code below:</label>
+                                <textarea
+                                    value={answers[currentQuestion] || ''}
+                                    onChange={(e) => setAnswers({ ...answers, [currentQuestion]: e.target.value })}
+                                    placeholder="// Paste your code here..."
+                                    style={{
+                                        width: '100%',
+                                        height: '400px',
+                                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                                        fontSize: '0.95rem',
+                                        padding: '16px',
+                                        borderRadius: '8px',
+                                        border: '2px solid #e2e8f0',
+                                        background: '#f8fafc',
+                                        outline: 'none',
+                                        resize: 'vertical'
+                                    }}
+                                />
+                            </div>
+                        )}
 
                         {/* Bottom Nav for Questions */}
                         <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
@@ -605,28 +684,30 @@ export default function MockTestPage() {
                 </div>
 
                 {/* ZOOM MODAL */}
-                {zoomedImage && (
-                    <div
-                        style={{
-                            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 9999,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out'
-                        }}
-                        onClick={() => setZoomedImage(null)}
-                    >
-                        <img
-                            src={zoomedImage}
-                            style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }}
-                            alt="Full Size"
-                        />
-                        <button
+                {
+                    zoomedImage && (
+                        <div
+                            style={{
+                                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 9999,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out'
+                            }}
                             onClick={() => setZoomedImage(null)}
-                            style={{ position: 'absolute', top: '24px', right: '24px', background: 'transparent', color: 'white', border: 'none', cursor: 'pointer' }}
                         >
-                            <XCircle size={40} />
-                        </button>
-                    </div>
-                )}
-            </div>
+                            <img
+                                src={zoomedImage}
+                                style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }}
+                                alt="Full Size"
+                            />
+                            <button
+                                onClick={() => setZoomedImage(null)}
+                                style={{ position: 'absolute', top: '24px', right: '24px', background: 'transparent', color: 'white', border: 'none', cursor: 'pointer' }}
+                            >
+                                <XCircle size={40} />
+                            </button>
+                        </div>
+                    )
+                }
+            </div >
         );
     }
 
@@ -639,7 +720,7 @@ export default function MockTestPage() {
         };
         const currentQ = test.questions[currentQuestion];
         const userAnswerIndex = (resultToDisplay?.answers || {})[currentQuestion];
-        const isCorrect = currentQ && userAnswerIndex === currentQ.correctOptionIndex;
+        const isCorrect = currentQ && userAnswerIndex == (currentQ.correctOption || currentQ.correctOptionIndex);
         const isSkipped = userAnswerIndex === undefined;
 
         // Calculate progress stats
@@ -660,9 +741,9 @@ export default function MockTestPage() {
                     </div>
                     <div style={{ textAlign: 'right', background: 'white', padding: '16px 24px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2563eb', lineHeight: '1' }}>
-                            {userScore} <span style={{ fontSize: '1.25rem', color: '#64748b' }}>/ {totalScore}</span>
+                            {userScore} <span style={{ fontSize: '1.25rem', color: '#64748b' }}>/ {(test.questions.filter(q => !q.isUnrated).length) * 4}</span>
                         </div>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500', marginTop: '4px' }}>Total Score</p>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500', marginTop: '4px' }}>Marks Obtained (Rated Only)</p>
                     </div>
                 </div>
 
@@ -677,62 +758,81 @@ export default function MockTestPage() {
                                 </span>
                                 <span style={{
                                     padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px',
-                                    background: isCorrect ? '#dcfce7' : isSkipped ? '#f1f5f9' : '#fee2e2',
-                                    color: isCorrect ? '#166534' : isSkipped ? '#64748b' : '#991b1b'
+                                    background: currentQ.isUnrated ? '#fef9c3' : isCorrect ? '#dcfce7' : isSkipped ? '#f1f5f9' : '#fee2e2',
+                                    color: currentQ.isUnrated ? '#854d0e' : isCorrect ? '#166534' : isSkipped ? '#64748b' : '#991b1b'
                                 }}>
-                                    {isCorrect ? <CheckCircle size={16} /> : isSkipped ? <AlertCircle size={16} /> : <XCircle size={16} />}
-                                    {isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Incorrect'}
+                                    {currentQ.isUnrated ? <AlertCircle size={16} /> : isCorrect ? <CheckCircle size={16} /> : isSkipped ? <AlertCircle size={16} /> : <XCircle size={16} />}
+                                    {currentQ.isUnrated ? 'Unrated' : isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Incorrect'}
                                 </span>
                             </div>
 
                             <h2 style={{ fontSize: '1.25rem', marginBottom: '24px', lineHeight: '1.6', color: '#1e293b' }}>
-                                {currentQ.questionText}
+                                <MarkdownRenderer content={renderSmartPreview(currentQ.questionText || currentQ.text)} />
                             </h2>
                             {currentQ.image && renderQuestionImage(currentQ.image)}
 
-                            <div style={{ display: 'grid', gap: '16px', marginTop: '32px' }}>
-                                {currentQ.options.map((option, idx) => {
-                                    const isSelected = userAnswerIndex === idx;
-                                    const isCorrectOpt = idx === currentQ.correctOptionIndex;
+                            {currentQ.type !== 'code' && (
+                                <div style={{ display: 'grid', gap: '16px', marginTop: '32px' }}>
+                                    {currentQ.options.map((option, idx) => {
+                                        const isSelected = userAnswerIndex === idx;
+                                        const isCorrectOpt = idx == (currentQ.correctOption || currentQ.correctOptionIndex);
 
-                                    let borderColor = '#e2e8f0';
-                                    let bg = 'white';
-                                    let icon = null;
+                                        let borderColor = '#e2e8f0';
+                                        let bg = 'white';
+                                        let icon = null;
 
-                                    if (isCorrectOpt) {
-                                        borderColor = '#22c55e';
-                                        bg = '#f0fdf4';
-                                        icon = <CheckCircle size={20} color="#16a34a" />;
-                                    } else if (isSelected && !isCorrectOpt) {
-                                        borderColor = '#ef4444';
-                                        bg = '#fef2f2';
-                                        icon = <XCircle size={20} color="#dc2626" />;
-                                    } else if (isSelected) {
-                                        borderColor = '#22c55e';
-                                        bg = '#f0fdf4';
-                                        icon = <CheckCircle size={20} color="#16a34a" />;
-                                    }
+                                        if (isCorrectOpt) {
+                                            borderColor = '#22c55e';
+                                            bg = '#f0fdf4';
+                                            icon = <CheckCircle size={20} color="#16a34a" />;
+                                        } else if (isSelected && !isCorrectOpt) {
+                                            borderColor = '#ef4444';
+                                            bg = '#fef2f2';
+                                            icon = <XCircle size={20} color="#dc2626" />;
+                                        } else if (isSelected) {
+                                            borderColor = '#22c55e';
+                                            bg = '#f0fdf4';
+                                            icon = <CheckCircle size={20} color="#16a34a" />;
+                                        }
 
-                                    return (
-                                        <div key={idx} style={{
-                                            padding: '16px', border: `2px solid ${borderColor}`, background: bg, borderRadius: '12px',
-                                            display: 'flex', gap: '16px', alignItems: 'center'
-                                        }}>
-                                            <div style={{
-                                                width: '28px', height: '28px', borderRadius: '6px',
-                                                background: isCorrectOpt ? '#16a34a' : (isSelected && !isCorrectOpt) ? '#dc2626' : '#f1f5f9',
-                                                color: (isCorrectOpt || (isSelected && !isCorrectOpt)) ? 'white' : '#64748b',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0
+                                        return (
+                                            <div key={idx} style={{
+                                                padding: '20px', border: `2px solid ${borderColor}`, background: bg, borderRadius: '12px',
+                                                display: 'flex', gap: '20px', alignItems: 'flex-start'
                                             }}>
-                                                {String.fromCharCode(65 + idx)}
+                                                <div style={{
+                                                    width: '28px', height: '28px', borderRadius: '6px',
+                                                    background: isCorrectOpt ? '#16a34a' : (isSelected && !isCorrectOpt) ? '#dc2626' : '#f1f5f9',
+                                                    color: (isCorrectOpt || (isSelected && !isCorrectOpt)) ? 'white' : '#64748b',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0,
+                                                    marginTop: '4px'
+                                                }}>
+                                                    {String.fromCharCode(65 + idx)}
+                                                </div>
+                                                <div style={{ flex: 1, fontSize: '1rem', color: '#334155' }}>
+                                                    <MarkdownRenderer content={renderSmartPreview(option)} />
+                                                </div>
+                                                {icon}
                                             </div>
-                                            <div style={{ flex: 1, fontSize: '1rem', color: '#334155' }}>{option}</div>
-                                            {icon}
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* Coding Question Result */}
+                            {currentQ.type === 'code' && (
+                                <div style={{ marginTop: '32px', display: 'grid', gap: '24px' }}>
+                                    <div>
+                                        <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1e293b' }}>Your Solution:</p>
+                                        <MarkdownRenderer content={renderSmartPreview(userAnswerIndex || 'No answer provided')} />
+                                    </div>
+                                    <div>
+                                        <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1e293b' }}>Model Solution:</p>
+                                        <MarkdownRenderer content={renderSmartPreview(currentQ.correctOption || 'No solution key provided')} />
+                                    </div>
+                                </div>
+                            )}
                         </Card>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '24px' }}>
@@ -761,12 +861,12 @@ export default function MockTestPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                                 {test.questions.map((q, idx) => {
                                     const ans = (resultToDisplay?.answers || {})[idx];
-                                    const isCorr = ans === q.correctOptionIndex;
+                                    const isCorr = ans == (q.correctOption || q.correctOptionIndex);
                                     const isSkp = ans === undefined;
                                     const isCurr = idx === currentQuestion;
 
-                                    let bg = isSkp ? '#f1f5f9' : isCorr ? '#dcfce7' : '#fee2e2';
-                                    let color = isSkp ? '#64748b' : isCorr ? '#166534' : '#991b1b';
+                                    let bg = q.isUnrated ? '#fef9c3' : isSkp ? '#f1f5f9' : isCorr ? '#dcfce7' : '#fee2e2';
+                                    let color = q.isUnrated ? '#854d0e' : isSkp ? '#64748b' : isCorr ? '#166534' : '#991b1b';
                                     let border = isCurr ? '2px solid #2563eb' : '1px solid transparent';
 
                                     return (

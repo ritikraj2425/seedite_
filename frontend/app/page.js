@@ -43,25 +43,54 @@ export default function Home() {
         </div>
 
         {/* Highlight Banner / Trust Badge - Clean Row */}
-        <div className="animate-fade-in" style={{
-          maxWidth: 'max-content',
-          margin: '0 auto',
-          padding: '12px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '16px',
-          background: '#f8fafc',
-          borderRadius: '100px',
-          border: '1px solid #e2e8f0'
-        }}>
-          <div style={{ borderRadius: '50%', overflow: 'hidden', display: 'flex', border: '1px solid #e2e8f0' }}>
-            <Image src="/nstlogo.png" alt="NST Logo" width={28} height={28} />
+        <div
+          className="animate-fade-in"
+          style={{
+            maxWidth: 'max-content',
+            margin: '0 auto',
+            padding: '12px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            background: '#f8fafc',
+            borderRadius: '100px',
+            border: '1px solid #e2e8f0'
+          }}
+        >
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid #e2e8f0',
+              flexShrink: 0
+            }}
+          >
+            <Image
+              src="/nstlogo.png"
+              alt="NST Logo"
+              width={28}
+              height={28}
+              style={{ objectFit: 'contain' }}
+            />
           </div>
-          <span style={{ fontSize: '1rem', fontWeight: '500', color: '#475569' }}>
+
+          <span
+            style={{
+              fontSize: '1rem',
+              fontWeight: '500',
+              color: '#475569',
+              lineHeight: '1.4'
+            }}
+          >
             Course content developed with guidance from the NSAT team of NST.
           </span>
         </div>
+
       </header>
 
 
