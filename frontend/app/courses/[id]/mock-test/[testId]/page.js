@@ -58,8 +58,8 @@ export default function MockTestPage() {
                 const testData = await testRes.json();
                 setTest(testData);
 
-                if (testData.durationMinutes) {
-                    setTimeRemaining(testData.durationMinutes * 60);
+                if (testData.duration || testData.durationMinutes) {
+                    setTimeRemaining((testData.duration || testData.durationMinutes) * 60);
                 }
 
                 // Fetch Course Data for Image
@@ -256,7 +256,7 @@ export default function MockTestPage() {
     const handleRetake = () => {
         setAnswers({});
         setCurrentQuestion(0);
-        setTimeRemaining((test?.durationMinutes || 180) * 60);
+        setTimeRemaining((test?.duration || test?.durationMinutes || 180) * 60);
         setSubmitted(false);
         setScore(0);
         setMarkedForReview(new Set());
@@ -397,8 +397,8 @@ export default function MockTestPage() {
                             title="Scoring Mechanism"
                             items={[
                                 <span>The <span style={{ background: '#ffedd5', color: '#c2410c', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fdba74', fontSize: '0.85rem' }}>All Questions</span> are mandatory to attempt.</span>,
-                                <span>Each correct answer earns <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>+4 marks</span>, while each incorrect answer deducts <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>-1 marks</span>.</span>,
-                                `The test duration is ${test.duration ? test.duration : 180} minutes, with a total of ${test.totalQuestions} questions.`
+                                <span>Each correct answer earns <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>+{test.correctMarks || 4} marks</span>, while each incorrect answer deducts <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>{test.incorrectMarks || -1} marks</span>.</span>,
+                                `The test duration is ${test.duration || 180} minutes, with a total of ${test.questions?.length || test.totalQuestions || 0} questions.`
                             ]}
                         />
 
@@ -432,8 +432,9 @@ export default function MockTestPage() {
                                 title="Scoring Mechanism"
                                 items={[
                                     "All Questions are mandatory.",
-                                    "Correct: +4 marks, Incorrect: -1 marks.",
-                                    `Duration: ${test.duration ? test.duration : 180} minutes.`
+                                    `Correct: +${test.correctMarks || 4} marks, Incorrect: ${test.incorrectMarks || -1} marks.`,
+                                    `Duration: ${test.duration || 180} minutes.`,
+                                    `Total Questions: ${test.questions?.length || test.totalQuestions || 0}`
                                 ]}
                             />
 
@@ -834,6 +835,35 @@ export default function MockTestPage() {
                                     <div>
                                         <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1e293b' }}>Model Solution:</p>
                                         <MarkdownRenderer content={renderSmartPreview(currentQ.correctOption || 'No solution key provided')} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Solution Explanation */}
+                            {currentQ.solution && (
+                                <div style={{
+                                    marginTop: '32px',
+                                    padding: '20px',
+                                    background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%)',
+                                    borderRadius: '12px',
+                                    border: '1px solid #bbf7d0'
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        marginBottom: '12px',
+                                        fontWeight: 'bold',
+                                        color: '#166534'
+                                    }}>
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <path d="M12 16v-4M12 8h.01" />
+                                        </svg>
+                                        Solution Explanation
+                                    </div>
+                                    <div style={{ color: '#334155', lineHeight: '1.7' }}>
+                                        <MarkdownRenderer content={renderSmartPreview(currentQ.solution)} />
                                     </div>
                                 </div>
                             )}

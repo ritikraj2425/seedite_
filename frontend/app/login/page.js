@@ -92,7 +92,10 @@ function LoginContent() {
                         {loading ? 'Loading...' : 'Login'}
                     </Button>
                 </form>
-                <p style={{ marginTop: '16px', textAlign: 'center', color: '#94a3b8' }}>
+                <p style={{ marginTop: '12px', textAlign: 'center' }}>
+                    <Link href="/forgot-password" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Forgot Password?</Link>
+                </p>
+                <p style={{ marginTop: '12px', textAlign: 'center', color: '#94a3b8' }}>
                     Don't have an account? <Link href="/signup" style={{ color: '#6366f1' }}>Sign up</Link>
                 </p>
             </Card>

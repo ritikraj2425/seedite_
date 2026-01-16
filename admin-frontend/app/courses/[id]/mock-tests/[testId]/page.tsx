@@ -148,7 +148,7 @@ export default function EditMockTestPage() {
     const addQuestion = () => {
         setQuestions([
             ...questions,
-            { type: 'mcq', text: '', options: ['', '', '', ''], correctOption: 0, marks: 4, externalLink: '', isUnrated: false }
+            { type: 'mcq', text: '', options: ['', '', '', ''], correctOption: 0, marks: 4, externalLink: '', isUnrated: false, solution: '' }
         ]);
     };
 
@@ -191,7 +191,8 @@ export default function EditMockTestPage() {
                         correctOption: q.correctOption?.toString() || '',
                         externalLink: q.externalLink || '',
                         isUnrated: !!q.isUnrated,
-                        marks: parseInt(q.marks?.toString() || '4')
+                        marks: parseInt(q.marks?.toString() || '4'),
+                        solution: q.solution || '' // Optional solution text
                     }))
                 })
             });
@@ -473,6 +474,23 @@ export default function EditMockTestPage() {
                                                     <label className="block text-xs text-gray-400 mb-2">Solution Preview</label>
                                                     <MarkdownRenderer content={renderSmartPreview(q.correctOption ?? '*No solution key*')} />
                                                 </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Solution Field - Optional */}
+                                    <div className="col-span-2 mt-4">
+                                        <label className="block text-xs text-gray-400 mb-1">Solution / Explanation (Optional)</label>
+                                        <textarea
+                                            placeholder="Enter the solution explanation for this question..."
+                                            value={q.solution || ''}
+                                            onChange={(e) => handleQuestionChange(qIndex, 'solution', e.target.value)}
+                                            className="w-full h-24 px-4 py-3 bg-black border border-gray-700 rounded-lg text-white text-sm"
+                                        />
+                                        {q.solution && (
+                                            <div className="mt-2 p-3 bg-gray-800 rounded-lg border border-gray-700">
+                                                <label className="block text-xs text-gray-400 mb-1">Solution Preview</label>
+                                                <MarkdownRenderer content={renderSmartPreview(q.solution) || '*No solution*'} />
                                             </div>
                                         )}
                                     </div>

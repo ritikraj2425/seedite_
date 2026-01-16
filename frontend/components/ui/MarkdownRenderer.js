@@ -52,21 +52,14 @@ const MarkdownRenderer = ({ content, className = '' }) => {
           font-family: inherit;
         }
         .markdown-renderer pre {
-          margin: 1rem 0;
           border-radius: 8px;
           overflow: auto;
-          background: #1a1a1a !important;
           color: #f8f8f2 !important;
-          padding: 1rem;
           white-space: pre !important;
           tab-size: 4;
           width: 100%;
-          border: 1px solid rgba(0, 0, 0, 0.1);
         }
         .markdown-renderer code {
-          background-color: rgba(0, 0, 0, 0.05);
-          padding: 0.2rem 0.4rem;
-          border-radius: 4px;
           font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
           white-space: pre-wrap;
           font-size: 0.9em;

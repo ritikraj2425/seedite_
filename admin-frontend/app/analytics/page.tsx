@@ -188,7 +188,7 @@ export default function Analytics() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 {/* Overview Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
                     <div className="bg-gray-900 p-4 rounded-lg border border-gray-800">
                         <p className="text-gray-400 text-sm">Real Revenue (Paid)</p>
                         <p className="text-2xl font-bold text-green-400">₹{globalMetrics.revenue.toLocaleString()}</p>
@@ -209,6 +209,13 @@ export default function Analytics() {
                         <p className="text-gray-400 text-sm">Total Courses</p>
                         <p className="text-2xl font-bold text-white">{stats?.totalCourses || 0}</p>
                     </div>
+                    <Link href="/free-access" className="bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 p-4 rounded-lg border border-emerald-500/30 hover:border-emerald-400/50 transition-all group">
+                        <p className="text-gray-400 text-sm group-hover:text-emerald-300 transition">Free Access Grants</p>
+                        <div className="flex items-center justify-between">
+                            <p className="text-2xl font-bold text-emerald-400">{stats?.freeAccessCount || 0}</p>
+                            <span className="text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* 2. Charts Section */}
