@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { API_URL } from '@/lib/api';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
-import Loader from '../../../../../components/ui/Loader';
+import { VideoSkeleton } from '../../../../../components/ui/Skeleton';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
@@ -119,7 +119,17 @@ export default function LecturePlayer() {
         }));
     };
 
-    if (loading) return <Loader />;
+    if (loading) return (
+        <div style={{ background: '#000', minHeight: '100vh', paddingTop: '80px' }}>
+            <div className="lecture-layout">
+                <VideoSkeleton />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <Card style={{ height: '120px', background: '#111', border: '1px solid #333' }} />
+                    <Card style={{ height: '400px', background: '#111', border: '1px solid #333' }} />
+                </div>
+            </div>
+        </div>
+    );
     if (!course || !currentLecture) return <div className="container" style={{ paddingTop: '40px' }}>Lecture not found</div>;
 
     return (

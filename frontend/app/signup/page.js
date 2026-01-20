@@ -7,6 +7,7 @@ import { API_URL } from '@/lib/api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
+import { UserPlus, User, Mail, Lock } from 'lucide-react';
 
 export default function Signup() {
     const router = useRouter();
@@ -42,13 +43,9 @@ export default function Signup() {
                 throw new Error(data.message || 'Signup failed');
             }
 
-            // Save token (if we were using localStorage for token, but we use cookies mostly)
-            // However, we can also save user info to localStorage for navbar update
             localStorage.setItem('user', JSON.stringify(data));
-            // data.token is also returned if we want to use it
 
             router.push('/courses');
-            // Force reload to update navbar or use context (force reload is simpler for MVP)
             setTimeout(() => window.location.reload(), 100);
         } catch (err) {
             setError(err.message);
@@ -58,44 +55,146 @@ export default function Signup() {
     };
 
     return (
-        <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-            <Card style={{ width: '100%', maxWidth: '400px' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '24px' }}>Sign Up</h2>
-                {error && <div style={{ color: '#ef4444', marginBottom: '16px', textAlign: 'center' }}>{error}</div>}
+        <div className="auth-bg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '20px' }}>
+            <Card style={{
+                width: '100%',
+                maxWidth: '420px',
+                padding: '40px 32px',
+                boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #e2e8f0',
+                position: 'relative',
+                zIndex: 1
+            }}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <div style={{
+                        width: '60px',
+                        height: '60px',
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
+                        borderRadius: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 20px',
+                        boxShadow: '0 8px 30px -4px rgba(124, 58, 237, 0.35)'
+                    }}>
+                        <UserPlus size={28} color="white" />
+                    </div>
+                    <h2 style={{
+                        fontSize: '1.5rem',
+                        marginBottom: '8px',
+                        color: '#0f172a'
+                    }}>
+                        Create Account
+                    </h2>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                        Start your NSAT preparation journey today
+                    </p>
+                </div>
+
+                {error && (
+                    <div style={{
+                        color: '#dc2626',
+                        background: '#fef2f2',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        marginBottom: '20px',
+                        textAlign: 'center',
+                        fontSize: '0.9rem',
+                        border: '1px solid #fecaca'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit}>
-                    <Input
-                        id="name"
-                        label="Full Name"
-                        placeholder="John Doe"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input
-                        id="email"
-                        label="Email Address"
-                        type="email"
-                        placeholder="name@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input
-                        id="password"
-                        label="Password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Button type="submit" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
-                        {loading ? 'Loading...' : 'Create Account'}
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            color: '#374151'
+                        }}>
+                            Full Name
+                        </label>
+                        <Input
+                            id="name"
+                            placeholder="John Doe"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            style={{ marginBottom: 0 }}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            color: '#374151'
+                        }}>
+                            Email Address
+                        </label>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="name@example.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            style={{ marginBottom: 0 }}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '24px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            color: '#374151'
+                        }}>
+                            Password
+                        </label>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            style={{ marginBottom: 0 }}
+                        />
+                    </div>
+                    <Button
+                        type="submit"
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            fontSize: '1rem',
+                            background: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
+                            boxShadow: '0 4px 14px 0 rgba(124, 58, 237, 0.25)'
+                        }}
+                        disabled={loading}
+                    >
+                        {loading ? 'Creating Account...' : 'Create Account'}
                     </Button>
                 </form>
-                <p style={{ marginTop: '16px', textAlign: 'center', color: '#94a3b8' }}>
-                    Already have an account? <Link href="/login" style={{ color: '#6366f1' }}>Login</Link>
-                </p>
+
+                <div style={{
+                    marginTop: '24px',
+                    paddingTop: '24px',
+                    borderTop: '1px solid #e2e8f0',
+                    textAlign: 'center'
+                }}>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                        Already have an account?{' '}
+                        <Link href="/login" style={{ color: '#7c3aed', fontWeight: '600' }}>
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
             </Card>
         </div>
     );

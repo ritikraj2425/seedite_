@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { API_URL } from '@/lib/api';
@@ -99,6 +99,18 @@ export default function Dashboard() {
                                 <h3 className="font-semibold">Analytics</h3>
                             </div>
                         </Link>
+                        <Link href="/blog">
+                            <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
+                                <div className="text-4xl mb-2">📝</div>
+                                <h3 className="font-semibold">Manage Blog</h3>
+                            </div>
+                        </Link>
+                        <Link href="/testimonials">
+                            <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
+                                <div className="text-4xl mb-2">⭐</div>
+                                <h3 className="font-semibold">Testimonials</h3>
+                            </div>
+                        </Link>
                     </div>
                 </div>
 
@@ -122,7 +134,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

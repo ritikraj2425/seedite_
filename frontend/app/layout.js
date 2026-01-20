@@ -5,9 +5,33 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Seedite',
-  description: 'Learn and grow with Seedite',
+  title: 'Seedite | Master Your NSAT Preparation',
+  description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success. Join thousands of students achieving their dreams with Seedite.',
+  keywords: 'NSAT, exam preparation, online courses, mock tests, video solutions, education, seedite',
+  openGraph: {
+    title: 'Seedite | Master Your NSAT Preparation',
+    description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
+    url: 'https://seedite.com',
+    siteName: 'Seedite',
+    images: [
+      {
+        url: '/og-image.jpg', // Placeholder
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
 };
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#ffffff',
+};
+
 
 import ToastProvider from '../components/providers/ToastProvider';
 import SessionProvider from '../components/providers/SessionProvider';
@@ -22,7 +46,7 @@ export default function RootLayout({ children }) {
           <ToastProvider />
           <Navbar />
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <main style={{ paddingTop: '80px', flex: 1 }}>
+            <main style={{ paddingTop: '40px', flex: 1 }}>
               {children}
             </main>
             <Footer />

@@ -12,6 +12,7 @@ export default function NewCoursePage() {
         title: '',
         description: '',
         price: '',
+        originalPrice: '', // New field for crossed-out price
         thumbnail: '',
         category: '',
         courseDetails: ''  // New field for bullet points
@@ -109,7 +110,7 @@ export default function NewCoursePage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Price (₹)</label>
+                                    <label className="block text-sm font-medium mb-1">Selling Price (₹)</label>
                                     <input
                                         type="number"
                                         value={formData.price}
@@ -117,6 +118,16 @@ export default function NewCoursePage() {
                                         className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                         placeholder="e.g., 999"
                                         required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Original Price (₹)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.originalPrice}
+                                        onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                        placeholder="e.g., 2999"
                                     />
                                 </div>
                                 <div>

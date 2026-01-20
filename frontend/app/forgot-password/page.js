@@ -6,6 +6,7 @@ import { API_URL } from '@/lib/api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
+import { KeyRound, CheckCircle, ArrowLeft } from 'lucide-react';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -45,93 +46,174 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-            <Card style={{ width: '100%', maxWidth: '420px' }}>
+        <div className="auth-bg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '20px' }}>
+            <Card style={{
+                width: '100%',
+                maxWidth: '420px',
+                padding: '40px 32px',
+                boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #e2e8f0',
+                position: 'relative',
+                zIndex: 1
+            }}>
                 {!submitted ? (
                     <>
-                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                        {/* Header */}
+                        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                             <div style={{
-                                width: '64px',
-                                height: '64px',
-                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                                borderRadius: '16px',
+                                width: '60px',
+                                height: '60px',
+                                background: 'var(--gradient-primary)', borderRadius: '16px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                margin: '0 auto 16px'
+                                margin: '0 auto 20px',
+                                boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)'
                             }}>
-                                <svg width="32" height="32" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                </svg>
+                                <KeyRound size={28} color="white" />
                             </div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px' }}>Forgot Password?</h2>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                            <h2 style={{
+                                fontSize: '1.5rem',
+                                marginBottom: '8px',
+                                color: '#0f172a'
+                            }}>
+                                Forgot Password?
+                            </h2>
+                            <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: '1.5' }}>
                                 No worries! Enter your email and we'll send you a reset link.
                             </p>
                         </div>
 
                         {error && (
                             <div style={{
-                                color: '#ef4444',
+                                color: '#dc2626',
                                 background: '#fef2f2',
-                                padding: '12px',
-                                borderRadius: '8px',
-                                marginBottom: '16px',
+                                padding: '12px 16px',
+                                borderRadius: '10px',
+                                marginBottom: '20px',
                                 textAlign: 'center',
-                                fontSize: '0.9rem'
+                                fontSize: '0.9rem',
+                                border: '1px solid #fecaca'
                             }}>
                                 {error}
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit}>
-                            <Input
-                                id="email"
-                                label="Email Address"
-                                type="email"
-                                placeholder="name@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                            <Button type="submit" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{
+                                    display: 'block',
+                                    marginBottom: '8px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '500',
+                                    color: '#374151'
+                                }}>
+                                    Email Address
+                                </label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    style={{ marginBottom: 0 }}
+                                />
+                            </div>
+                            <Button
+                                type="submit"
+                                style={{
+                                    width: '100%',
+                                    padding: '14px',
+                                    fontSize: '1rem',
+                                    boxShadow: '0 4px 14px 0 rgba(37, 99, 235, 0.25)'
+                                }}
+                                disabled={loading}
+                            >
                                 {loading ? 'Sending...' : 'Send Reset Link'}
                             </Button>
                         </form>
 
-                        <p style={{ marginTop: '24px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
-                            Remember your password? <Link href="/login" style={{ color: '#6366f1', fontWeight: '500' }}>Login</Link>
-                        </p>
+                        <div style={{
+                            marginTop: '24px',
+                            paddingTop: '24px',
+                            borderTop: '1px solid #e2e8f0',
+                            textAlign: 'center'
+                        }}>
+                            <Link
+                                href="/login"
+                                style={{
+                                    color: '#64748b',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '500',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <ArrowLeft size={16} />
+                                Back to Login
+                            </Link>
+                        </div>
                     </>
                 ) : (
                     <div style={{ textAlign: 'center', padding: '20px 0' }}>
                         <div style={{
                             width: '72px',
                             height: '72px',
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            margin: '0 auto 20px'
+                            margin: '0 auto 24px',
+                            boxShadow: '0 8px 30px -4px rgba(34, 197, 94, 0.4)'
                         }}>
-                            <svg width="36" height="36" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
+                            <CheckCircle size={36} color="white" />
                         </div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '12px', color: '#10b981' }}>
+                        <h2 style={{
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            marginBottom: '12px',
+                            color: '#0f172a'
+                        }}>
                             Check Your Email
                         </h2>
-                        <p style={{ color: '#64748b', marginBottom: '24px', lineHeight: '1.6' }}>
-                            We've sent a password reset link to<br />
-                            <strong style={{ color: '#1e293b' }}>{email}</strong>
+                        <p style={{ color: '#64748b', marginBottom: '8px', lineHeight: '1.6' }}>
+                            We've sent a password reset link to
                         </p>
-                        <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '20px' }}>
-                            The link will expire in 15 minutes.
+                        <p style={{
+                            color: '#0f172a',
+                            fontWeight: '600',
+                            marginBottom: '20px',
+                            fontSize: '1.05rem'
+                        }}>
+                            {email}
+                        </p>
+                        <p style={{
+                            color: '#94a3b8',
+                            fontSize: '0.85rem',
+                            marginBottom: '24px',
+                            background: '#f8fafc',
+                            padding: '10px 16px',
+                            borderRadius: '8px',
+                            display: 'inline-block'
+                        }}>
+                            The link will expire in 15 minutes
                         </p>
                         <Link href="/login">
-                            <Button variant="outline" style={{ width: '100%' }}>
+                            <Button
+                                variant="outline"
+                                style={{
+                                    width: '100%',
+                                    padding: '14px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <ArrowLeft size={18} />
                                 Back to Login
                             </Button>
                         </Link>

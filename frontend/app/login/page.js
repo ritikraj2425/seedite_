@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import Loader from '../../components/ui/Loader';
+import { LogIn, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
     return (
@@ -65,39 +66,132 @@ function LoginContent() {
     };
 
     return (
-        <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-            <Card style={{ width: '100%', maxWidth: '400px' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '24px' }}>Welcome Back</h2>
-                {error && <div style={{ color: '#ef4444', marginBottom: '16px', textAlign: 'center' }}>{error}</div>}
+        <div className="auth-bg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '20px' }}>
+            <Card style={{
+                width: '100%',
+                maxWidth: '420px',
+                padding: '40px 32px',
+                boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #e2e8f0',
+                position: 'relative',
+                zIndex: 1
+            }}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <div style={{
+                        width: '60px',
+                        height: '60px',
+                        background: 'var(--gradient-primary)',
+                        borderRadius: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 20px',
+                        boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)'
+                    }}>
+                        <LogIn size={28} color="white" />
+                    </div>
+                    <h2 style={{
+                        fontSize: '1.5rem',
+                        marginBottom: '8px',
+                        color: '#0f172a'
+                    }}>
+                        Welcome Back
+                    </h2>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                        Sign in to continue your learning journey
+                    </p>
+                </div>
+
+                {error && (
+                    <div style={{
+                        color: '#dc2626',
+                        background: '#fef2f2',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        marginBottom: '20px',
+                        textAlign: 'center',
+                        fontSize: '0.9rem',
+                        border: '1px solid #fecaca'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit}>
-                    <Input
-                        id="email"
-                        label="Email Address"
-                        type="email"
-                        placeholder="name@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Input
-                        id="password"
-                        label="Password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                    <Button type="submit" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
-                        {loading ? 'Loading...' : 'Login'}
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            color: '#374151'
+                        }}>
+                            Email Address
+                        </label>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="name@example.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            style={{ marginBottom: 0 }}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '24px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            color: '#374151'
+                        }}>
+                            Password
+                        </label>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            style={{ marginBottom: 0 }}
+                        />
+                    </div>
+                    <Button
+                        type="submit"
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            fontSize: '1rem',
+                            boxShadow: '0 4px 14px 0 rgba(37, 99, 235, 0.25)'
+                        }}
+                        disabled={loading}
+                    >
+                        {loading ? 'Signing in...' : 'Sign In'}
                     </Button>
                 </form>
-                <p style={{ marginTop: '12px', textAlign: 'center' }}>
-                    <Link href="/forgot-password" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Forgot Password?</Link>
+
+                <p style={{ marginTop: '16px', textAlign: 'center' }}>
+                    <Link href="/forgot-password" style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500' }}>
+                        Forgot Password?
+                    </Link>
                 </p>
-                <p style={{ marginTop: '12px', textAlign: 'center', color: '#94a3b8' }}>
-                    Don't have an account? <Link href="/signup" style={{ color: '#6366f1' }}>Sign up</Link>
-                </p>
+
+                <div style={{
+                    marginTop: '24px',
+                    paddingTop: '24px',
+                    borderTop: '1px solid #e2e8f0',
+                    textAlign: 'center'
+                }}>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                        Don't have an account?{' '}
+                        <Link href="/signup" style={{ color: '#2563eb', fontWeight: '600' }}>
+                            Sign up
+                        </Link>
+                    </p>
+                </div>
             </Card>
         </div>
     );

@@ -139,20 +139,31 @@ export default function CourseDetails() {
 
                     {/* Course Highlights / What you'll learn */}
                     {course.courseDetails && course.courseDetails.length > 0 && (
-                        <div style={{ marginBottom: '40px', background: '#1e293b', padding: '24px', borderRadius: '12px', border: '1px solid #334155' }}>
-                            <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span>✨</span> What you'll learn
+                        <div className="learn-box" style={{ marginBottom: '40px' }}>
+                            <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1rem'
+                                }}>📝</span>
+                                What you'll learn
                             </h3>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
                                 {course.courseDetails.map((detail, index) => (
-                                    <div key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#cbd5e1' }}>
-                                        <span style={{ color: '#22c55e', marginTop: '2px' }}>✓</span>
+                                    <div key={index} className="learn-item" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569' }}>
+                                        <span className="check-icon" style={{ color: '#22c55e', marginTop: '2px', fontWeight: 'bold' }}>✓</span>
                                         <span>{detail}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
+
 
                     {isEnrolled ? (
                         <div className="animate-fade-in">

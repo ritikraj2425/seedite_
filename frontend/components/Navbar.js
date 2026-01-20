@@ -68,6 +68,7 @@ const Navbar = () => {
                                 <Link href="/dashboard/announcements" style={{ color: pathname === '/dashboard/announcements' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Announcements</Link>
                             </>
                         )}
+                        <Link href="/blogs" style={{ color: pathname.startsWith('/blogs') ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Blogs</Link>
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

@@ -17,6 +17,7 @@ export default function EditCoursePage() {
         title: '',
         description: '',
         price: '',
+        originalPrice: '',
         thumbnail: '',
         category: '',
         instructor: '',
@@ -65,6 +66,7 @@ export default function EditCoursePage() {
                     title: data.title || '',
                     description: data.description || '',
                     price: data.price ? String(data.price) : '0', // Ensure safe fallback
+                    originalPrice: data.originalPrice ? String(data.originalPrice) : '',
                     thumbnail: data.thumbnail || '',
                     category: data.category || '',
                     instructor: data.instructor || '',
@@ -386,6 +388,16 @@ export default function EditCoursePage() {
                                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                         className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                         required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Original Price (₹)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.originalPrice}
+                                        onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                        placeholder="e.g. 2999"
                                     />
                                 </div>
                                 <div>

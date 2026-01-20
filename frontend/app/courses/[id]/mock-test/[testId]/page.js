@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { API_URL } from '@/lib/api';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
-import Loader from '../../../../../components/ui/Loader';
+import Skeleton from '../../../../../components/ui/Skeleton';
 import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
 import {
     Clock, CheckCircle, XCircle, AlertCircle, Maximize, Minimize,
@@ -310,7 +310,38 @@ export default function MockTestPage() {
         </div>
     );
 
-    if (loading) return <Loader />;
+    if (loading) return (
+        <div className="container" style={{ paddingTop: '80px', maxWidth: '1200px' }}>
+            <div className="responsive-grid" style={{ gridTemplateColumns: '1fr 1.5fr', gap: '48px' }}>
+                <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', height: '500px', padding: '24px' }}>
+                    <Skeleton height="200px" width="100%" borderRadius="12px" style={{ marginBottom: '24px' }} />
+                    <Skeleton height="32px" width="70%" style={{ marginBottom: '16px' }} />
+                    <div style={{ display: 'grid', gap: '16px' }}>
+                        <Skeleton height="40px" width="100%" />
+                        <Skeleton height="40px" width="100%" />
+                        <Skeleton height="40px" width="100%" />
+                    </div>
+                </div>
+                <div>
+                    <Skeleton height="48px" width="40%" style={{ marginBottom: '32px' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            <Skeleton width="48px" height="48px" borderRadius="12px" />
+                            <div style={{ flex: 1 }}><Skeleton height="20px" width="80%" /><Skeleton height="14px" width="40%" style={{ marginTop: '8px' }} /></div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            <Skeleton width="48px" height="48px" borderRadius="12px" />
+                            <div style={{ flex: 1 }}><Skeleton height="20px" width="80%" /><Skeleton height="14px" width="40%" style={{ marginTop: '8px' }} /></div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            <Skeleton width="48px" height="48px" borderRadius="12px" />
+                            <div style={{ flex: 1 }}><Skeleton height="20px" width="80%" /><Skeleton height="14px" width="40%" style={{ marginTop: '8px' }} /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
     if (!test) return <div className="container" style={{ paddingTop: '40px' }}>Test not found</div>;
 
     // --- RENDER: Instructions Page ---

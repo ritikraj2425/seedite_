@@ -83,9 +83,77 @@ const MarkdownRenderer = ({ content, className = '' }) => {
           padding: 8px;
           text-align: left;
         }
+        .markdown-renderer blockquote {
+          border-left: 4px solid #2563eb;
+          padding-left: 1rem;
+          margin: 1rem 0;
+          color: #475569;
+          background: #f8fafc;
+          border-radius: 0 8px 8px 0;
+        }
+        .markdown-renderer table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1.5rem 0;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #e2e8f0;
+        }
+        .markdown-renderer th {
+          background: #f8fafc;
+          font-weight: 600;
+          color: #0f172a;
+          text-align: left;
+          padding: 12px 16px;
+          border-bottom: 2px solid #e2e8f0;
+        }
+        .markdown-renderer td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #f1f5f9;
+          color: #334155;
+        }
+        .markdown-renderer tr:last-child td {
+          border-bottom: none;
+        }
+        .markdown-renderer tr:hover td {
+          background: #f8fafc;
+        }
+        .markdown-renderer a {
+          color: #2563eb;
+          text-decoration: none;
+          font-weight: 500;
+        }
+        .markdown-renderer a:hover {
+          text-decoration: underline;
+        }
+        .markdown-renderer img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
+          margin: 1rem 0;
+        }
+        .markdown-renderer hr {
+          border: none;
+          border-top: 1px solid #e2e8f0;
+          margin: 2rem 0;
+        }
+        @media (max-width: 768px) {
+          .markdown-renderer {
+            font-size: 0.95rem;
+          }
+          .markdown-renderer table {
+            display: block;
+            overflow-x: auto;
+          }
+          .markdown-renderer pre {
+            font-size: 0.85rem;
+          }
+        }
       `}</style>
     </div>
   );
 };
 
 export default memo(MarkdownRenderer);
+
+
