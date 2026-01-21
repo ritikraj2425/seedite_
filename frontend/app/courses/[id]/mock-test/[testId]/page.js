@@ -6,7 +6,7 @@ import { API_URL } from '@/lib/api';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
 import Skeleton from '../../../../../components/ui/Skeleton';
-import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
+import { convertToYouTubeEmbed, isIframeVideo } from '../../../../../lib/videoUtils';
 import {
     Clock, CheckCircle, XCircle, AlertCircle, Maximize, Minimize,
     Globe, Smartphone, Monitor, FileText, ChevronRight, LayoutGrid,
@@ -969,11 +969,16 @@ export default function MockTestPage() {
                                     <Monitor size={18} /> Video Solution
                                 </h3>
                                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', background: '#000' }}>
-                                    {test.videoSolutionUrl.includes('youtube') || test.videoSolutionUrl.includes('youtu.be') ? (
+                                    {isIframeVideo(test.videoSolutionUrl) ? (
                                         <iframe
                                             src={convertToYouTubeEmbed(test.videoSolutionUrl)}
-                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                            frameBorder="0" allowFullScreen
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
+                                            allowFullScreen
+                                            loading="lazy"
+                                            referrerPolicy="no-referrer"
+                                            tabIndex="0"
+                                            playsInline
                                         />
                                     ) : (
                                         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>

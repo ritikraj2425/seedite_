@@ -321,14 +321,13 @@ export default function CourseDetails() {
                         {/* Feedback / Request Section */}
                         <Card style={{
                             padding: '24px',
-                            background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%)',
-                            border: '1px solid rgba(148, 163, 184, 0.1)',
+                            background: 'linear-gradient(180deg, rgba(14, 116, 144, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%)',
                             backdropFilter: 'blur(12px)',
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                                 <div style={{
-                                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                                    background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
                                     width: '32px',
                                     height: '32px',
                                     borderRadius: '8px',
@@ -336,14 +335,14 @@ export default function CourseDetails() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     fontSize: '1.2rem',
-                                    boxShadow: '0 0 15px rgba(99, 102, 241, 0.3)'
+                                    boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
                                 }}>
                                     ✨
                                 </div>
                                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#ffffff', margin: 0 }}>Request Features</h3>
                             </div>
 
-                            <p style={{ fontSize: '0.9rem', color: '#ffffff', marginBottom: '20px', lineHeight: '1.5' }}>
+                            <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '20px', lineHeight: '1.5' }}>
                                 Let us know what you want to see in this batch.
                             </p>
 
@@ -356,7 +355,7 @@ export default function CourseDetails() {
                                     minHeight: '100px',
                                     padding: '16px',
                                     background: 'rgba(2, 6, 23, 0.5)',
-                                    border: '1px solid rgba(51, 65, 85, 0.5)',
+                                    border: '1px solid rgba(6, 182, 212, 0.3)',
                                     borderRadius: '12px',
                                     color: 'white',
                                     fontSize: '0.95rem',
@@ -365,8 +364,8 @@ export default function CourseDetails() {
                                     outline: 'none',
                                     transition: 'all 0.2s'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-                                onBlur={(e) => e.target.style.borderColor = 'rgba(51, 65, 85, 0.5)'}
+                                onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
+                                onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.3)'}
                             />
 
                             <Button
@@ -374,7 +373,7 @@ export default function CourseDetails() {
                                 disabled={submittingFeedback || !feedbackText.trim()}
                                 style={{
                                     width: '100%',
-                                    background: 'linear-gradient(to right, #4f46e5, #7c3aed)',
+                                    background: 'linear-gradient(to right, #0891b2, #2563eb)',
                                     border: 'none',
                                     padding: '12px',
                                     fontSize: '0.95rem',

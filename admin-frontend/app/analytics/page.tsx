@@ -275,7 +275,7 @@ export default function Analytics() {
                             <div>
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     📢 Student Voice
-                                    <span className="bg-purple-900 text-purple-200 text-xs px-2 py-1 rounded-full">{feedback.length} Requests</span>
+                                    <span className="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full">{feedback.length} Requests</span>
                                 </h2>
                                 <p className="text-gray-400 text-sm mt-1">Feature requests and feedback collected from course pages.</p>
                             </div>
@@ -321,19 +321,19 @@ export default function Analytics() {
 
                     {/* Stats/Suggestions Side Column */}
                     <div className="space-y-6">
-                        <div className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/20 rounded-xl p-6">
-                            <h3 className="text-lg font-bold mb-3 text-indigo-300">💡 Insights</h3>
+                        <div className="bg-gradient-to-br from-blue-900/20 to-emerald-900/20 border border-blue-500/20 rounded-xl p-6">
+                            <h3 className="text-lg font-bold mb-3 text-blue-300">💡 Insights</h3>
                             <ul className="space-y-3 text-sm text-gray-400">
                                 <li className="flex gap-2">
-                                    <span className="text-indigo-400">•</span>
+                                    <span className="text-blue-400">•</span>
                                     <span>Top performing course: <strong className="text-white">{chartData.sort((a: any, b: any) => b.revenue - a.revenue)[0]?.fullTitle || 'N/A'}</strong></span>
                                 </li>
                                 <li className="flex gap-2">
-                                    <span className="text-indigo-400">•</span>
+                                    <span className="text-blue-400">•</span>
                                     <span>Most popular course: <strong className="text-white">{chartData.sort((a: any, b: any) => b.enrolled - a.enrolled)[0]?.fullTitle || 'N/A'}</strong></span>
                                 </li>
                                 <li className="flex gap-2">
-                                    <span className="text-indigo-400">•</span>
+                                    <span className="text-blue-400">•</span>
                                     <span>Avg. Revenue per batch: <strong className="text-white">₹{stats?.courseAnalytics?.length ? Math.round(globalMetrics.revenue / stats.courseAnalytics.length).toLocaleString() : 0}</strong></span>
                                 </li>
                             </ul>

@@ -1,7 +1,7 @@
 
 import { API_URL } from '@/lib/api';
 
-export const uploadFile = async (file: File): Promise<{ url: string; key: string }> => {
+export const uploadFile = async (file: File, type: 'image' | 'video' = 'image'): Promise<{ url: string; key: string; videoId?: string }> => {
     const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
     const token = adminUser.token;
 
@@ -14,8 +14,11 @@ export const uploadFile = async (file: File): Promise<{ url: string; key: string
 
     const apiUrl = API_URL;
 
+    // Choose endpoint based on type
+    const endpoint = type === 'video' ? '/api/upload/bunny' : '/api/upload/s3';
+
     try {
-        const response = await fetch(`${apiUrl}/api/upload/s3`, {
+        const response = await fetch(`${apiUrl}${endpoint}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`

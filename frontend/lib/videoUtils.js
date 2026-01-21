@@ -2,8 +2,10 @@
 export const convertToYouTubeEmbed = (url) => {
     if (!url) return url;
 
-    // Already an embed URL
-    if (url.includes('youtube.com/embed/') || url.includes('vimeo.com/video/')) {
+    // Already an embed URL (YouTube, Vimeo, or Bunny.net)
+    if (url.includes('youtube.com/embed/') ||
+        url.includes('vimeo.com/video/') ||
+        url.includes('iframe.mediadelivery.net/embed/')) {
         return url;
     }
 
@@ -21,4 +23,26 @@ export const convertToYouTubeEmbed = (url) => {
 
     // Return original if not a recognized video URL
     return url;
+};
+
+/**
+ * Check if a video URL should be displayed in an iframe
+ * (YouTube, Vimeo, or Bunny.net Stream)
+ */
+export const isIframeVideo = (url) => {
+    if (!url) return false;
+    return url.includes('youtube.com') ||
+        url.includes('youtu.be') ||
+        url.includes('vimeo.com') ||
+        url.includes('iframe.mediadelivery.net') ||
+        url.includes('mediadelivery.net');
+};
+
+/**
+ * Check if URL is a Bunny.net Stream video
+ */
+export const isBunnyVideo = (url) => {
+    if (!url) return false;
+    return url.includes('iframe.mediadelivery.net') ||
+        url.includes('mediadelivery.net');
 };

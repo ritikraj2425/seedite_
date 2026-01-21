@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { API_URL } from '@/lib/api';
@@ -9,7 +9,7 @@ import Card from '../../../../../components/ui/Card';
 import { VideoSkeleton } from '../../../../../components/ui/Skeleton';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight } from 'lucide-react';
-import { convertToYouTubeEmbed } from '../../../../../lib/videoUtils';
+import { convertToYouTubeEmbed, isIframeVideo, isBunnyVideo } from '../../../../../lib/videoUtils';
 
 export default function LecturePlayer() {
     const params = useParams();
@@ -21,6 +21,28 @@ export default function LecturePlayer() {
     const [allLectures, setAllLectures] = useState([]); // Flattened list for easy navigation
     const [loading, setLoading] = useState(true);
     const [expandedSections, setExpandedSections] = useState({});
+    const [isPlaying, setIsPlaying] = useState(false);
+    const iframeRef = useRef(null);
+
+    // Handle keyboard events - focus the iframe for player's built-in keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Only handle if not typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault();
+                // Focus the iframe so the Bunny.net player can receive the spacebar
+                if (iframeRef.current) {
+                    iframeRef.current.focus();
+                    // The player will handle play/pause internally
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     useEffect(() => {
         if (!courseId) return;
@@ -149,18 +171,23 @@ export default function LecturePlayer() {
                     </div>
 
                     <Card style={{ padding: '0', overflow: 'hidden', background: '#000', border: '1px solid #333' }}>
-                        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, background: '#000' }}>
+                        <div className="video-container">
                             {!currentLecture.videoUrl ? (
                                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                                     Video Unavailable
                                 </div>
-                            ) : currentLecture.videoUrl.includes('youtube.com') || currentLecture.videoUrl.includes('youtu.be') ? (
+                            ) : isIframeVideo(currentLecture.videoUrl) ? (
                                 <iframe
+                                    ref={iframeRef}
+                                    id="video-player"
                                     src={convertToYouTubeEmbed(currentLecture.videoUrl)}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
                                     allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer"
+                                    tabIndex="0"
+                                    playsInline
                                     title={currentLecture.title || 'Lecture Video'}
                                 />
                             ) : (

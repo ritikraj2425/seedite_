@@ -64,7 +64,7 @@ export default function RootLayout({ children }) {
               right: '30px',
               backgroundColor: '#2563eb',
               color: 'white',
-              padding: '8px 20px',
+              padding: '8px 16px',
               borderRadius: '50px',
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
               textDecoration: 'none',
@@ -76,7 +76,7 @@ export default function RootLayout({ children }) {
               transition: 'transform 0.2s ease'
             }}
           >
-            <span>Query?</span>
+            <span>Support</span>
           </a>
         </SessionProvider>
       </body>

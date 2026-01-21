@@ -38,7 +38,7 @@ export default function CreateMockTestPage() {
 
         try {
             setUploadingVideo(true);
-            const { key } = await uploadFile(file);
+            const { key } = await uploadFile(file, 'video');
             setVideoSolutionKey(key);
             toast.success('Video solution uploaded successfully!');
         } catch (error) {

@@ -155,7 +155,7 @@ export default function EditCoursePage() {
 
         try {
             setUploadingLecture(true);
-            const { key } = await uploadFile(file);
+            const { key } = await uploadFile(file, 'video');
             setNewLectureVideoKey(key);
             toast.success('Lecture video uploaded successfully!');
         } catch (error) {

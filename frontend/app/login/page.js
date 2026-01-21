@@ -36,6 +36,10 @@ function LoginContent() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Prevent multiple submissions
+        if (loading) return;
+
         setError('');
         setLoading(true);
 
@@ -60,9 +64,9 @@ function LoginContent() {
             router.refresh();
         } catch (err) {
             setError(err.message);
-        } finally {
-            setLoading(false);
+            setLoading(false); // Only reset loading on error
         }
+        // Don't reset loading on success - let the redirect happen
     };
 
     return (
@@ -81,12 +85,12 @@ function LoginContent() {
                     <div style={{
                         width: '60px',
                         height: '60px',
-                        background: 'var(--gradient-primary)',
                         borderRadius: '16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         margin: '0 auto 20px',
+                        background: 'var(--gradient-primary)',
                         boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)'
                     }}>
                         <LogIn size={28} color="white" />

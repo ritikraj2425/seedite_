@@ -70,13 +70,13 @@ export default function Signup() {
                     <div style={{
                         width: '60px',
                         height: '60px',
-                        background: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
                         borderRadius: '16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         margin: '0 auto 20px',
-                        boxShadow: '0 8px 30px -4px rgba(124, 58, 237, 0.35)'
+                        background: 'var(--gradient-primary)',
+                        boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)'
                     }}>
                         <UserPlus size={28} color="white" />
                     </div>
@@ -173,8 +173,6 @@ export default function Signup() {
                             width: '100%',
                             padding: '14px',
                             fontSize: '1rem',
-                            background: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
-                            boxShadow: '0 4px 14px 0 rgba(124, 58, 237, 0.25)'
                         }}
                         disabled={loading}
                     >
