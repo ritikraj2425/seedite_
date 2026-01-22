@@ -10,6 +10,7 @@ export default function ManageBlog() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         title: '',
@@ -54,24 +55,43 @@ export default function ManageBlog() {
                 tags: tagsArray
             };
 
-            const res = await fetch(`${API_URL}/api/blogs`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${adminUser.token}`
-                },
-                body: JSON.stringify(payload)
-            });
+            if (editingId) {
+                // Update existing blog
+                const res = await fetch(`${API_URL}/api/blogs/${editingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminUser.token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            const data = await res.json();
+                if (!res.ok) throw new Error('Failed to update blog');
 
-            if (!res.ok) {
-                throw new Error(data.message || 'Failed to create blog');
+                toast.success('Blog updated successfully');
+                setEditingId(null);
+            } else {
+                // Create new blog
+                const res = await fetch(`${API_URL}/api/blogs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminUser.token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.message || 'Failed to create blog');
+                }
+
+                toast.success('Blog created successfully');
             }
 
-            toast.success('Blog created successfully');
             setShowForm(false);
             setFormData({ title: '', content: '', image: '', tags: '' });
+            setEditingId(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
             fetchBlogs();
         } catch (error: any) {
@@ -118,6 +138,18 @@ export default function ManageBlog() {
         }
     };
 
+    const handleEdit = (blog: any) => {
+        setFormData({
+            title: blog.title,
+            content: blog.content,
+            image: blog.image || '',
+            tags: blog.tags ? blog.tags.join(', ') : ''
+        });
+        setEditingId(blog._id);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
             <nav className="bg-white border-b border-gray-200">
@@ -128,7 +160,13 @@ export default function ManageBlog() {
                             <h1 className="text-2xl font-bold">Manage Blog</h1>
                         </div>
                         <button
-                            onClick={() => setShowForm(!showForm)}
+                            onClick={() => {
+                                setShowForm(!showForm);
+                                if (showForm) {
+                                    setEditingId(null);
+                                    setFormData({ title: '', content: '', image: '', tags: '' });
+                                }
+                            }}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                         >
                             {showForm ? 'Cancel' : '+ New Post'}
@@ -141,7 +179,7 @@ export default function ManageBlog() {
 
                 {showForm && (
                     <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8 shadow-sm animate-fade-in">
-                        <h2 className="text-xl font-bold mb-4">Create New Blog Post</h2>
+                        <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Blog Post' : 'Create New Blog Post'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Title</label>
@@ -218,7 +256,7 @@ export default function ManageBlog() {
                                 />
                             </div>
                             <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md">
-                                Create Post
+                                {editingId ? 'Update Post' : 'Create Post'}
                             </button>
                         </form>
                     </div>
@@ -239,6 +277,12 @@ export default function ManageBlog() {
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleEdit(blog)}
+                                        className="text-blue-600 text-sm hover:text-blue-800 font-medium"
+                                    >
+                                        Edit
+                                    </button>
                                     <button
                                         onClick={() => handleTogglePublish(blog._id, blog.isPublished)}
                                         className="text-yellow-600 text-sm hover:text-yellow-800 font-medium"

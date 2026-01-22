@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Head from 'next/head';
 import { API_URL } from '@/lib/api';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -37,13 +38,47 @@ export default function Home() {
 
 
   return (
-    <div style={{ paddingBottom: '120px' }}>
-      {/* Hero Section with Gradient Background */}
-      <section className="gradient-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
-        <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px', position: 'relative', zIndex: 1 }}>
-          <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
-            {/* Badge */}
-            {/* <div className="animate-fade-in" style={{
+    <>
+      <Head>
+        <title>Seedite | Master Your NSAT Preparation</title>
+        <meta name="description" content="Access premium courses, mock tests, and video solutions tailored for NSAT success. Join thousands of students achieving their dreams with Seedite." />
+        <meta property="og:title" content="Seedite | Master Your NSAT Preparation" />
+        <meta property="og:description" content="Access premium courses, mock tests, and video solutions tailored for NSAT success." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://seedite.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Seedite | Master Your NSAT Preparation" />
+        <meta name="twitter:description" content="Access premium courses, mock tests, and video solutions tailored for NSAT success." />
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Seedite",
+              "url": "https://seedite.com",
+              "logo": "https://seedite.com/logo.png",
+              "sameAs": [
+                "https://www.youtube.com/@Seedite",
+                "https://www.instagram.com/seedite_edu"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+91-9876543210",
+                "contactType": "customer support"
+              }
+            })
+          }}
+        />
+      </Head>
+      <div style={{ paddingBottom: '120px' }}>
+        {/* Hero Section with Gradient Background */}
+        <section className="gradient-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
+          <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px', position: 'relative', zIndex: 1 }}>
+            <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+              {/* Badge */}
+              {/* <div className="animate-fade-in" style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
@@ -57,531 +92,556 @@ export default function Home() {
               <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e40af' }}>NSAT Preparation Platform</span>
             </div> */}
 
-            <h1 className="hero-title animate-fade-in" style={{
-              color: '#0f172a',
-              marginBottom: '24px',
-              letterSpacing: '-0.03em',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #0f172a 0%, #334155 50%, #1e40af 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>
-              Master Your Future with Seedite
-            </h1>
+              <h1 className="hero-title animate-fade-in" style={{
+                color: '#0f172a',
+                marginBottom: '24px',
+                letterSpacing: '-0.03em',
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #0f172a 0%, #334155 50%, #1e40af 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>
+                Crack NSAT with Real NST Students
+              </h1>
 
-            <p className="animate-fade-in" style={{
-              fontSize: '1.2rem',
-              color: '#64748b',
-              maxWidth: '600px',
-              margin: '0 auto 40px',
-              lineHeight: '1.7'
-            }}>
-              Access premium courses, mock tests, and video solutions tailored for your success.
-              Join thousands of students achieving their dreams.
-            </p>
+              <p className="animate-fade-in" style={{
+                fontSize: '1.2rem',
+                color: '#64748b',
+                maxWidth: '600px',
+                margin: '0 auto 40px',
+                lineHeight: '1.7'
+              }}>
+                Prepare for Newton School of Technology using structured mocks, clear concepts, and interview guidance designed from real NSAT experience.
+              </p>
 
-            <div className="animate-fade-in" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '60px' }}>
-              <Link href="/courses">
-                <Button style={{
-                  fontSize: '1.1rem',
-                  padding: '16px 32px',
-                  borderRadius: '12px',
-                  background: 'var(--gradient-primary)',
-                  boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  Explore Courses
-                  <ArrowRight size={20} />
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button variant="outline" style={{
-                  fontSize: '1.1rem',
-                  padding: '16px 32px',
-                  borderRadius: '12px',
-                  background: 'white',
-                  borderColor: '#e2e8f0',
-                  color: '#0f172a'
-                }}>
-                  <Play size={18} style={{ marginRight: '4px' }} />
-                  Go to Dashboard
-                </Button>
-              </Link>
-            </div>
+              <div className="animate-fade-in" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '60px' }}>
+                <Link href="/courses">
+                  <Button style={{
+                    fontSize: '1.1rem',
+                    padding: '16px 32px',
+                    borderRadius: '12px',
+                    background: 'var(--gradient-primary)',
+                    boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    👉 Start NSAT Preparation
+                    <ArrowRight size={20} />
+                  </Button>
+                </Link>
+                {isLoggedIn && (
+                  <Link href="/dashboard">
+                    <Button variant="outline" style={{
+                      fontSize: '1.1rem',
+                      padding: '16px 32px',
+                      borderRadius: '12px',
+                      background: 'white',
+                      borderColor: '#e2e8f0',
+                      color: '#0f172a'
+                    }}>
+                      <Play size={18} style={{ marginRight: '4px' }} />
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                )}
+              </div>
 
-            {/* Trust Badge */}
-            <div className="animate-fade-in" style={{
-              maxWidth: 'max-content',
-              margin: '0 auto',
-              padding: '16px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              background: 'white',
-              borderRadius: '16px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                overflow: 'hidden',
+              {/* Trust Badge */}
+              <div className="animate-fade-in" style={{
+                maxWidth: 'max-content',
+                margin: '0 auto',
+                padding: '16px 24px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                background: '#f8fafc',
+                gap: '16px',
+                background: 'white',
+                borderRadius: '16px',
                 border: '1px solid #e2e8f0',
-                flexShrink: 0
+                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)'
               }}>
-                <Image
-                  src="/nstlogo.png"
-                  alt="NST Logo"
-                  width={32}
-                  height={32}
-                  style={{ objectFit: 'contain' }}
-                />
-              </div>
-              <span style={{
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#475569',
-                lineHeight: '1.4'
-              }}>
-                Course content developed with guidance from the <strong style={{ color: '#0f172a' }}>NSAT team of NST</strong>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Decorative Elements */}
-        <div style={{
-          position: 'absolute',
-          top: '10%',
-          right: '5%',
-          width: '300px',
-          height: '300px',
-          background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)',
-          borderRadius: '50%',
-          filter: 'blur(40px)',
-          pointerEvents: 'none'
-        }} />
-        <div style={{
-          position: 'absolute',
-          bottom: '10%',
-          left: '5%',
-          width: '250px',
-          height: '250px',
-          background: 'radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%)',
-          borderRadius: '50%',
-          filter: 'blur(40px)',
-          pointerEvents: 'none'
-        }} />
-      </section>
-
-      <div className="container">
-        {/* Stats Section */}
-        <section style={{
-          marginTop: '-40px',
-          marginBottom: '100px',
-          position: 'relative',
-          zIndex: 2
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '24px',
-            background: 'white',
-            borderRadius: '20px',
-            padding: '32px',
-            boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e2e8f0'
-          }}>
-            <div className="stat-card">
-              <div className="stat-number">200+</div>
-              <div className="stat-label">NSAT-Style Questions Explained</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">30+</div>
-              <div className="stat-label">Hours of Content</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">10+</div>
-              <div className="stat-label">Mock Tests</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number">95%</div>
-              <div className="stat-label">Success Rate</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section style={{ marginBottom: '120px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: '#f1f5f9',
-              padding: '6px 14px',
-              borderRadius: '100px',
-              marginBottom: '16px'
-            }}>
-              <Target size={14} color="#64748b" />
-              <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Seedite</span>
-            </div>
-            <h2 className="section-title" style={{ marginBottom: '16px' }}>Why Choose Seedite?</h2>
-            <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
-              Everything you need to crack NSAT and secure your future
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
-            <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-              <div className="icon-box">
-                <BookOpen size={26} color="#0f172a" strokeWidth={1.5} />
-              </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Mock-Based Learning</h3>
-              <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                Topic-wise and full-length NSAT mock tests with detailed video solutions focused on exam-relevant problem solving.
-              </p>
-            </div>
-
-            <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-              <div className="icon-box">
-                <Award size={26} color="#0f172a" strokeWidth={1.5} />
-              </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Guided by NSAT Experience</h3>
-              <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                Preparation strategy and content shaped with guidance from NST students and mentors familiar with the NSAT process.
-              </p>
-            </div>
-
-            <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-              <div className="icon-box">
-                <CheckCircle size={26} color="#0f172a" strokeWidth={1.5} />
-              </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Concept Clarity</h3>
-              <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                In-depth video explanations that break down each question step by step to build strong problem-solving intuition.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Courses Section */}
-        <section style={{ marginBottom: '120px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
-            <div>
-              <h2 className="section-title" style={{ marginBottom: '8px', textAlign: 'left' }}>Featured Courses</h2>
-              <p style={{ color: '#64748b', fontSize: '1rem' }}>Start your journey with our most popular courses</p>
-            </div>
-            <Link href="/courses">
-              <Button variant="outline" style={{
-                borderRadius: '100px',
-                fontSize: '0.9rem',
-                padding: '12px 24px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                View All
-                <ArrowRight size={16} />
-              </Button>
-            </Link>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '28px' }}>
-            {loading ? (
-              Array(3).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)
-            ) : courses.length > 0 ? (
-              courses.slice(0, 3).map((course, index) => (
-                <div key={course._id} className="modern-card" style={{
-                  padding: '0',
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
                   overflow: 'hidden',
                   display: 'flex',
-                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f8fafc',
                   border: '1px solid #e2e8f0',
-                  position: 'relative'
+                  flexShrink: 0
                 }}>
-                  {/* Badge */}
-                  {index === 0 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '16px',
-                      left: '16px',
-                      zIndex: 2,
-                      background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                      color: '#b45309',
-                      padding: '4px 12px',
-                      borderRadius: '100px',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.02em'
-                    }}>
-                      Popular
-                    </div>
-                  )}
-                  <div style={{
-                    height: '200px',
-                    background: '#f8fafc',
-                    position: 'relative',
-                    borderBottom: '1px solid #f1f5f9',
-                    overflow: 'hidden'
+                  <Image
+                    src="/nstlogo.png"
+                    alt="NST Logo"
+                    width={32}
+                    height={32}
+                    style={{ objectFit: 'contain' }}
+                  />
+                </div>
+                <span style={{
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  color: '#475569',
+                  lineHeight: '1.4'
+                }}>
+                  Course content developed with guidance from the <strong style={{ color: '#0f172a' }}>NSAT team of NST</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative Elements */}
+          <div style={{
+            position: 'absolute',
+            top: '10%',
+            right: '5%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)',
+            pointerEvents: 'none'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '5%',
+            width: '250px',
+            height: '250px',
+            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)',
+            pointerEvents: 'none'
+          }} />
+        </section>
+
+        <div className="container">
+          {/* Stats Section */}
+          <section style={{
+            marginTop: '-40px',
+            marginBottom: '100px',
+            position: 'relative',
+            zIndex: 2
+          }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '24px',
+              background: 'white',
+              borderRadius: '20px',
+              padding: '32px',
+              boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div className="stat-card">
+                <div className="stat-number">200+</div>
+                <div className="stat-label">NSAT-Style Questions Explained</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">30+</div>
+                <div className="stat-label">Hours of Content</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">10+</div>
+                <div className="stat-label">Mock Tests</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">95%</div>
+                <div className="stat-label">Success Rate</div>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Section */}
+          <section style={{ marginBottom: '120px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#f1f5f9',
+                padding: '6px 14px',
+                borderRadius: '100px',
+                marginBottom: '16px'
+              }}>
+                <Target size={14} color="#64748b" />
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Seedite for NSAT?
+                </span>
+              </div>
+              <h2 className="section-title" style={{ marginBottom: '16px' }}>Why Choose Seedite?</h2>
+              <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
+                One place for all your NSAT preparation needs.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
+              <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+                <div className="icon-box">
+                  <BookOpen size={26} color="#0f172a" strokeWidth={1.5} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>NSAT-Focused Mock Practice
+                </h3>
+                <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
+                  Topic-wise and full-length mocks designed to match NSAT difficulty, pattern, and thinking style not generic aptitude tests.              </p>
+              </div>
+
+              <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+                <div className="icon-box">
+                  <Award size={26} color="#0f172a" strokeWidth={1.5} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Built from Real NST Experience
+                </h3>
+                <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
+                  Preparation strategy shaped by NST students who’ve cleared NSAT, faced the interview, and know where one can usually go wrong.              </p>
+              </div>
+
+              <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+                <div className="icon-box">
+                  <CheckCircle size={26} color="#0f172a" strokeWidth={1.5} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Concepts Clarity
+                </h3>
+                <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
+                  Step-by-step video explanations that help you think like NSAT expects not just memorize answers.              </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Featured Courses Section */}
+          <section style={{ marginBottom: '120px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h2 className="section-title" style={{ marginBottom: '8px', textAlign: 'left' }}>Featured Courses</h2>
+                <p style={{ color: '#64748b', fontSize: '1rem' }}>Start your journey with our most popular courses</p>
+              </div>
+              <Link href="/courses">
+                <Button variant="outline" style={{
+                  borderRadius: '100px',
+                  fontSize: '0.9rem',
+                  padding: '12px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  View All
+                  <ArrowRight size={16} />
+                </Button>
+              </Link>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '28px' }}>
+              {loading ? (
+                Array(3).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)
+              ) : courses.length > 0 ? (
+                [...courses].reverse().slice(0, 3).map((course, index) => (
+                  <div key={course._id} className="modern-card" style={{
+                    padding: '0',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    border: '1px solid #e2e8f0',
+                    position: 'relative'
                   }}>
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        transition: 'transform 0.3s ease'
-                      }}
-                      onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                      onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-                    />
-                  </div>
-                  <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', fontWeight: '700', color: '#0f172a' }}>{course.title}</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem', flex: 1, marginBottom: '20px', lineHeight: '1.6' }}>
-                      {course.description.substring(0, 90)}...
-                    </p>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      paddingTop: '16px',
-                      borderTop: '1px solid #f1f5f9'
-                    }}>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.9rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                          ₹{course.originalPrice || Math.round(course.price * 1.5)}
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '1.35rem', fontWeight: '700', color: '#0f172a' }}>₹{course.price}</span>
-                          <span style={{
-                            fontSize: '0.75rem',
-                            fontWeight: '700',
-                            color: '#16a34a',
-                            background: '#dcfce7',
-                            padding: '2px 6px',
-                            borderRadius: '4px'
-                          }}>
-                            {Math.round(((course.originalPrice || Math.round(course.price * 1.5)) - course.price) / (course.originalPrice || Math.round(course.price * 1.5)) * 100)}% OFF
-                          </span>
-                        </div>
+                    {/* Badge */}
+                    {index === 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '16px',
+                        left: '16px',
+                        zIndex: 2,
+                        background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                        color: '#b45309',
+                        padding: '4px 12px',
+                        borderRadius: '100px',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.02em'
+                      }}>
+                        Popular
                       </div>
-                      <Link href={`/courses/${course._id}`}>
-                        <span style={{
-                          fontSize: '0.95rem',
-                          fontWeight: '600',
-                          color: '#2563eb',
-                          cursor: 'pointer',
+                    )}
+                    <div style={{
+                      height: '200px',
+                      background: '#f8fafc',
+                      position: 'relative',
+                      borderBottom: '1px solid #f1f5f9',
+                      overflow: 'hidden'
+                    }}>
+                      <img
+                        src={course.thumbnail}
+                        alt={course.title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s ease'
+                        }}
+                        onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                        onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                      />
+                    </div>
+                    <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', fontWeight: '700', color: '#0f172a' }}>{course.title}</h3>
+                      <p style={{ color: '#64748b', fontSize: '0.95rem', flex: 1, marginBottom: '20px', lineHeight: '1.6' }}>
+                        {course.description.substring(0, 90)}...
+                      </p>
+                      {course.launchLater ? (
+                        <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '4px'
+                          justifyContent: 'center',
+                          width: '100%',
+                          paddingTop: '16px',
+                          borderTop: '1px solid #f1f5f9'
                         }}>
-                          View Details
-                          <ArrowRight size={16} />
-                        </span>
-                      </Link>
+                          <span style={{
+                            fontSize: '1.1rem',
+                            fontWeight: '700',
+                            color: '#eab308',
+                            background: '#fefce8',
+                            padding: '8px 16px',
+                            borderRadius: '100px',
+                            border: '1px solid #fef08a'
+                          }}>
+                            {course.launchDateText || "Coming Soon"}
+                          </span>
+                        </div>
+                      ) : (
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          paddingTop: '16px',
+                          borderTop: '1px solid #f1f5f9'
+                        }}>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.9rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                              ₹{course.originalPrice || Math.round(course.price * 1.5)}
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '1.35rem', fontWeight: '700', color: '#0f172a' }}>₹{course.price}</span>
+                              <span style={{
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                color: '#16a34a',
+                                background: '#dcfce7',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                              }}>
+                                {Math.round(((course.originalPrice || Math.round(course.price * 1.5)) - course.price) / (course.originalPrice || Math.round(course.price * 1.5)) * 100)}% OFF
+                              </span>
+                            </div>
+                          </div>
+                          <Link href={`/courses/${course._id}`}>
+                            <span style={{
+                              fontSize: '0.95rem',
+                              fontWeight: '600',
+                              color: '#2563eb',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              View Details
+                              <ArrowRight size={16} />
+                            </span>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
+                ))
+              ) : (
+                <p style={{ color: '#64748b', gridColumn: '1 / -1', textAlign: 'center' }}>No courses available yet.</p>
+              )}
+            </div>
+          </section>
+
+          {/* Instructors Section */}
+          <section style={{ marginBottom: '80px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+              <h2 className="section-title" style={{ marginBottom: '16px' }}>Meet Our Experts</h2>
+              <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
+                Learn from the best - our instructors bring real NSAT experience
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', maxWidth: '1200px', margin: '0 auto' }}>
+              <div className="modern-card" style={{ textAlign: 'center', padding: '40px 28px' }}>
+                <div style={{
+                  width: '110px',
+                  height: '110px',
+                  borderRadius: '50%',
+                  margin: '0 auto 20px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  border: '3px solid #e2e8f0',
+                  boxShadow: '0 0 0 4px rgba(37, 99, 235, 0.1)'
+                }}>
+                  <Image
+                    src="/ritik.png"
+                    alt="Ritik Raj"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
                 </div>
-              ))
-            ) : (
-              <p style={{ color: '#64748b', gridColumn: '1 / -1', textAlign: 'center' }}>No courses available yet.</p>
-            )}
-          </div>
-        </section>
-
-        {/* Instructors Section */}
-        <section style={{ marginBottom: '80px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 className="section-title" style={{ marginBottom: '16px' }}>Meet Our Experts</h2>
-            <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
-              Learn from the best - our instructors bring real NSAT experience
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div className="modern-card" style={{ textAlign: 'center', padding: '40px 28px' }}>
-              <div style={{
-                width: '110px',
-                height: '110px',
-                borderRadius: '50%',
-                margin: '0 auto 20px',
-                position: 'relative',
-                overflow: 'hidden',
-                border: '3px solid #e2e8f0',
-                boxShadow: '0 0 0 4px rgba(37, 99, 235, 0.1)'
-              }}>
-                <Image
-                  src="/ritik.png"
-                  alt="Ritik Raj"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
+                <h3 style={{ fontSize: '1.15rem', marginBottom: '6px', fontWeight: '700', color: '#0f172a' }}>Ritik Raj</h3>
+                <p style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '0.8rem',
+                  marginBottom: '12px',
+                  background: 'var(--gradient-primary)',
+                  padding: '4px 14px',
+                  borderRadius: '100px',
+                  display: 'inline-block'
+                }}>Ex-SDE Intern @Physics Wallah</p>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  Third year BTech student at NST
+                </p>
               </div>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '6px', fontWeight: '700', color: '#0f172a' }}>Ritik Raj</h3>
-              <p style={{
-                color: 'white',
-                fontWeight: '600',
-                fontSize: '0.8rem',
-                marginBottom: '12px',
-                background: 'var(--gradient-primary)',
-                padding: '4px 14px',
-                borderRadius: '100px',
-                display: 'inline-block'
-              }}>Ex-SDE Intern @Physics Wallah</p>
-              <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                Third year BTech student at NST
-              </p>
+
+              <div className="modern-card" style={{ textAlign: 'center', padding: '40px 28px' }}>
+                <div style={{
+                  width: '110px',
+                  height: '110px',
+                  borderRadius: '50%',
+                  margin: '0 auto 20px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  border: '3px solid #e2e8f0',
+                  boxShadow: '0 0 0 4px rgba(124, 58, 237, 0.1)'
+                }}>
+                  <Image
+                    src="/amod.jpg"
+                    alt="Amod Ranjan"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', marginBottom: '6px', fontWeight: '700', color: '#0f172a' }}>Amod Ranjan</h3>
+                <p style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '0.8rem',
+                  marginBottom: '12px',
+                  background: 'var(--gradient-primary)',
+                  padding: '4px 14px',
+                  borderRadius: '100px',
+                  display: 'inline-block'
+                }}>3x ICPC Regionalist</p>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  Third year BTech student at NST
+                </p>
+              </div>
+
+              <div className="modern-card" style={{ textAlign: 'center', padding: '40px 28px' }}>
+                <div style={{
+                  width: '110px',
+                  height: '110px',
+                  borderRadius: '50%',
+                  margin: '0 auto 20px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  border: '3px solid #e2e8f0',
+                  boxShadow: '0 0 0 4px rgba(124, 58, 237, 0.1)'
+                }}>
+                  <Image
+                    src="/jigyashu.jpeg"
+                    alt="Jigyasu"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', marginBottom: '6px', fontWeight: '700', color: '#0f172a' }}>Jigyasu Kalyan</h3>
+                <p style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '0.8rem',
+                  marginBottom: '12px',
+                  background: 'var(--gradient-primary)',
+                  padding: '4px 14px',
+                  borderRadius: '100px',
+                  display: 'inline-block'
+                }}>1x ICPC Regionalist</p>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  Second year BTech student at NST
+                </p>
+              </div>
             </div>
 
-            <div className="modern-card" style={{ textAlign: 'center', padding: '40px 28px' }}>
-              <div style={{
-                width: '110px',
-                height: '110px',
-                borderRadius: '50%',
-                margin: '0 auto 20px',
-                position: 'relative',
-                overflow: 'hidden',
-                border: '3px solid #e2e8f0',
-                boxShadow: '0 0 0 4px rgba(124, 58, 237, 0.1)'
-              }}>
-                <Image
-                  src="/amod.jpg"
-                  alt="Amod Ranjan"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '6px', fontWeight: '700', color: '#0f172a' }}>Amod Ranjan</h3>
-              <p style={{
+
+          </section>
+
+          {/* Testimonials Section */}
+          <Testimonials />
+
+          {/* CTA Section */}
+          <section style={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+            borderRadius: '24px',
+            padding: '60px 40px',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <h2 style={{
                 color: 'white',
-                fontWeight: '600',
-                fontSize: '0.8rem',
-                marginBottom: '12px',
-                background: 'var(--gradient-primary)',
-                padding: '4px 14px',
-                borderRadius: '100px',
-                display: 'inline-block'
-              }}>3x ICPC Regionalist</p>
-              <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                Third year BTech student at NST
-              </p>
+                fontSize: '2rem',
+                fontWeight: '700',
+                marginBottom: '16px',
+                background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                Ready to Prepare for NSAT the Right Way?
+              </h2>
+              <p style={{ color: '#94a3b8', marginBottom: '32px', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 32px' }}>
+                Stop guessing. Start preparing with structure, clarity, and real NST guidance.            </p>
+              <Link href={isLoggedIn ? "/dashboard" : "/signup"}>
+                <Button style={{
+                  padding: '16px 40px',
+                  fontSize: '1.1rem',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.5)'
+                }}>
+                  {isLoggedIn ? "Go to Dashboard" : "Get Started for Free"}
+                  <ArrowRight size={20} style={{ marginLeft: '8px' }} />
+                </Button>
+              </Link>
             </div>
 
-            <div className="modern-card" style={{ textAlign: 'center', padding: '40px 28px' }}>
-              <div style={{
-                width: '110px',
-                height: '110px',
-                borderRadius: '50%',
-                margin: '0 auto 20px',
-                position: 'relative',
-                overflow: 'hidden',
-                border: '3px solid #e2e8f0',
-                boxShadow: '0 0 0 4px rgba(124, 58, 237, 0.1)'
-              }}>
-                <Image
-                  src="/jigyashu.jpeg"
-                  alt="Jigyasu"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '6px', fontWeight: '700', color: '#0f172a' }}>Jigyasu Kalyan</h3>
-              <p style={{
-                color: 'white',
-                fontWeight: '600',
-                fontSize: '0.8rem',
-                marginBottom: '12px',
-                background: 'var(--gradient-primary)',
-                padding: '4px 14px',
-                borderRadius: '100px',
-                display: 'inline-block'
-              }}>1x ICPC Regionalist</p>
-              <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                Second year BTech student at NST
-              </p>
-            </div>
-          </div>
 
-
-        </section>
-
-        {/* Testimonials Section */}
-        <Testimonials />
-
-        {/* CTA Section */}
-        <section style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-          borderRadius: '24px',
-          padding: '60px 40px',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h2 style={{
-              color: 'white',
-              fontSize: '2rem',
-              fontWeight: '700',
-              marginBottom: '16px',
-              background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              Ready to Start Your Journey?
-            </h2>
-            <p style={{ color: '#94a3b8', marginBottom: '32px', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 32px' }}>
-              Join thousands of students who are already preparing smarter with Seedite
-            </p>
-            <Link href={isLoggedIn ? "/dashboard" : "/signup"}>
-              <Button style={{
-                padding: '16px 40px',
-                fontSize: '1.1rem',
-                borderRadius: '12px',
-                boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.5)'
-              }}>
-                {isLoggedIn ? "Go to Dashboard" : "Get Started for Free"}
-                <ArrowRight size={20} style={{ marginLeft: '8px' }} />
-              </Button>
-            </Link>
-          </div>
-
-
-          {/* Decorative circles */}
-          <div style={{
-            position: 'absolute',
-            top: '-50px',
-            right: '-50px',
-            width: '200px',
-            height: '200px',
-            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, transparent 70%)',
-            borderRadius: '50%',
-            pointerEvents: 'none'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '-30px',
-            left: '-30px',
-            width: '150px',
-            height: '150px',
-            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)',
-            borderRadius: '50%',
-            pointerEvents: 'none'
-          }} />
-        </section>
+            {/* Decorative circles */}
+            <div style={{
+              position: 'absolute',
+              top: '-50px',
+              right: '-50px',
+              width: '200px',
+              height: '200px',
+              background: 'radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none'
+            }} />
+            <div style={{
+              position: 'absolute',
+              bottom: '-30px',
+              left: '-30px',
+              width: '150px',
+              height: '150px',
+              background: 'radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none'
+            }} />
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

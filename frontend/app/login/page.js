@@ -8,7 +8,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import Loader from '../../components/ui/Loader';
-import { LogIn, Mail, Lock } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     return (
@@ -29,6 +29,7 @@ function LoginContent() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -153,15 +154,37 @@ function LoginContent() {
                         }}>
                             Password
                         </label>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            style={{ marginBottom: 0 }}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                style={{ marginBottom: 0, paddingRight: '40px' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '12px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#64748b',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '4px'
+                                }}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
                     <Button
                         type="submit"

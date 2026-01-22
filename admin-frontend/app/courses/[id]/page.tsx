@@ -21,7 +21,10 @@ export default function EditCoursePage() {
         thumbnail: '',
         category: '',
         instructor: '',
-        courseDetails: ''
+
+        courseDetails: '',
+        launchLater: false,
+        launchDateText: ''
     });
     const [lectures, setLectures] = useState<any[]>([]);
     const [sections, setSections] = useState<any[]>([]); // New state for sections
@@ -70,7 +73,10 @@ export default function EditCoursePage() {
                     thumbnail: data.thumbnail || '',
                     category: data.category || '',
                     instructor: data.instructor || '',
-                    courseDetails: data.courseDetails ? data.courseDetails.join('\n') : ''
+
+                    courseDetails: data.courseDetails ? data.courseDetails.join('\n') : '',
+                    launchLater: data.launchLater || false,
+                    launchDateText: data.launchDateText || ''
                 });
                 setLectures(data.lectures || []);
                 setSections(data.sections || []); // Set sections
@@ -410,6 +416,37 @@ export default function EditCoursePage() {
                                     />
                                 </div>
                             </div>
+
+
+                            <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="editLaunchLater"
+                                        checked={formData.launchLater}
+                                        onChange={(e) => setFormData({ ...formData, launchLater: e.target.checked })}
+                                        className="w-4 h-4 rounded border-gray-700 bg-gray-900 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <label htmlFor="editLaunchLater" className="text-sm font-medium text-white cursor-pointer select-none">
+                                        Launch Later (Show "Coming Soon")
+                                    </label>
+                                </div>
+
+                                {formData.launchLater && (
+                                    <div className="animate-fade-in-down">
+                                        <label className="block text-sm font-medium mb-1">Launch Date Text</label>
+                                        <input
+                                            type="text"
+                                            value={formData.launchDateText}
+                                            onChange={(e) => setFormData({ ...formData, launchDateText: e.target.value })}
+                                            className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                            placeholder="e.g., Launching in June"
+                                            required={formData.launchLater}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium mb-1">Thumbnail</label>
                                 {formData.thumbnail && (
@@ -435,13 +472,13 @@ export default function EditCoursePage() {
                         </button>
                     </form>
                 </div>
-            </div>
+            </div >
 
             {/* Right Column: Content Management */}
-            <div className="space-y-8">
+            < div className="space-y-8" >
 
                 {/* Lectures Management */}
-                <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+                < div className="bg-gray-900 rounded-lg border border-gray-800 p-6" >
                     <h2 className="text-xl font-bold mb-4">Lectures</h2>
 
                     {/* List */}
@@ -587,10 +624,10 @@ export default function EditCoursePage() {
                             </button>
                         </form>
                     </div>
-                </div>
+                </div >
 
                 {/* Mock Tests Management */}
-                <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+                < div className="bg-gray-900 rounded-lg border border-gray-800 p-6" >
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Mock Tests</h2>
                         <Link href={`/courses/${courseId}/mock-tests/new`} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -620,10 +657,10 @@ export default function EditCoursePage() {
                         ))}
                         {mockTests.length === 0 && <p className="text-gray-500 text-center py-4">No mock tests added yet</p>}
                     </div>
-                </div>
+                </div >
 
                 {/* Announcements Section */}
-                <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+                < div className="bg-gray-900 rounded-lg border border-gray-800 p-6" >
                     <h2 className="text-xl font-bold mb-6">Batch Announcements</h2>
 
                     {/* New Announcement Form */}
@@ -681,9 +718,9 @@ export default function EditCoursePage() {
                             {announcements.length === 0 && <p className="text-gray-500 text-center py-4">No announcements posted yet</p>}
                         </div>
                     </div>
-                </div>
+                </div >
 
-            </div>
+            </div >
         </div >
     );
 }

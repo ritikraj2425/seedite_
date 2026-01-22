@@ -21,6 +21,20 @@ export default function VideoPlayer({ src, poster }) {
     const controlsTimeoutRef = useRef(null);
 
     useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Only handle if this video player is in view or active?
+            // For now, global listener if no other input is focused
+            if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                togglePlay();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isPlaying]);
+
+    useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
@@ -54,12 +68,14 @@ export default function VideoPlayer({ src, poster }) {
 
     const togglePlay = () => {
         if (videoRef.current) {
-            if (isPlaying) {
-                videoRef.current.pause();
+            if (videoRef.current.paused) {
+                videoRef.current.play().then(() => {
+                    setIsPlaying(true);
+                }).catch(e => console.error("Play error:", e));
             } else {
-                videoRef.current.play();
+                videoRef.current.pause();
+                setIsPlaying(false);
             }
-            setIsPlaying(!isPlaying);
             setShowSettings(false);
         }
     };
@@ -190,25 +206,42 @@ export default function VideoPlayer({ src, poster }) {
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && setShowControls(false)}
             style={{
-                position: 'relative',
-                width: '100%',
-                height: '100%',
+                position: isFullscreen ? 'fixed' : 'relative',
+                top: isFullscreen ? 0 : 'auto',
+                left: isFullscreen ? 0 : 'auto',
+                width: isFullscreen ? '100vw' : '100%',
+                height: isFullscreen ? '100vh' : '100%',
                 backgroundColor: 'black',
                 overflow: 'hidden',
                 borderRadius: isFullscreen ? '0' : '8px',
-                userSelect: 'none'
+                userSelect: 'none',
+                zIndex: isFullscreen ? 99999 : 'auto',
             }}
         >
             <video
                 ref={videoRef}
                 src={src}
                 poster={poster}
-                onClick={togglePlay}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onContextMenu={(e) => e.preventDefault()}
                 playsInline
                 onWaiting={() => setIsLoading(true)}
                 onCanPlay={() => setIsLoading(false)}
+            />
+
+            {/* Click/Tap Overlay */}
+            <div
+                onClick={togglePlay}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 1,
+                    cursor: 'pointer',
+                    background: 'transparent' // Explicitly transparent
+                }}
             />
 
             {/* Loading Overlay */}
@@ -252,6 +285,7 @@ export default function VideoPlayer({ src, poster }) {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
+                zIndex: 10,
             }}>
                 {/* Progress Bar */}
                 <div style={{ position: 'relative', width: '100%', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', cursor: 'pointer' }}>
@@ -428,7 +462,8 @@ export default function VideoPlayer({ src, poster }) {
                         justifyContent: 'center',
                         cursor: 'pointer',
                         pointerEvents: 'auto',
-                        boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
+                        boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)',
+                        zIndex: 10,
                     }}
                 >
                     <Play size={36} fill="white" color="white" style={{ marginLeft: '4px' }} />

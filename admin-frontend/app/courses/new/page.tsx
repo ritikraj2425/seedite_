@@ -15,7 +15,9 @@ export default function NewCoursePage() {
         originalPrice: '', // New field for crossed-out price
         thumbnail: '',
         category: '',
-        courseDetails: ''  // New field for bullet points
+        courseDetails: '',  // New field for bullet points
+        launchLater: false,
+        launchDateText: ''
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -140,6 +142,35 @@ export default function NewCoursePage() {
                                         placeholder="e.g., Web Development"
                                     />
                                 </div>
+                            </div>
+
+                            <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="launchLater"
+                                        checked={formData.launchLater}
+                                        onChange={(e) => setFormData({ ...formData, launchLater: e.target.checked })}
+                                        className="w-4 h-4 rounded border-gray-700 bg-gray-900 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <label htmlFor="launchLater" className="text-sm font-medium text-white cursor-pointer select-none">
+                                        Launch Later (Show "Coming Soon")
+                                    </label>
+                                </div>
+
+                                {formData.launchLater && (
+                                    <div className="animate-fade-in-down">
+                                        <label className="block text-sm font-medium mb-1">Launch Date Text</label>
+                                        <input
+                                            type="text"
+                                            value={formData.launchDateText}
+                                            onChange={(e) => setFormData({ ...formData, launchDateText: e.target.value })}
+                                            className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                            placeholder="e.g., Launching in June"
+                                            required={formData.launchLater}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div>

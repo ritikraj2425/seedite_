@@ -12,6 +12,7 @@ export default function ManageTestimonials() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -46,26 +47,45 @@ export default function ManageTestimonials() {
         e.preventDefault();
         try {
             const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
-            const res = await fetch(`${API_URL}/api/testimonials`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${adminUser.token}`
-                },
-                body: JSON.stringify({ ...formData, rating: Number(formData.rating) })
-            });
 
-            if (!res.ok) throw new Error('Failed to create testimonial');
+            if (editingId) {
+                // Update existing testimonial
+                const res = await fetch(`${API_URL}/api/testimonials/${editingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminUser.token}`
+                    },
+                    body: JSON.stringify({ ...formData, rating: Number(formData.rating) })
+                });
 
-            toast.success('Testimonial created');
+                if (!res.ok) throw new Error('Failed to update testimonial');
+                toast.success('Testimonial updated');
+                setEditingId(null);
+            } else {
+                // Create new testimonial
+                const res = await fetch(`${API_URL}/api/testimonials`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminUser.token}`
+                    },
+                    body: JSON.stringify({ ...formData, rating: Number(formData.rating) })
+                });
+
+                if (!res.ok) throw new Error('Failed to create testimonial');
+                toast.success('Testimonial created');
+            }
+
             setShowForm(false);
             setFormData({ name: '', role: '', content: '', rating: '5', image: '' });
+            setEditingId(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
             setUploading(false);
             fetchTestimonials();
         } catch (error) {
             console.error(error);
-            toast.error('Error creating testimonial');
+            toast.error(editingId ? 'Error updating testimonial' : 'Error creating testimonial');
         }
     };
 
@@ -107,6 +127,19 @@ export default function ManageTestimonials() {
         }
     };
 
+    const handleEdit = (t: any) => {
+        setFormData({
+            name: t.name,
+            role: t.role,
+            content: t.content,
+            rating: String(t.rating),
+            image: t.image || ''
+        });
+        setEditingId(t._id);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div className="min-h-screen bg-black text-white">
             <nav className="bg-black border-b border-gray-800">
@@ -117,7 +150,13 @@ export default function ManageTestimonials() {
                             <h1 className="text-2xl font-bold">Manage Testimonials</h1>
                         </div>
                         <button
-                            onClick={() => setShowForm(!showForm)}
+                            onClick={() => {
+                                setShowForm(!showForm);
+                                if (showForm) {
+                                    setEditingId(null);
+                                    setFormData({ name: '', role: '', content: '', rating: '5', image: '' });
+                                }
+                            }}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                         >
                             {showForm ? 'Cancel' : '+ New Testimonial'}
@@ -130,7 +169,7 @@ export default function ManageTestimonials() {
 
                 {showForm && (
                     <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-8 animate-fade-in">
-                        <h2 className="text-xl font-bold mb-4">Add New Testimonial</h2>
+                        <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Testimonial' : 'Add New Testimonial'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -223,7 +262,7 @@ export default function ManageTestimonials() {
                                 />
                             </div>
                             <button type="submit" className="w-full py-2 bg-blue-600 rounded-lg font-bold hover:bg-blue-700">
-                                Create Testimonial
+                                {editingId ? 'Update Testimonial' : 'Create Testimonial'}
                             </button>
                         </form>
                     </div>
@@ -245,6 +284,12 @@ export default function ManageTestimonials() {
                                 <p className="text-sm text-gray-400 mb-8">"{t.content}"</p>
 
                                 <div className="absolute bottom-4 right-4 flex gap-3">
+                                    <button
+                                        onClick={() => handleEdit(t)}
+                                        className="text-blue-400 text-xs hover:text-blue-300 mr-2"
+                                    >
+                                        Edit
+                                    </button>
                                     <button
                                         onClick={() => handleToggleVisibility(t._id, t.isVisible)}
                                         className={`text-xs px-2 py-1 rounded border ${t.isVisible ? 'border-green-800 text-green-500' : 'border-gray-700 text-gray-500'}`}

@@ -72,12 +72,7 @@ const MarkdownRenderer = ({ content, className = '' }) => {
           white-space: pre !important;
           font-size: inherit;
         }
-        .markdown-renderer table {
-          border-collapse: collapse;
-          width: 100%;
-          margin: 1rem 0;
-          border: 1px solid rgba(0, 0, 0, 0.1);
-        }
+
         .markdown-renderer th, .markdown-renderer td {
           border: 1px solid rgba(0, 0, 0, 0.1);
           padding: 8px;
@@ -94,7 +89,7 @@ const MarkdownRenderer = ({ content, className = '' }) => {
         .markdown-renderer table {
           border-collapse: collapse;
           width: 100%;
-          margin: 1.5rem 0;
+          margin: 1rem 0;
           border-radius: 8px;
           overflow: hidden;
           border: 1px solid #e2e8f0;
