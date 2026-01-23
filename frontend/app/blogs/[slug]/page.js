@@ -1,9 +1,5 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Head from 'next/head';
+import { notFound } from 'next/navigation';
 import { API_URL } from '@/lib/api';
 import Loader from '../../../components/ui/Loader';
 import MarkdownRenderer from '../../../components/ui/MarkdownRenderer';
@@ -13,147 +9,166 @@ import ShareButtons from '../../../components/ui/ShareButtons';
 import Breadcrumb from '../../../components/ui/Breadcrumb';
 import ReadTime from '../../../components/ui/ReadTime';
 import RelatedPosts from '../../../components/ui/RelatedPosts';
-import { Calendar, User, ArrowLeft, Tag, Share2, Clock, BookOpen } from 'lucide-react';
+import { Calendar, User, BookOpen, Clock } from 'lucide-react';
 
-export default function BlogPost() {
-    const { slug } = useParams();
-    const [blog, setBlog] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [headings, setHeadings] = useState([]);
-    const [readTime, setReadTime] = useState(0);
+// Helper functions (moved from client component)
+const calculateReadTime = (content) => {
+    if (!content) return 0;
+    const wordsPerMinute = 200;
+    // Strip HTML/Markdown characters for more accurate count if needed, but simple split is fine
+    const wordCount = content.split(/\s+/).length;
+    return Math.ceil(wordCount / wordsPerMinute);
+};
 
-    // Calculate read time
-    const calculateReadTime = (content) => {
-        const wordsPerMinute = 200;
-        const wordCount = content.split(/\s+/).length;
-        return Math.ceil(wordCount / wordsPerMinute);
-    };
+const extractHeadings = (content) => {
+    if (!content) return [];
+    const headingRegex = /^(#{1,3})\s+(.+)$/gm;
+    const matches = [];
+    let match;
+    while ((match = headingRegex.exec(content)) !== null) {
+        const level = match[1].length;
+        const text = match[2];
+        const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+        matches.push({ id, text, level });
+    }
+    return matches;
+};
 
-    // Extract headings for TOC
-    const extractHeadings = (content) => {
-        const headingRegex = /^(#{1,3})\s+(.+)$/gm;
-        const matches = [];
-        let match;
-        while ((match = headingRegex.exec(content)) !== null) {
-            const level = match[1].length;
-            const text = match[2];
-            const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-            matches.push({ id, text, level });
+// Data Fetching
+async function getBlog(slug) {
+    try {
+        const res = await fetch(`${API_URL}/api/blogs/${slug}`, { cache: 'no-store' });
+        if (!res.ok) {
+            if (res.status === 404) return null;
+            throw new Error('Failed to fetch blog');
         }
-        return matches;
-    };
-
-    useEffect(() => {
-        if (!slug) return;
-
-        fetch(`${API_URL}/api/blogs/${slug}`)
-            .then(res => {
-                if (!res.ok) throw new Error('Blog not found');
-                return res.json();
-            })
-            .then(data => {
-                setBlog(data);
-                setHeadings(extractHeadings(data.content));
-                setReadTime(calculateReadTime(data.content));
-                setLoading(false);
-
-                // Update meta tags dynamically
-                updateMetaTags(data);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
-    }, [slug]);
-
-    const updateMetaTags = (data) => {
-        // Update title
-        document.title = `${data.title} | Seedite Blog`;
-
-        // Update meta description
-        let metaDesc = document.querySelector('meta[name="description"]');
-        if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            metaDesc.name = 'description';
-            document.head.appendChild(metaDesc);
+        return await res.json();
+    } catch (error) {
+        if (error.digest === 'DYNAMIC_SERVER_USAGE') {
+            throw error;
         }
-        const description = data.content.substring(0, 160).replace(/[#*_`]/g, '');
-        metaDesc.content = description;
+        console.error('Error fetching blog:', error);
+        return null;
+    }
+}
 
-        // Update Open Graph tags
-        const ogTitle = document.querySelector('meta[property="og:title"]');
-        const ogDesc = document.querySelector('meta[property="og:description"]');
-        const ogImage = document.querySelector('meta[property="og:image"]');
+// Dynamic Metadata
+export async function generateMetadata({ params }) {
+    const { slug } = await params;
+    const blog = await getBlog(slug);
 
-        if (ogTitle) ogTitle.content = data.title;
-        if (ogDesc) ogDesc.content = description;
-        if (ogImage && data.image) ogImage.content = data.image;
-    };
-
-    const generateSchemaMarkup = () => {
-        if (!blog) return null;
-
-        const schema = {
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": blog.title,
-            "description": blog.content.substring(0, 200).replace(/[#*_`]/g, ''),
-            "image": blog.image || '',
-            "author": {
-                "@type": "Person",
-                "name": blog.author || "Seedite Team"
-            },
-            "publisher": {
-                "@type": "Organization",
-                "name": "Seedite",
-                "logo": {
-                    "@type": "ImageObject",
-                    "url": "https://www.seedite.in/logo.png"
-                }
-            },
-            "datePublished": blog.createdAt,
-            "dateModified": blog.updatedAt || blog.createdAt,
-            "mainEntityOfPage": {
-                "@type": "WebPage",
-                "@id": typeof window !== 'undefined' ? window.location.href : ''
-            },
-            "articleBody": blog.content.replace(/[#*_`]/g, ''),
-            "wordCount": blog.content.split(/\s+/).length,
-            "timeRequired": `PT${readTime}M`
+    if (!blog) {
+        return {
+            title: 'Blog Post Not Found | Seedite',
+            description: 'The requested blog post could not be found.'
         };
+    }
 
-        return JSON.stringify(schema);
+    const description = blog.content.substring(0, 160).replace(/[#*_`]/g, '');
+
+    return {
+        title: `${blog.title} | Seedite Blog`,
+        description: description,
+        openGraph: {
+            title: blog.title,
+            description: description,
+            type: 'article',
+            url: `https://www.seedite.in/blogs/${slug}`,
+            images: blog.image ? [{ url: blog.image }] : [],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: blog.title,
+            description: description,
+            images: blog.image ? [blog.image] : [],
+        },
+    };
+}
+
+export default async function BlogPost({ params }) {
+    const { slug } = await params;
+    const blog = await getBlog(slug);
+
+    if (!blog) {
+        notFound();
+    }
+
+    const headings = extractHeadings(blog.content);
+    // Use server-side calculation or passing content to ReadTime component if it handles calculation
+    // The previous code had `setReadTime(calculateReadTime(data.content))` and passed nothing to `<ReadTime content={blog.content} />`?
+    // Wait, line 184 in original was `<ReadTime content={blog.content} />`. 
+    // But line 23 was `const [readTime, setReadTime] = useState(0);`.
+    // And line 122 used `readTime` state for schema: `"timeRequired": PT${readTime}M`.
+    // So I need the value for Schema, but the component might calculate it itself for display.
+    const readTimeVal = calculateReadTime(blog.content);
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": blog.title,
+        "description": blog.content.substring(0, 200).replace(/[#*_`]/g, ''),
+        "image": blog.image || '',
+        "author": {
+            "@type": "Person",
+            "name": blog.author || "Seedite Team"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Seedite",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.seedite.in/logo.png"
+            }
+        },
+        "datePublished": blog.createdAt,
+        "dateModified": blog.updatedAt || blog.createdAt,
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `https://www.seedite.in/blogs/${slug}`
+        },
+        "articleBody": blog.content.replace(/[#*_`]/g, ''),
+        "wordCount": blog.content.split(/\s+/).length,
+        "timeRequired": `PT${readTimeVal}M`
     };
 
-    if (loading) return <Loader />;
-    if (!blog) return (
-        <div className="container" style={{ paddingTop: '120px', textAlign: 'center' }}>
-            <h1>Blog Post Not Found</h1>
-            <Link href="/blogs" style={{ color: '#2563eb', marginTop: '16px', display: 'inline-block' }}>Back to Blogs</Link>
-        </div>
-    );
+    // FAQ Schema
+    const faqSchema = blog.faq && blog.faq.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": blog.faq.map(q => ({
+            "@type": "Question",
+            "name": q.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": q.answer
+            }
+        }))
+    } : null;
+
+    // Image Schema
+    const imageSchema = blog.image ? {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "contentUrl": blog.image,
+        "name": blog.title,
+        "description": blog.title,
+        "license": "https://creativecommons.org/licenses/by/4.0/"
+    } : null;
+
 
     return (
         <>
-            <Head>
-                <title>{blog.title} | Seedite Blog</title>
-                <meta name="description" content={blog.content.substring(0, 160).replace(/[#*_`]/g, '')} />
-                <meta property="og:title" content={blog.title} />
-                <meta property="og:description" content={blog.content.substring(0, 160).replace(/[#*_`]/g, '')} />
-                <meta property="og:type" content="article" />
-                {blog.image && <meta property="og:image" content={blog.image} />}
-                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={blog.title} />
-                <meta name="twitter:description" content={blog.content.substring(0, 160).replace(/[#*_`]/g, '')} />
-                {blog.image && <meta name="twitter:image" content={blog.image} />}
-
-                {/* Structured Data */}
+            {/* Structured Data */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            />
+            {faqSchema && (
                 <script
                     type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: generateSchemaMarkup() }}
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
                 />
-            </Head>
+            )}
 
             <div style={{ paddingBottom: '100px' }}>
                 {/* Breadcrumb */}
@@ -214,16 +229,13 @@ export default function BlogPost() {
                                             color: '#475569',
                                             fontWeight: '500',
                                             textDecoration: 'none',
-                                            transition: 'all 0.2s'
+                                            transition: 'all 0.2s',
+                                            // Note: inline styles for hover/active won't work in SSR component output easily without converting to client component or using CSS classes.
+                                            // I'll stick to style prop but remove event handlers. 
+                                            // The user should ideally use CSS modules or global CSS for this.
+                                            // For now, I'll keep basic styles.
                                         }}
-                                        onMouseOver={(e) => {
-                                            e.target.style.background = '#f1f5f9';
-                                            e.target.style.color = '#2563eb';
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.target.style.background = 'white';
-                                            e.target.style.color = '#475569';
-                                        }}
+                                        className="tag-link" // Suggesting a class if they have CSS, otherwise just static style
                                     >
                                         #{tag}
                                     </Link>
@@ -267,22 +279,14 @@ export default function BlogPost() {
                                         height: '100%',
                                         objectFit: 'cover'
                                     }}
-                                    loading="lazy"
+                                // loading="lazy" - default in modern browsers or use Next.js Image
                                 />
-                                {/* Add image schema for SEO */}
-                                <script
-                                    type="application/ld+json"
-                                    dangerouslySetInnerHTML={{
-                                        __html: JSON.stringify({
-                                            "@context": "https://schema.org",
-                                            "@type": "ImageObject",
-                                            "contentUrl": blog.image,
-                                            "name": blog.title,
-                                            "description": blog.title,
-                                            "license": "https://creativecommons.org/licenses/by/4.0/"
-                                        })
-                                    }}
-                                />
+                                {imageSchema && (
+                                    <script
+                                        type="application/ld+json"
+                                        dangerouslySetInnerHTML={{ __html: JSON.stringify(imageSchema) }}
+                                    />
+                                )}
                             </div>
                         )}
 
@@ -301,33 +305,10 @@ export default function BlogPost() {
                         <div style={{ marginTop: '60px', paddingTop: '40px', borderTop: '1px solid #e2e8f0' }}>
                             <ShareButtons
                                 title={blog.title}
-                                url={typeof window !== 'undefined' ? window.location.href : ''}
+                                url={`https://www.seedite.in/blogs/${slug}`}
                                 description={blog.content.substring(0, 100).replace(/[#*_`]/g, '')}
                             />
                         </div>
-
-                        {/* FAQ Schema (if applicable) */}
-                        {blog.faq && blog.faq.length > 0 && (
-                            <div style={{ marginTop: '60px' }}>
-                                <script
-                                    type="application/ld+json"
-                                    dangerouslySetInnerHTML={{
-                                        __html: JSON.stringify({
-                                            "@context": "https://schema.org",
-                                            "@type": "FAQPage",
-                                            "mainEntity": blog.faq.map(q => ({
-                                                "@type": "Question",
-                                                "name": q.question,
-                                                "acceptedAnswer": {
-                                                    "@type": "Answer",
-                                                    "text": q.answer
-                                                }
-                                            }))
-                                        })
-                                    }}
-                                />
-                            </div>
-                        )}
 
                         {/* Related Posts */}
                         <RelatedPosts currentSlug={slug} tags={blog.tags} />

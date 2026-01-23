@@ -1,3 +1,5 @@
+'use client';
+
 import React, { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -42,13 +44,20 @@ const MarkdownRenderer = ({ content, className = '' }) => {
       </ReactMarkdown>
       <style jsx global>{`
         .markdown-renderer {
-          line-height: 1.6;
-          white-space: pre-wrap;
+          line-height: 1.8;
           word-break: break-word;
+          color: #334155;
         }
-        .markdown-renderer p, .markdown-renderer li, .markdown-renderer div, .markdown-renderer span {
-          margin-bottom: 0px;
-          white-space: pre-wrap;
+        .markdown-renderer p {
+          margin-bottom: 1.5rem;
+          white-space: normal;
+        }
+        .markdown-renderer li {
+          margin-bottom: 0.5rem;
+          white-space: normal;
+        }
+        .markdown-renderer div, .markdown-renderer span {
+          white-space: normal;
           font-family: inherit;
         }
         .markdown-renderer pre {

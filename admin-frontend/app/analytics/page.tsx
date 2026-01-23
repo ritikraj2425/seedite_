@@ -89,14 +89,21 @@ export default function Analytics() {
     // Data Processing
     const chartData = useMemo(() => {
         if (!stats?.courseAnalytics) return [];
-        return stats.courseAnalytics.map((c: any) => ({
-            name: c.title.length > 15 ? c.title.substring(0, 15) + '...' : c.title,
-            fullTitle: c.title,
-            enrolled: c.enrolledCount,
-            revenue: c.totalRevenue,
-            avgScore: parseFloat(c.avgMockScore) || 0
-        }));
-    }, [stats]);
+
+        return stats.courseAnalytics.map((c: any) => {
+            // Calculate real revenue for chart (same logic as coursePerformance)
+            const coursePayments = payments.filter(p => p.status === 'paid' && (p.course?._id === c._id || p.course === c._id));
+            const realRevenue = coursePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+            return {
+                name: c.title.length > 15 ? c.title.substring(0, 15) + '...' : c.title,
+                fullTitle: c.title,
+                enrolled: c.enrolledCount,
+                revenue: realRevenue, // Use real revenue
+                avgScore: parseFloat(c.avgMockScore) || 0
+            };
+        });
+    }, [stats, payments]);
 
     const globalMetrics = useMemo(() => {
         if (!payments.length) return { revenue: 0, discounts: 0, couponsUsed: 0 };
@@ -256,7 +263,7 @@ export default function Analytics() {
                                         dataKey="enrolled"
                                         nameKey="name"
                                     >
-                                        {chartData.map((entry: any, index: number) => (
+                                        {chartData?.map((entry: any, index: number) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -326,11 +333,11 @@ export default function Analytics() {
                             <ul className="space-y-3 text-sm text-gray-400">
                                 <li className="flex gap-2">
                                     <span className="text-blue-400">•</span>
-                                    <span>Top performing course: <strong className="text-white">{chartData.sort((a: any, b: any) => b.revenue - a.revenue)[0]?.fullTitle || 'N/A'}</strong></span>
+                                    <span>Top performing course: <strong className="text-white">{[...(chartData || [])].sort((a: any, b: any) => b.revenue - a.revenue)[0]?.fullTitle || 'N/A'}</strong></span>
                                 </li>
                                 <li className="flex gap-2">
                                     <span className="text-blue-400">•</span>
-                                    <span>Most popular course: <strong className="text-white">{chartData.sort((a: any, b: any) => b.enrolled - a.enrolled)[0]?.fullTitle || 'N/A'}</strong></span>
+                                    <span>Most popular course: <strong className="text-white">{[...(chartData || [])].sort((a: any, b: any) => b.enrolled - a.enrolled)[0]?.fullTitle || 'N/A'}</strong></span>
                                 </li>
                                 <li className="flex gap-2">
                                     <span className="text-blue-400">•</span>

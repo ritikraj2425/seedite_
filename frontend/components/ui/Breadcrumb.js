@@ -67,7 +67,7 @@ export default function Breadcrumb({ items }) {
                             "@type": "ListItem",
                             "position": index + 1,
                             "name": item.label,
-                            "item": `${window.location.origin}${item.href}`
+                            "item": `https://www.seedite.in${item.href}`
                         }))
                     })
                 }}
