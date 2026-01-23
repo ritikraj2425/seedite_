@@ -5,23 +5,55 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Seedite | Master Your NSAT Preparation',
+  metadataBase: new URL('https://www.seedite.in'),
+  title: {
+    default: 'Seedite | Master Your NSAT Preparation',
+    template: '%s | Seedite',
+  },
   description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success. Join thousands of students achieving their dreams with Seedite.',
-  keywords: 'NSAT, exam preparation, online courses, mock tests, video solutions, education, seedite',
+  keywords: ['NSAT', 'Newton School of Technology', 'NSAT Preparation', 'NSAT Mock Test', 'NSAT Syllabus', 'Tech Career', 'Seedite'],
+  authors: [{ name: 'Seedite Team' }],
+  creator: 'Seedite',
+  publisher: 'Seedite',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: './',
+  },
   openGraph: {
     title: 'Seedite | Master Your NSAT Preparation',
     description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
-    url: 'https://seedite.com',
+    url: 'https://www.seedite.in',
     siteName: 'Seedite',
     images: [
       {
-        url: '/og-image.jpg', // Placeholder
+        url: '/og-image.jpg', // Ensure this file exists in public/ folder or update path
         width: 1200,
         height: 630,
+        alt: 'Seedite - NSAT Preparation Platform',
       },
     ],
     locale: 'en_US',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Seedite | Master Your NSAT Preparation',
+    description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
+    creator: '@seedite_edu', // Update if specific handle exists
+  },
+  icons: {
+    icon: '/favicon.ico',
+    // apple: '/apple-icon.png', // Add if available
   },
 };
 
