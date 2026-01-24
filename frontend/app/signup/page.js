@@ -137,7 +137,7 @@ export default function Signup() {
                         </label>
                         <Input
                             id="name"
-                            placeholder="John Doe"
+                            placeholder="Your Name"
                             value={formData.name}
                             onChange={handleChange}
                             required
@@ -178,7 +178,6 @@ export default function Signup() {
                             <Input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
@@ -220,7 +219,6 @@ export default function Signup() {
                             <Input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? "text" : "password"}
-                                placeholder="••••••••"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required

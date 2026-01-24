@@ -27,7 +27,7 @@ export default function PaymentPage() {
     useEffect(() => {
         if (!courseId) return;
 
-        // Validate user session first
+        // Check if user is logged in
         const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
         const token = savedUser.token;
 
@@ -38,35 +38,7 @@ export default function PaymentPage() {
             return;
         }
 
-        // Verify token is still valid by making a test request
-        const validateToken = async () => {
-            try {
-                const res = await fetch(`${API_URL}/api/users/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!res.ok) {
-                    // Token expired or invalid
-                    localStorage.removeItem('user');
-                    toast.error('Session expired. Please login again.');
-                    router.push(`/login?redirect=/payment/${courseId}`);
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                console.error('Token validation error:', error);
-                localStorage.removeItem('user');
-                toast.error('Session error. Please login again.');
-                router.push(`/login?redirect=/payment/${courseId}`);
-                return false;
-            }
-        };
-
         const fetchCourse = async () => {
-            // Validate token before proceeding
-            const isValid = await validateToken();
-            if (!isValid) return;
-
             try {
                 const res = await fetch(`${API_URL}/api/courses/${courseId}`);
                 if (res.ok) {
