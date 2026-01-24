@@ -125,7 +125,6 @@ export default function HomeClient() {
                             marginBottom: '24px',
                             border: '1px solid #bfdbfe'
                         }}>
-                            <Sparkles size={16} color="#2563eb" />
                             <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e40af' }}>NSAT Preparation Platform</span>
                         </div>
 
@@ -375,7 +374,7 @@ export default function HomeClient() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '28px' }}>
                         {loading ? (
                             Array(3).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)
-                        ) : courses.length > 0 ? (
+                        ) : courses?.length > 0 ? (
                             [...courses].reverse().slice(0, 3).map((course, index) => (
                                 <div key={course._id} className="modern-card" style={{
                                     padding: '0',
@@ -425,11 +424,11 @@ export default function HomeClient() {
                                         />
                                     </div>
                                     <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                        <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', fontWeight: '700', color: '#0f172a' }}>{course.title}</h3>
+                                        <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', fontWeight: '700', color: '#0f172a' }}>{course?.title}</h3>
                                         <p style={{ color: '#64748b', fontSize: '0.95rem', flex: 1, marginBottom: '20px', lineHeight: '1.6' }}>
-                                            {course.description.substring(0, 90)}...
+                                            {course?.description?.substring(0, 90)}...
                                         </p>
-                                        {course.launchLater ? (
+                                        {course?.launchLater ? (
                                             <div style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -447,7 +446,7 @@ export default function HomeClient() {
                                                     borderRadius: '100px',
                                                     border: '1px solid #fef08a'
                                                 }}>
-                                                    {course.launchDateText || "Coming Soon"}
+                                                    {course?.launchDateText || "Coming Soon"}
                                                 </span>
                                             </div>
                                         ) : (
@@ -460,7 +459,7 @@ export default function HomeClient() {
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <span style={{ fontSize: '0.9rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                                                        ₹{course.originalPrice || Math.round(course.price * 1.5)}
+                                                        ₹{course?.originalPrice || Math.round(course.price * 1.5)}
                                                     </span>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <span style={{ fontSize: '1.35rem', fontWeight: '700', color: '#0f172a' }}>₹{course.price}</span>

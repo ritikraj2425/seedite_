@@ -251,16 +251,16 @@ export default function CourseDetails() {
 
                                 <div style={{ marginBottom: '40px' }}>
                                     <h3 style={{ fontSize: '1.4rem', color: '#ec4899' }}>Mock Tests</h3>
-                                    {course.mockTests && course.mockTests.length > 0 ? (
+                                    {course?.mockTests && course?.mockTests?.length > 0 ? (
                                         <div style={{ display: 'grid', gap: '16px' }}>
-                                            {course.mockTests.map((test) => (
+                                            {course?.mockTests?.map((test) => (
                                                 <Card key={test._id} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <div>
-                                                        <span style={{ fontWeight: 500 }}>{test.title}</span>
-                                                        <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>{test.durationMinutes} mins</span>
+                                                        <span style={{ fontWeight: 500 }}>{test?.title}</span>
+                                                        <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>{test?.duration} mins</span>
                                                     </div>
                                                     <Link href={`/courses/${id}/mock-test/${test._id}`}>
-                                                        <Button style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Start Test</Button>
+                                                        <Button style={{ fontSize: '0.9rem', padding: '8px 12px', width: '120px', justifyContent: 'center' }}>Start Test</Button>
                                                     </Link>
                                                 </Card>
                                             ))}

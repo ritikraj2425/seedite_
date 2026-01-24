@@ -172,7 +172,7 @@ export default async function BlogPost({ params }) {
 
             <div style={{ paddingBottom: '100px' }}>
                 {/* Breadcrumb */}
-                <div className="container" style={{ maxWidth: '1200px', paddingTop: '120px', paddingBottom: '20px' }}>
+                <div className="container" style={{ maxWidth: '1200px', paddingTop: '60px', paddingBottom: '20px' }}>
                     <Breadcrumb
                         items={[
                             { label: 'Home', href: '/' },

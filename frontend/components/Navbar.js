@@ -2,16 +2,32 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { createPortal } from 'react-dom';
 import Button from './ui/Button';
 import { useState, useEffect, useRef } from 'react';
-import { User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, ChevronDown, Menu } from 'lucide-react';
+
+const NavLink = ({ href, children, active }) => (
+    <Link
+        href={href}
+        className={active ? 'navbar__link navbar__link--active' : 'navbar__link'}
+    >
+        {children}
+    </Link>
+);
 
 const Navbar = () => {
     const pathname = usePathname();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -37,6 +53,27 @@ const Navbar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [pathname]);
 
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isSidebarOpen]);
+
+    useEffect(() => {
+        const onEscape = (e) => {
+            if (e.key === 'Escape') setIsSidebarOpen(false);
+        };
+        if (isSidebarOpen) {
+            window.addEventListener('keydown', onEscape);
+            return () => window.removeEventListener('keydown', onEscape);
+        }
+    }, [isSidebarOpen]);
+
     const handleLogout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -46,127 +83,272 @@ const Navbar = () => {
         window.location.href = '/login';
     };
 
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const closeSidebar = () => setIsSidebarOpen(false);
+
+    const isSidebarLinkActive = (href) => {
+        if (href === '/blogs') return pathname.startsWith('/blogs');
+        if (href === '/dashboard') return pathname === '/dashboard';
+        if (href === '/dashboard/announcements') return pathname.startsWith('/dashboard/announcements');
+        return pathname === href;
+    };
+
+    const sidebarLink = (href, label) => (
+        <Link
+            href={href}
+            onClick={closeSidebar}
+            className={`navbar-sidebar__link ${isSidebarLinkActive(href) ? 'navbar-sidebar__link--active' : ''}`}
+        >
+            {label}
+        </Link>
+    );
 
     return (
         <nav className="glass-nav">
-            <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%' }}>
+            {/* --- DESKTOP --- */}
+            <div className="navbar-desktop" style={{ width: '100%', height: '100%' }}>
+                <div className="navbar-inner">
+                    <Link href="/" className="navbar__logo">
+                        <div className="navbar__logo-icon">S</div>
+                        <span>Seedite</span>
+                    </Link>
 
-                {/* --- Logo --- */}
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', zIndex: 101 }}>
-                    <div style={{ width: '32px', height: '32px', background: '#000', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '20px' }}>S</div>
-                    <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0f172a', letterSpacing: '-0.5px' }}>Seedite</span>
-                </Link>
-
-                {/* --- DESKTOP Menu --- */}
-                <div className="desktop-only" style={{ alignItems: 'center', gap: '40px', width: '100%', justifyContent: 'space-between', marginLeft: '40px' }}>
-                    <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-                        <Link href="/courses" style={{ color: pathname === '/courses' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Courses</Link>
+                    <div className="navbar__center">
+                        <NavLink href="/courses" active={pathname === '/courses'}>Courses</NavLink>
                         {isLoggedIn && (
                             <>
-                                <Link href="/dashboard" style={{ color: pathname === '/dashboard' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Dashboard</Link>
-                                <Link href="/dashboard/announcements" style={{ color: pathname === '/dashboard/announcements' ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Announcements</Link>
+                                <NavLink href="/dashboard" active={pathname === '/dashboard'}>Dashboard</NavLink>
+                                <NavLink href="/dashboard/announcements" active={pathname === '/dashboard/announcements'}>Announcements</NavLink>
                             </>
                         )}
-                        <Link href="/blogs" style={{ color: pathname.startsWith('/blogs') ? '#2563eb' : '#64748b', fontWeight: 500, transition: 'color 0.2s' }}>Blogs</Link>
+                        <NavLink href="/blogs" active={pathname.startsWith('/blogs')}>Blogs</NavLink>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div className="navbar__right">
                         {isLoggedIn ? (
                             <div style={{ position: 'relative' }} ref={dropdownRef}>
                                 <button
+                                    type="button"
                                     onClick={() => setShowDropdown(!showDropdown)}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        padding: '6px 10px',
+                                        borderRadius: '10px',
+                                        transition: 'background 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                                 >
-                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f1f5f9', color: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: '1px solid #e2e8f0' }}>
+                                    <div style={{
+                                        width: '38px',
+                                        height: '38px',
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+                                        color: 'var(--foreground)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 700,
+                                        fontSize: '0.95rem',
+                                        border: '1px solid #e2e8f0',
+                                    }}>
                                         {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                                     </div>
-                                    <ChevronDown size={14} color="#64748b" />
+                                    <ChevronDown size={16} color="var(--text-muted)" />
                                 </button>
 
                                 {showDropdown && (
                                     <div style={{
-                                        position: 'absolute', top: '48px', right: '0', background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px',
-                                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', width: '200px', padding: '8px', zIndex: 50
+                                        position: 'absolute',
+                                        top: 'calc(100% + 8px)',
+                                        right: 0,
+                                        background: '#ffffff',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)',
+                                        width: 'fit-content',
+                                        padding: '8px',
+                                        zIndex: 9999,
                                     }}>
-                                        <div style={{ padding: '8px 12px', borderBottom: '1px solid #f1f5f9', marginBottom: '8px' }}>
-                                            <p style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>{user?.name}</p>
-                                            <p style={{ fontSize: '12px', color: '#64748b' }}>{user?.email}</p>
+                                        <div style={{ padding: '12px 14px', borderBottom: '1px solid #f1f5f9', marginBottom: '6px' }}>
+                                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)' }}>{user?.name}</p>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{user?.email}</p>
                                         </div>
-                                        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', color: '#475569', fontSize: '14px', borderRadius: '6px' }}>
-                                            <User size={16} /> Profile
+                                        <Link
+                                            href="/profile"
+                                            onClick={() => setShowDropdown(false)}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', color: '#475569', fontSize: '0.9rem', borderRadius: '8px', transition: 'background 0.2s' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                        >
+                                            <User size={18} /> Profile
                                         </Link>
-                                        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', color: '#475569', fontSize: '14px', borderRadius: '6px' }}>
-                                            <LayoutDashboard size={16} /> Dashboard
+                                        <Link
+                                            href="/dashboard"
+                                            onClick={() => setShowDropdown(false)}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', color: '#475569', fontSize: '0.9rem', borderRadius: '8px', transition: 'background 0.2s' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                        >
+                                            <LayoutDashboard size={18} /> Dashboard
                                         </Link>
-                                        <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', color: '#ef4444', fontSize: '14px', borderRadius: '6px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                                            <LogOut size={16} /> Logout
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            style={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                padding: '10px 14px',
+                                                color: '#ef4444',
+                                                fontSize: '0.9rem',
+                                                borderRadius: '8px',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                textAlign: 'left',
+                                                transition: 'background 0.2s',
+                                            }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.background = '#fef2f2'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                        >
+                                            <LogOut size={18} /> Logout
                                         </button>
                                     </div>
                                 )}
                             </div>
                         ) : (
                             <>
-                                <Link href="/login"><Button variant="outline" style={{ border: 'none', color: '#64748b' }}>Login</Button></Link>
-                                <Link href="/signup"><Button style={{ borderRadius: '50px', padding: '10px 24px' }}>Sign Up</Button></Link>
+                                <Link href="/login">
+                                    <Button variant="outline" style={{ borderColor: '#e2e8f0', color: 'var(--text-muted)' }}>Login</Button>
+                                </Link>
+                                <Link href="/signup">
+                                    <Button style={{ borderRadius: '10px', padding: '10px 22px' }}>Sign Up</Button>
+                                </Link>
                             </>
                         )}
                     </div>
                 </div>
+            </div>
 
-                {/* --- MOBILE Hamburger --- */}
-                <button
-                    className="mobile-only"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    style={{ background: 'transparent', padding: '8px', zIndex: 101 }}
-                >
-                    <div style={{ width: '24px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <span style={{ display: 'block', width: '100%', height: '2px', background: '#0f172a', transition: 'all 0.3s', transform: isMobileMenuOpen ? 'rotate(45deg) translate(6px, 6px)' : 'none' }}></span>
-                        <span style={{ display: 'block', width: '100%', height: '2px', background: '#0f172a', transition: 'all 0.3s', opacity: isMobileMenuOpen ? 0 : 1 }}></span>
-                        <span style={{ display: 'block', width: '100%', height: '2px', background: '#0f172a', transition: 'all 0.3s', transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></span>
+            {/* --- MOBILE: Bar + Hamburger --- */}
+            <div className="navbar-mobile" style={{ width: '100%', height: '100%' }}>
+                <div className="navbar-mobile-bar">
+                    <div className="navbar-mobile__left">
+                        <button
+                            type="button"
+                            className="navbar-mobile__hamburger"
+                            onClick={() => setIsSidebarOpen(true)}
+                            aria-label="Open menu"
+                        >
+                            <Menu size={24} strokeWidth={2} />
+                        </button>
+                        <Link href="/" className="navbar-mobile__logo" onClick={closeSidebar}>
+                            <div className="navbar__logo-icon">S</div>
+                            <span>Seedite</span>
+                        </Link>
                     </div>
-                </button>
 
-                {/* --- MOBILE Menu Overlay --- */}
-                {isMobileMenuOpen && (
-                    <div className="mobile-only" style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'white', zIndex: 100,
-                        flexDirection: 'column', padding: '80px 24px 24px', alignItems: 'center', gap: '24px'
-                    }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', background: 'white', backdropFilter: 'blur(12px)', padding: '8px 12px', borderRadius: '6px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
-                            <Link href="/courses" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Courses</Link>
+                    <div className="navbar__right">
+                        {isLoggedIn ? (
+                            <Link
+                                href="/profile"
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+                                    color: 'var(--foreground)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    border: '1px solid #e2e8f0',
+                                }}
+                            >
+                                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login"><Button variant="outline" style={{ borderColor: '#e2e8f0', color: 'var(--text-muted)', padding: '8px 16px', fontSize: '0.9rem' }}>Login</Button></Link>
+                                <Link href="/signup"><Button style={{ borderRadius: '10px', padding: '8px 18px', fontSize: '0.9rem' }}>Sign Up</Button></Link>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* --- MOBILE: Sidebar overlay + panel (portaled to body so they sit above banner, Support, etc.) --- */}
+            {mounted && typeof document !== 'undefined' && createPortal(
+                <>
+                    <div
+                        className={`navbar-sidebar-overlay ${isSidebarOpen ? 'navbar-sidebar-overlay--open' : ''}`}
+                        onClick={closeSidebar}
+                        role="button"
+                        tabIndex={-1}
+                        aria-label="Close menu"
+                    />
+                    <aside className={`navbar-sidebar ${isSidebarOpen ? 'navbar-sidebar--open' : ''}`}>
+                        <div className="navbar-sidebar__header">
+                            <Link href="/" className="navbar-sidebar__logo" onClick={closeSidebar}>
+                                <div className="navbar__logo-icon">S</div>
+                                <span>Seedite</span>
+                            </Link>
+                        </div>
+
+                        <nav className="navbar-sidebar__nav">
+                            {sidebarLink('/courses', 'Courses')}
                             {isLoggedIn && (
                                 <>
-                                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Dashboard</Link>
-                                    <Link href="/dashboard/announcements" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>Announcements</Link>
+                                    {sidebarLink('/dashboard', 'Dashboard')}
+                                    {sidebarLink('/dashboard/announcements', 'Announcements')}
                                 </>
                             )}
+                            {sidebarLink('/blogs', 'Blogs')}
+                        </nav>
 
-                            <div style={{ width: '100%', height: '1px', background: '#e2e8f0' }}></div>
+                        <div className="navbar-sidebar__divider" />
 
-                            {isLoggedIn ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%' }}>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <p style={{ fontWeight: 600 }}>{user?.name}</p>
-                                        <p style={{ fontSize: '0.9rem', color: '#64748b' }}>{user?.email}</p>
-                                    </div>
-                                    <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={20} /> Profile</Link>
-                                    <button onClick={handleLogout} style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent' }}><LogOut size={20} /> Logout</button>
+                        {isLoggedIn ? (
+                            <>
+                                <div className="navbar-sidebar__user">
+                                    <p className="navbar-sidebar__user-name">{user?.name}</p>
+                                    <p className="navbar-sidebar__user-email">{user?.email}</p>
                                 </div>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', alignItems: 'center' }}>
-                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ width: '100%' }}>
-                                        <Button variant="outline" style={{ width: '100%', justifyContent: 'center' }}>Login</Button>
+                                <div className="navbar-sidebar__actions">
+                                    <Link href="/profile" onClick={closeSidebar} className="navbar-sidebar__link">
+                                        <User size={20} /> Profile
                                     </Link>
-                                    <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} style={{ width: '100%' }}>
-                                        <Button style={{ width: '100%', justifyContent: 'center' }}>Sign Up</Button>
-                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => { handleLogout(); closeSidebar(); }}
+                                        className="navbar-sidebar__link"
+                                        style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
+                                    >
+                                        <LogOut size={20} /> Logout
+                                    </button>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
+                            </>
+                        ) : (
+                            <div className="navbar-sidebar__actions">
+                                <Link href="/login" onClick={closeSidebar}>
+                                    <Button variant="outline" style={{ width: '100%', justifyContent: 'center' }}>Login</Button>
+                                </Link>
+                                <Link href="/signup" onClick={closeSidebar}>
+                                    <Button style={{ width: '100%', justifyContent: 'center' }}>Sign Up</Button>
+                                </Link>
+                            </div>
+                        )}
+                    </aside>
+                </>,
+                document.body
+            )}
         </nav>
     );
 };

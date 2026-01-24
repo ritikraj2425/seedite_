@@ -9,6 +9,7 @@ import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import Loader from '../../components/ui/Loader';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import GoogleLoginButton from '../../components/ui/GoogleLoginButton';
 
 export default function Login() {
     return (
@@ -198,6 +199,21 @@ function LoginContent() {
                         {loading ? 'Signing in...' : 'Sign In'}
                     </Button>
                 </form>
+
+                {/* Divider */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    margin: '24px 0'
+                }}>
+                    <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>or</span>
+                    <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+                </div>
+
+                {/* Google Login */}
+                <GoogleLoginButton text="Sign in with Google" disabled={loading} />
 
                 <p style={{ marginTop: '16px', textAlign: 'center' }}>
                     <Link href="/forgot-password" style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500' }}>

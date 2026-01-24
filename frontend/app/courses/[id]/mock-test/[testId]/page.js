@@ -1,19 +1,26 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import { API_URL } from '@/lib/api';
+import {
+    AlertCircle,
+    CheckCircle,
+    ChevronRight,
+    Clock,
+    FileText,
+    Flag,
+    Maximize, Minimize,
+    Monitor,
+    RotateCcw,
+    XCircle
+} from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
-import Skeleton from '../../../../../components/ui/Skeleton';
-import { convertToYouTubeEmbed, isIframeVideo } from '../../../../../lib/videoUtils';
-import {
-    Clock, CheckCircle, XCircle, AlertCircle, Maximize, Minimize,
-    Globe, Smartphone, Monitor, FileText, ChevronRight, LayoutGrid,
-    Bookmark, RotateCcw, Flag
-} from 'lucide-react';
-import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 import MarkdownRenderer from '../../../../../components/ui/MarkdownRenderer';
+import Skeleton from '../../../../../components/ui/Skeleton';
+import VideoPlayer from '../../../../../components/ui/VideoPlayer';
+import { convertToYouTubeEmbed, isIframeVideo } from '../../../../../lib/videoUtils';
 
 export default function MockTestPage() {
     const params = useParams();
@@ -446,14 +453,14 @@ export default function MockTestPage() {
                         <InstructionItem
                             title="Scoring Mechanism"
                             items={[
-                                <span>The <span style={{ background: '#ffedd5', color: '#c2410c', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fdba74', fontSize: '0.85rem' }}>All Questions</span> are mandatory to attempt.</span>,
+                                <span><span style={{ background: '#ffedd5', color: '#c2410c', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fdba74', fontSize: '0.85rem' }}>All Questions</span> are mandatory to attempt.</span>,
                                 <span>Each correct answer earns <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>+{test.correctMarks || 4} marks</span>, while each incorrect answer deducts <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>{test.incorrectMarks || -1} marks</span>.</span>,
                                 `The test duration is ${test.duration || 180} minutes, with a total of ${test.questions?.length || test.totalQuestions || 0} questions.`
                             ]}
                         />
 
                         <InstructionItem
-                            title="Invigilation Instructions (This is just to give you actual NSAT feel, ignore it)"
+                            title="Invigilation Instructions (This is just to give you actual NSAT feel)"
                             items={[
                                 "Test the proctoring environment before starting the exam to ensure smooth functioning.",
                                 "Stay in full-screen mode throughout the test. Close all other tabs and refrain from switching tabs.",
@@ -678,52 +685,54 @@ export default function MockTestPage() {
                         position: 'sticky', top: '100px'
                     }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: 'bold' }}>Question Palette</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-                            {test.questions.map((_, idx) => {
-                                const isCurr = idx === currentQuestion;
-                                const isAns = answers[idx] !== undefined;
-                                const isMark = markedForReview.has(idx);
-                                const isView = viewedQuestions.has(idx);
+                        <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                                {test.questions.map((_, idx) => {
+                                    const isCurr = idx === currentQuestion;
+                                    const isAns = answers[idx] !== undefined;
+                                    const isMark = markedForReview.has(idx);
+                                    const isView = viewedQuestions.has(idx);
 
-                                let bg = 'white';
-                                let border = '#e2e8f0';
-                                let color = '#64748b';
+                                    let bg = 'white';
+                                    let border = '#e2e8f0';
+                                    let color = '#64748b';
 
-                                if (isCurr) {
-                                    border = '#2563eb';
-                                    color = '#2563eb';
-                                    bg = 'white';
-                                } else if (isMark) {
-                                    bg = '#f3e8ff';
-                                    border = '#a855f7';
-                                    color = '#7e22ce';
-                                } else if (isAns) {
-                                    bg = '#dcfce7';
-                                    border = '#22c55e';
-                                    color = '#15803d';
-                                } else if (isView) {
-                                    bg = '#ffedd5';
-                                    border = '#fdba74';
-                                }
+                                    if (isCurr) {
+                                        border = '#2563eb';
+                                        color = '#2563eb';
+                                        bg = 'white';
+                                    } else if (isMark) {
+                                        bg = '#f3e8ff';
+                                        border = '#a855f7';
+                                        color = '#7e22ce';
+                                    } else if (isAns) {
+                                        bg = '#dcfce7';
+                                        border = '#22c55e';
+                                        color = '#15803d';
+                                    } else if (isView) {
+                                        bg = '#ffedd5';
+                                        border = '#fdba74';
+                                    }
 
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setCurrentQuestion(idx)}
-                                        style={{
-                                            width: '100%', aspectRatio: '1', borderRadius: '8px',
-                                            border: `2px solid ${border}`,
-                                            background: bg,
-                                            color: color,
-                                            fontWeight: '600',
-                                            fontSize: '0.9rem',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        {idx + 1}
-                                    </button>
-                                );
-                            })}
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentQuestion(idx)}
+                                            style={{
+                                                width: '100%', aspectRatio: '1', borderRadius: '8px',
+                                                border: `2px solid ${border}`,
+                                                background: bg,
+                                                color: color,
+                                                fontWeight: '600',
+                                                fontSize: '0.9rem',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            {idx + 1}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Legend */}

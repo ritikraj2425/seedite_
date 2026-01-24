@@ -219,14 +219,14 @@ export default function LecturePlayer() {
                                 disabled={getCurrentIndex() === 0}
                                 style={{ flex: 1, opacity: getCurrentIndex() === 0 ? 0.5 : 1 }}
                             >
-                                ← Prev
+                                Previous
                             </Button>
                             <Button
                                 onClick={() => navigateLecture('next')}
                                 disabled={getCurrentIndex() === allLectures.length - 1}
                                 style={{ flex: 1, opacity: getCurrentIndex() === allLectures.length - 1 ? 0.5 : 1 }}
                             >
-                                Next →
+                                Next
                             </Button>
                         </div>
                     </Card>

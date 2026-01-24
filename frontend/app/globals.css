@@ -147,9 +147,275 @@ button {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  z-index: 100;
+  z-index: 1100;
   display: flex;
   align-items: center;
+}
+
+/* Navbar layout: logo left | nav center | profile right */
+.navbar-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  justify-self: start;
+}
+
+.navbar__logo-icon {
+  width: 36px;
+  height: 36px;
+  background: #000;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.navbar__center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
+.navbar__link {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: var(--primary);
+}
+
+.navbar__link--active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.navbar__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Mobile navbar bar */
+.navbar-mobile-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 100%;
+}
+
+.navbar-mobile__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-mobile__hamburger {
+  background: transparent;
+  padding: 10px;
+  border-radius: 10px;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.navbar-mobile__hamburger:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.navbar-mobile__hamburger-line {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.navbar-mobile__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Sidebar overlay */
+.navbar-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 99998;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.navbar-sidebar-overlay--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Sidebar panel (slides from left) — portaled to body, above banner/Support */
+.navbar-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  max-width: 320px;
+  background: #ffffff;
+  z-index: 99999;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.navbar-sidebar--open {
+  transform: translateX(0);
+}
+
+.navbar-sidebar__header {
+  padding: 0 24px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.navbar-sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.navbar-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.navbar-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #475569;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 10px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.navbar-sidebar__link:hover {
+  background: #f1f5f9;
+  color: var(--primary);
+}
+
+.navbar-sidebar__link--active {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary);
+}
+
+.navbar-sidebar__divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 16px 24px;
+}
+
+.navbar-sidebar__user {
+  padding: 16px 24px;
+  margin: 0 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.navbar-sidebar__user-name {
+  font-weight: 600;
+  color: var(--foreground);
+  font-size: 0.95rem;
+}
+
+.navbar-sidebar__user-email {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.navbar-sidebar__actions {
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* Responsive: hide desktop nav, show mobile */
+.navbar-desktop {
+  display: flex;
+}
+
+.navbar-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .navbar-desktop {
+    display: none !important;
+  }
+
+  .navbar-mobile {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .navbar-mobile {
+    display: none !important;
+  }
 }
 
 /* Heading Typography */

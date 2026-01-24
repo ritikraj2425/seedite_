@@ -69,7 +69,7 @@ export default function BlogListingClient({ initialBlogs }) {
     const totalPages = Math.ceil(filteredBlogs.length / postsPerPage);
 
     return (
-        <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+        <div className="container" style={{ paddingTop: '60px', paddingBottom: '100px' }}>
             {/* Hero Section */}
             <div style={{ textAlign: 'center', marginBottom: '60px', maxWidth: '800px', margin: '0 auto' }}>
                 <h1 style={{
