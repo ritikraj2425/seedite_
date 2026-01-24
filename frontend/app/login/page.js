@@ -158,7 +158,6 @@ function LoginContent() {
                             <Input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required

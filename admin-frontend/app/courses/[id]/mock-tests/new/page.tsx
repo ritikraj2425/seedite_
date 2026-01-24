@@ -81,30 +81,45 @@ export default function CreateMockTestPage() {
 
     const renderSmartPreview = (content: any) => {
         if (content === null || content === undefined || content === '') return '';
-        const str = String(content);
-        // Improved heuristic: keywords+newline OR indentation OR algo symbols
+        let str = String(content);
+
+        // Convert escaped newlines (literal \n from database) to actual newlines
+        str = str.replace(/\\n/g, '\n');
+
+        // If already has markdown code blocks, return as-is
+        if (str.trim().startsWith('```')) {
+            return str;
+        }
+
+        // Check for multiline content
+        const hasNewlines = str.includes('\n');
+
+        // Improved heuristic: keywords OR algo symbols OR indentation
         const codeKeywords = [
             'def ', 'class ', 'import ', 'from ', 'public ', 'private ', 'function ', 'var ', 'const ', 'let ',
-            'INPUT', 'OUTPUT', 'IF ', 'ELSE ', 'WHILE ', 'FOR ', 'THEN ', 'DO ', 'END ', 'PRINT ', 'STEP ', 'ALGORITHM'
+            'INPUT', 'OUTPUT', 'IF ', 'ELSE ', 'WHILE ', 'FOR ', 'THEN ', 'DO ', 'END', 'PRINT', 'STEP', 'ALGORITHM',
+            'for ', 'if ', 'else ', 'while ', 'end ', 'print ', 'arr', 'sum ', 'length('
         ];
-        const algoSymbols = ['←', '≤', '≥', '≠', '×', '÷', 'mod ', '==', '!=', '>=', '<='];
+        const algoSymbols = ['←', '≤', '≥', '≠', '×', '÷', 'mod ', '==', '!=', '>=', '<=', '= 0', '= [', '++', '--', '+=', '-='];
 
+        // Use simple string matching instead of regex to avoid special character issues
         const lowerStr = str.toLowerCase();
-        const hasCodeKeyword = codeKeywords.some(k => {
-            const kl = k.toLowerCase().trim();
-            // Match whole word or keyword followed by space
-            const regex = new RegExp(`\\b${kl}\\b`, 'i');
-            return regex.test(str);
-        });
+        const hasCodeKeyword = codeKeywords.some(k => lowerStr.includes(k.toLowerCase()));
         const hasAlgoSymbol = algoSymbols.some(s => str.includes(s));
-        const hasIndentation = /^\s{3,}/m.test(str);
+        const hasIndentation = /^[ \t]{2,}/m.test(str);
 
-        // Treat as code if it has multi-line structure OR certain algo elements
-        const isCodeLike = (hasCodeKeyword && str.includes('\n')) || hasIndentation || (hasAlgoSymbol && str.length > 5);
+        // If it has multiple lines and looks like code/pseudocode, wrap in code block
+        const isCodeLike = hasNewlines && (hasCodeKeyword || hasAlgoSymbol || hasIndentation);
 
-        if (isCodeLike && !str.trim().startsWith('```')) {
-            return `\n\n\`\`\`python\n${str}\n\`\`\`\n\n`;
+        if (isCodeLike) {
+            return `\n\n\`\`\`\n${str}\n\`\`\`\n\n`;
         }
+
+        // For any content with newlines that isn't code-like, preserve line breaks
+        if (hasNewlines) {
+            return str.split('\n').join('  \n');
+        }
+
         return str;
     };
 

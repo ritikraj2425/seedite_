@@ -14,11 +14,13 @@ export default function Signup() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -27,15 +29,29 @@ export default function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        // Validate password match
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            setError('Password must be at least 6 characters');
+            return;
+        }
+
         setLoading(true);
 
         try {
+            // Don't send confirmPassword to backend
+            const { confirmPassword, ...submitData } = formData;
             const res = await fetch(`${API_URL}/api/auth/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(submitData),
             });
 
             const data = await res.json();
@@ -189,6 +205,51 @@ export default function Signup() {
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+                    </div>
+                    <div style={{ marginBottom: '24px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '8px',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            color: '#374151'
+                        }}>
+                            Confirm Password
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                            <Input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                style={{ marginBottom: 0, paddingRight: '40px' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '12px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#64748b',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '4px'
+                                }}
+                            >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+                        {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                            <p style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '6px' }}>Passwords do not match</p>
+                        )}
                     </div>
                     <Button
                         type="submit"

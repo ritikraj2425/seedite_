@@ -2,6 +2,9 @@ import './globals.css';
 import Navbar from '../components/Navbar';
 import { Inter } from 'next/font/google';
 
+
+import { GoogleAnalytics } from '@next/third-parties/google';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
@@ -52,8 +55,9 @@ export const metadata = {
     creator: '@seedite_edu', // Update if specific handle exists
   },
   icons: {
-    icon: '/favicon.ico',
-    // apple: '/apple-icon.png', // Add if available
+    icon: '/logo.png',
+    apple: '/logo.png',
+    shortcut: '/logo.png',
   },
 };
 
@@ -69,6 +73,7 @@ import ToastProvider from '../components/providers/ToastProvider';
 import SessionProvider from '../components/providers/SessionProvider';
 
 import Footer from '../components/Footer';
+import QuickUpdateBanner from '../components/QuickUpdateBanner';
 
 export default function RootLayout({ children }) {
   return (
@@ -77,6 +82,7 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <ToastProvider />
           <Navbar />
+          <QuickUpdateBanner />
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <main style={{ paddingTop: '80px', flex: 1 }}>
               {children}
@@ -111,6 +117,7 @@ export default function RootLayout({ children }) {
             <span>Support</span>
           </a>
         </SessionProvider>
+        <GoogleAnalytics gaId="G-QGXK2J8EXS" />
       </body>
     </html>
   );

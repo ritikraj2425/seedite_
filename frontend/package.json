@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@next/third-parties": "^16.1.4",
     "date-fns": "^4.1.0",
     "katex": "^0.16.27",
     "lucide-react": "^0.556.0",

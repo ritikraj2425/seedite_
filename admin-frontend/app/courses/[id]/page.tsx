@@ -304,6 +304,52 @@ export default function EditCoursePage() {
         }
     };
 
+    // Edit lecture state
+    const [editingLectureId, setEditingLectureId] = useState<string | null>(null);
+    const [editLectureTitle, setEditLectureTitle] = useState('');
+    const [editLectureIsFree, setEditLectureIsFree] = useState(false);
+
+    const startEditingLecture = (lecture: any) => {
+        setEditingLectureId(lecture._id);
+        setEditLectureTitle(lecture.title || '');
+        setEditLectureIsFree(lecture.isFree || false);
+    };
+
+    const cancelEditingLecture = () => {
+        setEditingLectureId(null);
+        setEditLectureTitle('');
+        setEditLectureIsFree(false);
+    };
+
+    const handleUpdateLecture = async (id: string) => {
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+
+        try {
+            const res = await fetch(`${API_URL}/api/admin/lectures/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminUser.token}`
+                },
+                body: JSON.stringify({
+                    title: editLectureTitle,
+                    isFree: editLectureIsFree
+                })
+            });
+
+            if (res.ok) {
+                toast.success('Lecture updated');
+                cancelEditingLecture();
+                fetchCourseData();
+            } else {
+                const error = await res.json();
+                toast.error('Failed to update: ' + (error.message || 'Unknown error'));
+            }
+        } catch (error) {
+            toast.error('Failed to update lecture');
+        }
+    };
+
     const handleDeleteMockTest = async (id: string) => {
         if (!confirm('Delete this mock test?')) return;
         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
@@ -498,14 +544,63 @@ export default function EditCoursePage() {
                                 </div>
                                 <div className="space-y-2 pl-2">
                                     {section.lectures && section.lectures.length > 0 ? section.lectures.map((lecture: any) => (
-                                        <div key={lecture._id} className="flex justify-between items-center p-2 bg-gray-900 rounded border border-gray-800/50">
-                                            <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
-                                            <button
-                                                onClick={() => handleDeleteLecture(lecture._id)}
-                                                className="text-red-500 hover:text-red-400 text-xs"
-                                            >
-                                                Delete
-                                            </button>
+                                        <div key={lecture._id} className="p-2 bg-gray-900 rounded border border-gray-800/50">
+                                            {editingLectureId === lecture._id ? (
+                                                <div className="space-y-2">
+                                                    <input
+                                                        type="text"
+                                                        value={editLectureTitle}
+                                                        onChange={(e) => setEditLectureTitle(e.target.value)}
+                                                        className="w-full px-2 py-1 bg-black border border-gray-700 rounded text-sm text-white"
+                                                        placeholder="Lecture title"
+                                                    />
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`edit-free-${lecture._id}`}
+                                                            checked={editLectureIsFree}
+                                                            onChange={(e) => setEditLectureIsFree(e.target.checked)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <label htmlFor={`edit-free-${lecture._id}`} className="text-xs text-gray-400">Demo Video</label>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleUpdateLecture(lecture._id)}
+                                                            className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={cancelEditingLecture}
+                                                            className="px-2 py-1 bg-gray-700 text-white text-xs rounded hover:bg-gray-600"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
+                                                        {lecture.isFree && <span className="px-1.5 py-0.5 bg-green-600/20 text-green-400 text-xs rounded">Demo</span>}
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => startEditingLecture(lecture)}
+                                                            className="text-blue-400 hover:text-blue-300 text-xs"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteLecture(lecture._id)}
+                                                            className="text-red-500 hover:text-red-400 text-xs"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )) : <p className="text-xs text-gray-500 italic">No lectures in this section</p>}
                                 </div>
@@ -519,14 +614,63 @@ export default function EditCoursePage() {
                             </div>
                             <div className="space-y-2 pl-2">
                                 {lectures.map((lecture) => (
-                                    <div key={lecture._id} className="flex justify-between items-center p-2 bg-gray-900 rounded border border-gray-800/50">
-                                        <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
-                                        <button
-                                            onClick={() => handleDeleteLecture(lecture._id)}
-                                            className="text-red-500 hover:text-red-400 text-xs"
-                                        >
-                                            Delete
-                                        </button>
+                                    <div key={lecture._id} className="p-2 bg-gray-900 rounded border border-gray-800/50">
+                                        {editingLectureId === lecture._id ? (
+                                            <div className="space-y-2">
+                                                <input
+                                                    type="text"
+                                                    value={editLectureTitle}
+                                                    onChange={(e) => setEditLectureTitle(e.target.value)}
+                                                    className="w-full px-2 py-1 bg-black border border-gray-700 rounded text-sm text-white"
+                                                    placeholder="Lecture title"
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`edit-free-ungrouped-${lecture._id}`}
+                                                        checked={editLectureIsFree}
+                                                        onChange={(e) => setEditLectureIsFree(e.target.checked)}
+                                                        className="w-4 h-4"
+                                                    />
+                                                    <label htmlFor={`edit-free-ungrouped-${lecture._id}`} className="text-xs text-gray-400">Demo Video</label>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleUpdateLecture(lecture._id)}
+                                                        className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                                                    >
+                                                        Save
+                                                    </button>
+                                                    <button
+                                                        onClick={cancelEditingLecture}
+                                                        className="px-2 py-1 bg-gray-700 text-white text-xs rounded hover:bg-gray-600"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
+                                                    {lecture.isFree && <span className="px-1.5 py-0.5 bg-green-600/20 text-green-400 text-xs rounded">Demo</span>}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => startEditingLecture(lecture)}
+                                                        className="text-blue-400 hover:text-blue-300 text-xs"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteLecture(lecture._id)}
+                                                        className="text-red-500 hover:text-red-400 text-xs"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 {lectures.length === 0 && <p className="text-xs text-gray-500 italic">No ungrouped lectures.</p>}

@@ -10,6 +10,7 @@ import Card from '../../../components/ui/Card';
 import Loader from '../../../components/ui/Loader';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { convertToYouTubeEmbed } from '../../../lib/videoUtils';
 
 export default function CourseDetails() {
     const params = useParams();
@@ -83,6 +84,7 @@ export default function CourseDetails() {
     const [feedbackText, setFeedbackText] = useState('');
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
     const [expandedSections, setExpandedSections] = useState({});
+    const [selectedDemoVideo, setSelectedDemoVideo] = useState(null);
 
     const toggleSection = (sectionId) => {
         setExpandedSections(prev => ({
@@ -148,7 +150,7 @@ export default function CourseDetails() {
             <div className="container" style={{ paddingTop: '40px' }}>
                 <div className="responsive-grid">
                     <div>
-                        <h1 style={{ marginBottom: '16px' }}>{course.title}</h1>
+                        <h1 className="course-title">{course.title}</h1>
                         {isEnrolled ? <></> : <p style={{ color: '#94a3b8', marginBottom: '24px', fontSize: '1.1rem' }}>{course.description}</p>}
 
                         {/* Course Highlights / What you'll learn */}
@@ -212,15 +214,15 @@ export default function CourseDetails() {
                                                     {isExpanded && section.lectures && section.lectures.length > 0 && (
                                                         <div style={{ paddingLeft: '24px', marginTop: '12px', display: 'grid', gap: '12px' }}>
                                                             {section.lectures.map((lecture, index) => (
-                                                                <Card key={lecture._id} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                    <div>
-                                                                        <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
-                                                                        <span style={{ fontWeight: 500 }}>{lecture.title}</span>
-                                                                    </div>
-                                                                    <Link href={`/courses/${id}/lecture/${lecture._id}`}>
+                                                                <Link key={lecture._id} href={`/courses/${id}/lecture/${lecture._id}`}>
+                                                                    <Card style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                        <div>
+                                                                            <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
+                                                                            <span style={{ fontWeight: 500 }}>{lecture.title}</span>
+                                                                        </div>
                                                                         <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Watch</Button>
-                                                                    </Link>
-                                                                </Card>
+                                                                    </Card>
+                                                                </Link>
                                                             ))}
                                                         </div>
                                                     )}
@@ -269,15 +271,127 @@ export default function CourseDetails() {
                                 </div>
                             </div>
                         ) : (
-                            <Card style={{ padding: '40px', textAlign: 'center' }}>
-                                <h3 style={{ marginBottom: '16px' }}>Unlock Full Access</h3>
-                                <p style={{ color: '#94a3b8', marginBottom: '24px' }}>
-                                    Get access to all lectures, mock tests, and video solutions.
-                                </p>
-                                <Button onClick={handleEnroll} style={{ fontSize: '1.2rem', padding: '16px 40px', width: '100%' }}>
-                                    Buy Now for ₹{course.price}
-                                </Button>
-                            </Card>
+                            <div className="animate-fade-in">
+                                {/* Demo Videos Section */}
+                                {(() => {
+                                    // Collect all demo lectures
+                                    const demoLectures = [];
+                                    if (course.sections) {
+                                        course.sections.forEach(section => {
+                                            if (section.lectures) {
+                                                section.lectures.forEach(lecture => {
+                                                    if (lecture.isFree) demoLectures.push(lecture);
+                                                });
+                                            }
+                                        });
+                                    }
+                                    if (course.lectures) {
+                                        course.lectures.forEach(lecture => {
+                                            if (lecture.isFree) demoLectures.push(lecture);
+                                        });
+                                    }
+
+                                    if (demoLectures.length > 0) {
+                                        // Auto-select first demo if none selected
+                                        const currentDemo = selectedDemoVideo || demoLectures[0];
+
+                                        return (
+                                            <div style={{ marginBottom: '32px' }}>
+                                                <h2 style={{ marginBottom: '20px' }}>Free Preview</h2>
+
+                                                {/* Demo Video Player */}
+                                                <Card style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
+                                                    <div style={{
+                                                        position: 'relative',
+                                                        paddingTop: '56.25%',
+                                                        background: '#000'
+                                                    }}>
+                                                        <iframe
+                                                            src={convertToYouTubeEmbed(currentDemo.videoUrl)}
+                                                            style={{
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                left: 0,
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                border: 'none'
+                                                            }}
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
+                                                            allowFullScreen
+                                                            loading="lazy"
+                                                            referrerPolicy="no-referrer"
+                                                            tabIndex="0"
+                                                            playsInline
+                                                            title={currentDemo.title || 'Demo Video'}
+                                                        />
+                                                    </div>
+                                                    <div style={{ padding: '16px' }}>
+                                                        <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{currentDemo.title}</p>
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            marginTop: '8px',
+                                                            background: 'rgba(34, 197, 94, 0.2)',
+                                                            color: '#22c55e',
+                                                            padding: '4px 8px',
+                                                            borderRadius: '4px',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 600
+                                                        }}>FREE PREVIEW</span>
+                                                    </div>
+                                                </Card>
+
+                                                {/* Demo Lectures List */}
+                                                <h3 style={{ fontSize: '1.2rem', color: '#6366f1', marginBottom: '16px' }}>Available Previews</h3>
+                                                <div style={{ display: 'grid', gap: '12px' }}>
+                                                    {demoLectures.map((lecture, index) => (
+                                                        <Card
+                                                            key={lecture._id || index}
+                                                            style={{
+                                                                padding: '16px',
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                border: currentDemo._id === lecture._id ? '2px solid #6366f1' : undefined
+                                                            }}
+                                                        >
+                                                            <div>
+                                                                <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
+                                                                <span style={{ fontWeight: 500 }}>{lecture.title}</span>
+                                                                <span style={{
+                                                                    marginLeft: '12px',
+                                                                    background: 'rgba(34, 197, 94, 0.2)',
+                                                                    color: '#22c55e',
+                                                                    padding: '2px 6px',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '0.7rem'
+                                                                }}>FREE</span>
+                                                            </div>
+                                                            <Button
+                                                                variant={currentDemo._id === lecture._id ? 'primary' : 'outline'}
+                                                                onClick={() => setSelectedDemoVideo(lecture)}
+                                                                style={{ fontSize: '0.9rem', padding: '8px 12px' }}
+                                                            >
+                                                                {currentDemo._id === lecture._id ? 'Playing' : 'Watch'}
+                                                            </Button>
+                                                        </Card>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+
+                                <Card style={{ padding: '40px', textAlign: 'center' }}>
+                                    <h3 style={{ marginBottom: '16px' }}>Unlock Full Access</h3>
+                                    <p style={{ color: '#94a3b8', marginBottom: '24px' }}>
+                                        Get access to all lectures, mock tests, and video solutions.
+                                    </p>
+                                    <Button onClick={handleEnroll} style={{ fontSize: '1.2rem', padding: '16px 40px', width: '100%' }}>
+                                        Buy Now for ₹{course.price}
+                                    </Button>
+                                </Card>
+                            </div>
                         )}
                     </div>
 
@@ -333,82 +447,84 @@ export default function CourseDetails() {
 
                             {/* Feedback / Request Section */}
                             {/* Feedback / Request Section */}
-                            <Card style={{
-                                padding: '24px',
-                                background: 'linear-gradient(180deg, rgba(14, 116, 144, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%)',
-                                backdropFilter: 'blur(12px)',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                    <div style={{
-                                        background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
-                                        width: '32px',
-                                        height: '32px',
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '1.2rem',
-                                        boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
-                                    }}>
-                                        ✨
+                            {isEnrolled && (
+                                <Card style={{
+                                    padding: '24px',
+                                    background: 'linear-gradient(180deg, rgba(14, 116, 144, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%)',
+                                    backdropFilter: 'blur(12px)',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                        <div style={{
+                                            background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
+                                            width: '32px',
+                                            height: '32px',
+                                            borderRadius: '8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '1.2rem',
+                                            boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
+                                        }}>
+                                            ✨
+                                        </div>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#ffffff', margin: 0 }}>Request Features</h3>
                                     </div>
-                                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#ffffff', margin: 0 }}>Request Features</h3>
-                                </div>
 
-                                <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '20px', lineHeight: '1.5' }}>
-                                    Let us know what you want to see in this batch.
-                                </p>
+                                    <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '20px', lineHeight: '1.5' }}>
+                                        Let us know what you want to see in this batch.
+                                    </p>
 
-                                <textarea
-                                    value={feedbackText}
-                                    onChange={(e) => setFeedbackText(e.target.value)}
-                                    placeholder="I wish there was a module about..."
-                                    style={{
-                                        width: '100%',
-                                        minHeight: '100px',
-                                        padding: '16px',
-                                        background: 'rgba(2, 6, 23, 0.5)',
-                                        border: '1px solid rgba(6, 182, 212, 0.3)',
-                                        borderRadius: '12px',
-                                        color: 'white',
-                                        fontSize: '0.95rem',
-                                        marginBottom: '16px',
-                                        resize: 'vertical',
-                                        outline: 'none',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
-                                    onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.3)'}
-                                />
+                                    <textarea
+                                        value={feedbackText}
+                                        onChange={(e) => setFeedbackText(e.target.value)}
+                                        placeholder="I wish there was a module about..."
+                                        style={{
+                                            width: '100%',
+                                            minHeight: '100px',
+                                            padding: '16px',
+                                            background: 'rgba(2, 6, 23, 0.5)',
+                                            border: '1px solid rgba(6, 182, 212, 0.3)',
+                                            borderRadius: '12px',
+                                            color: 'white',
+                                            fontSize: '0.95rem',
+                                            marginBottom: '16px',
+                                            resize: 'vertical',
+                                            outline: 'none',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
+                                        onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.3)'}
+                                    />
 
-                                <Button
-                                    onClick={handleFeedbackSubmit}
-                                    disabled={submittingFeedback || !feedbackText.trim()}
-                                    style={{
-                                        width: '100%',
-                                        background: 'linear-gradient(to right, #0891b2, #2563eb)',
-                                        border: 'none',
-                                        padding: '12px',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 600,
-                                        opacity: submittingFeedback ? 0.7 : 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '8px'
-                                    }}
-                                >
-                                    {submittingFeedback ? (
-                                        'Sending...'
-                                    ) : (
-                                        <>
-                                            <span>Submit Request</span>
-                                            <span>→</span>
-                                        </>
-                                    )}
-                                </Button>
-                            </Card>
+                                    <Button
+                                        onClick={handleFeedbackSubmit}
+                                        disabled={submittingFeedback || !feedbackText.trim()}
+                                        style={{
+                                            width: '100%',
+                                            background: 'linear-gradient(to right, #0891b2, #2563eb)',
+                                            border: 'none',
+                                            padding: '12px',
+                                            fontSize: '0.95rem',
+                                            fontWeight: 600,
+                                            opacity: submittingFeedback ? 0.7 : 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        {submittingFeedback ? (
+                                            'Sending...'
+                                        ) : (
+                                            <>
+                                                <span>Submit Request</span>
+                                                <span>→</span>
+                                            </>
+                                        )}
+                                    </Button>
+                                </Card>
+                            )}
                         </div>
                     </div>
                 </div>

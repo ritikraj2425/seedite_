@@ -153,27 +153,46 @@ export default function MockTestPage() {
 
     const renderSmartPreview = (content) => {
         if (content === null || content === undefined || content === '') return '';
-        const str = String(content);
-        // Improved heuristic: keywords+newline OR indentation OR algo symbols
+        let str = String(content);
+
+        // Convert escaped newlines (literal \n from database) to actual newlines
+        str = str.replace(/\\n/g, '\n');
+
+        // If already has markdown code blocks, return as-is
+        if (str.trim().startsWith('```')) {
+            return str;
+        }
+
+        // Check for multiline content
+        const hasNewlines = str.includes('\n');
+
+        // Improved heuristic: keywords OR algo symbols OR indentation
         const codeKeywords = [
             'def ', 'class ', 'import ', 'from ', 'public ', 'private ', 'function ', 'var ', 'const ', 'let ',
-            'INPUT', 'OUTPUT', 'IF ', 'ELSE ', 'WHILE ', 'FOR ', 'THEN ', 'DO ', 'END ', 'PRINT ', 'STEP ', 'ALGORITHM'
+            'INPUT', 'OUTPUT', 'IF ', 'ELSE ', 'WHILE ', 'FOR ', 'THEN ', 'DO ', 'END', 'PRINT', 'STEP', 'ALGORITHM',
+            'for ', 'if ', 'else ', 'while ', 'end ', 'print ', 'arr', 'sum ', 'length('
         ];
-        const algoSymbols = ['←', '≤', '≥', '≠', '×', '÷', 'mod ', '==', '!=', '>=', '<='];
+        const algoSymbols = ['←', '≤', '≥', '≠', '×', '÷', 'mod ', '==', '!=', '>=', '<=', '= 0', '= [', '++', '--', '+=', '-='];
 
-        const hasCodeKeyword = codeKeywords.some(k => {
-            const kl = k.toLowerCase().trim();
-            const regex = new RegExp(`\\b${kl}\\b`, 'i');
-            return regex.test(str);
-        });
+        // Use simple string matching instead of regex to avoid special character issues
+        const lowerStr = str.toLowerCase();
+        const hasCodeKeyword = codeKeywords.some(k => lowerStr.includes(k.toLowerCase()));
         const hasAlgoSymbol = algoSymbols.some(s => str.includes(s));
-        const hasIndentation = /^\s{3,}/m.test(str);
+        const hasIndentation = /^[ \t]{2,}/m.test(str);
 
-        const isCodeLike = (hasCodeKeyword && str.includes('\n')) || hasIndentation || (hasAlgoSymbol && str.length > 5);
+        // If it has multiple lines and looks like code/pseudocode, wrap in code block
+        const isCodeLike = hasNewlines && (hasCodeKeyword || hasAlgoSymbol || hasIndentation);
 
-        if (isCodeLike && !str.trim().startsWith('```')) {
-            return `\n\n\`\`\`python\n${str}\n\`\`\`\n\n`;
+        if (isCodeLike) {
+            return `\n\n\`\`\`\n${str}\n\`\`\`\n\n`;
         }
+
+        // For any content with newlines that isn't code-like, preserve line breaks
+        // using markdown soft breaks (two trailing spaces)
+        if (hasNewlines) {
+            return str.split('\n').join('  \n');
+        }
+
         return str;
     };
 
@@ -921,32 +940,34 @@ export default function MockTestPage() {
 
                     {/* Result Sidebar: Palette & Video */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                        <Card className="modern-card" style={{ padding: '20px', maxHeight: '400px', overflowY: 'auto' }}>
+                        <Card className="modern-card" style={{ padding: '20px' }}>
                             <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '16px' }}>Question Overview</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-                                {test.questions.map((q, idx) => {
-                                    const ans = (resultToDisplay?.answers || {})[idx];
-                                    const isCorr = ans == (q.correctOption || q.correctOptionIndex);
-                                    const isSkp = ans === undefined;
-                                    const isCurr = idx === currentQuestion;
+                            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                                    {test.questions.map((q, idx) => {
+                                        const ans = (resultToDisplay?.answers || {})[idx];
+                                        const isCorr = ans == (q.correctOption || q.correctOptionIndex);
+                                        const isSkp = ans === undefined;
+                                        const isCurr = idx === currentQuestion;
 
-                                    let bg = q.isUnrated ? '#fef9c3' : isSkp ? '#f1f5f9' : isCorr ? '#dcfce7' : '#fee2e2';
-                                    let color = q.isUnrated ? '#854d0e' : isSkp ? '#64748b' : isCorr ? '#166534' : '#991b1b';
-                                    let border = isCurr ? '2px solid #2563eb' : '1px solid transparent';
+                                        let bg = q.isUnrated ? '#fef9c3' : isSkp ? '#f1f5f9' : isCorr ? '#dcfce7' : '#fee2e2';
+                                        let color = q.isUnrated ? '#854d0e' : isSkp ? '#64748b' : isCorr ? '#166534' : '#991b1b';
+                                        let border = isCurr ? '2px solid #2563eb' : '1px solid transparent';
 
-                                    return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setCurrentQuestion(idx)}
-                                            style={{
-                                                width: '100%', aspectRatio: '1', borderRadius: '6px', background: bg, color: color,
-                                                border: border, fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }}>
-                                            {idx + 1}
-                                        </button>
-                                    );
-                                })}
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setCurrentQuestion(idx)}
+                                                style={{
+                                                    width: '100%', aspectRatio: '1', borderRadius: '6px', background: bg, color: color,
+                                                    border: border, fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }}>
+                                                {idx + 1}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
                             <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>

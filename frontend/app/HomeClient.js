@@ -11,6 +11,65 @@ import CourseCardSkeleton from '../components/ui/CourseCardSkeleton';
 import Testimonials from '../components/Testimonials';
 import { BookOpen, Users, Award, CheckCircle, ArrowRight, Sparkles, Play, Target } from 'lucide-react';
 
+// StatCard component with counting animation
+function StatCard({ number, suffix, label }) {
+    const [count, setCount] = useState(0);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && !isVisible) {
+                    setIsVisible(true);
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        const element = document.getElementById(`stat-${label.replace(/\s+/g, '-')}`);
+        if (element) observer.observe(element);
+
+        return () => observer.disconnect();
+    }, [label, isVisible]);
+
+    useEffect(() => {
+        if (!isVisible) return;
+
+        let start = 0;
+        const duration = 2000; // 2 seconds
+        const increment = number / (duration / 16);
+
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= number) {
+                setCount(number);
+                clearInterval(timer);
+            } else {
+                setCount(Math.floor(start));
+            }
+        }, 16);
+
+        return () => clearInterval(timer);
+    }, [isVisible, number]);
+
+    return (
+        <div
+            id={`stat-${label.replace(/\s+/g, '-')}`}
+            className="stat-card"
+            style={{
+                position: 'relative',
+                zIndex: 1,
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.6s ease, transform 0.6s ease'
+            }}
+        >
+            <div className="stat-number">{count}{suffix}</div>
+            <div className="stat-label">{label}</div>
+        </div>
+    );
+}
+
 export default function HomeClient() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -40,37 +99,46 @@ export default function HomeClient() {
         <div style={{ paddingBottom: '120px' }}>
             {/* Hero Section with Gradient Background */}
             <section className="gradient-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
+                {/* Floating Particles */}
+                <div className="hero-particle hero-particle-1" />
+                <div className="hero-particle hero-particle-2" />
+                <div className="hero-particle hero-particle-3" />
+                <div className="hero-particle hero-particle-4" />
+                <div className="hero-particle hero-particle-5" />
+                <div className="hero-particle hero-particle-6" />
+
+                {/* Floating Shapes */}
+                <div className="hero-shape hero-shape-ring" />
+                <div className="hero-shape hero-shape-square" />
+                <div className="hero-shape hero-shape-dots" />
+
                 <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px', position: 'relative', zIndex: 1 }}>
                     <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
                         {/* Badge */}
-                        {/* <div className="animate-fade-in" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)',
-              padding: '8px 16px',
-              borderRadius: '100px',
-              marginBottom: '24px',
-              border: '1px solid #bfdbfe'
-            }}>
-              <Sparkles size={16} color="#2563eb" />
-              <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e40af' }}>NSAT Preparation Platform</span>
-            </div> */}
+                        <div className="hero-badge" style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)',
+                            padding: '8px 16px',
+                            borderRadius: '100px',
+                            marginBottom: '24px',
+                            border: '1px solid #bfdbfe'
+                        }}>
+                            <Sparkles size={16} color="#2563eb" />
+                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e40af' }}>NSAT Preparation Platform</span>
+                        </div>
 
-                        <h1 className="hero-title animate-fade-in" style={{
+                        <h1 className="hero-title hero-title-shimmer" style={{
                             color: '#0f172a',
                             marginBottom: '24px',
                             letterSpacing: '-0.03em',
                             fontWeight: 800,
-                            background: 'linear-gradient(135deg, #0f172a 0%, #334155 50%, #1e40af 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
                         }}>
                             Crack NSAT with Real NST Students
                         </h1>
 
-                        <p className="animate-fade-in" style={{
+                        <p className="hero-subtitle" style={{
                             fontSize: '1.2rem',
                             color: '#64748b',
                             maxWidth: '600px',
@@ -80,9 +148,9 @@ export default function HomeClient() {
                             Prepare for Newton School of Technology using structured mocks, clear concepts, and interview guidance designed from real NSAT experience.
                         </p>
 
-                        <div className="animate-fade-in" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '60px' }}>
+                        <div className="hero-cta" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '60px' }}>
                             <Link href="/courses">
-                                <Button style={{
+                                <Button className="hero-cta-button" style={{
                                     fontSize: '1.1rem',
                                     padding: '16px 32px',
                                     borderRadius: '12px',
@@ -98,7 +166,7 @@ export default function HomeClient() {
                             </Link>
                             {isLoggedIn && (
                                 <Link href="/dashboard">
-                                    <Button variant="outline" style={{
+                                    <Button variant="outline" className="hero-cta-button" style={{
                                         fontSize: '1.1rem',
                                         padding: '16px 32px',
                                         borderRadius: '12px',
@@ -114,14 +182,15 @@ export default function HomeClient() {
                         </div>
 
                         {/* Trust Badge */}
-                        <div className="animate-fade-in" style={{
+                        <div className="hero-trust-badge" style={{
                             maxWidth: 'max-content',
                             margin: '0 auto',
                             padding: '16px 24px',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '16px',
-                            background: 'white',
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            backdropFilter: 'blur(10px)',
                             borderRadius: '16px',
                             border: '1px solid #e2e8f0',
                             boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)'
@@ -158,17 +227,18 @@ export default function HomeClient() {
                     </div>
                 </div>
 
-                {/* Decorative Elements */}
+                {/* Decorative Gradient Orbs */}
                 <div style={{
                     position: 'absolute',
                     top: '10%',
                     right: '5%',
                     width: '300px',
                     height: '300px',
-                    background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%)',
                     borderRadius: '50%',
                     filter: 'blur(40px)',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    animation: 'glowPulse 5s ease-in-out infinite'
                 }} />
                 <div style={{
                     position: 'absolute',
@@ -176,10 +246,26 @@ export default function HomeClient() {
                     left: '5%',
                     width: '250px',
                     height: '250px',
-                    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%)',
                     borderRadius: '50%',
                     filter: 'blur(40px)',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    animation: 'glowPulse 7s ease-in-out infinite',
+                    animationDelay: '1s'
+                }} />
+                <div style={{
+                    position: 'absolute',
+                    top: '40%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '400px',
+                    height: '400px',
+                    background: 'radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, transparent 70%)',
+                    borderRadius: '50%',
+                    filter: 'blur(60px)',
+                    pointerEvents: 'none',
+                    animation: 'glowPulse 9s ease-in-out infinite',
+                    animationDelay: '2s'
                 }} />
             </section>
 
@@ -199,24 +285,14 @@ export default function HomeClient() {
                         borderRadius: '20px',
                         padding: '32px',
                         boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.1)',
-                        border: '1px solid #e2e8f0'
+                        border: '1px solid #e2e8f0',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}>
-                        <div className="stat-card">
-                            <div className="stat-number">200+</div>
-                            <div className="stat-label">NSAT-Style Questions Explained</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-number">30+</div>
-                            <div className="stat-label">Hours of Content</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-number">10+</div>
-                            <div className="stat-label">Mock Tests</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-number">95%</div>
-                            <div className="stat-label">Success Rate</div>
-                        </div>
+                        <StatCard number={200} suffix="+" label="NSAT-Style Questions Explained" />
+                        <StatCard number={30} suffix="+" label="Hours of Content" />
+                        <StatCard number={10} suffix="+" label="Mock Tests" />
+                        <StatCard number={95} suffix="%" label="Success Rate" />
                     </div>
                 </section>
 
@@ -233,8 +309,7 @@ export default function HomeClient() {
                             marginBottom: '16px'
                         }}>
                             <Target size={14} color="#64748b" />
-                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Seedite for NSAT?
-                            </span>
+                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', letterSpacing: '0.05em' }}>Why Seedite for NSAT?</span>
                         </div>
                         <h2 className="section-title" style={{ marginBottom: '16px' }}>Why Choose Seedite?</h2>
                         <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
@@ -247,30 +322,30 @@ export default function HomeClient() {
                             <div className="icon-box">
                                 <BookOpen size={26} color="#0f172a" strokeWidth={1.5} />
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>NSAT-Focused Mock Practice
-                            </h3>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>NSAT-Focused Mock Practice</h3>
                             <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                                Topic-wise and full-length mocks designed to match NSAT difficulty, pattern, and thinking style not generic aptitude tests.              </p>
+                                Topic-wise and full-length mocks designed to match NSAT difficulty, pattern, and thinking style not generic aptitude tests.
+                            </p>
                         </div>
 
                         <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
                             <div className="icon-box">
                                 <Award size={26} color="#0f172a" strokeWidth={1.5} />
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Built from Real NST Experience
-                            </h3>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Built from Real NST Experience</h3>
                             <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                                Preparation strategy shaped by NST students who’ve cleared NSAT, faced the interview, and know where one can usually go wrong.              </p>
+                                Preparation strategy shaped by NST students who've cleared NSAT, faced the interview, and know where one can usually go wrong.
+                            </p>
                         </div>
 
                         <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
                             <div className="icon-box">
                                 <CheckCircle size={26} color="#0f172a" strokeWidth={1.5} />
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Concepts Clarity
-                            </h3>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Concepts Clarity</h3>
                             <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                                Step-by-step video explanations that help you think like NSAT expects not just memorize answers.              </p>
+                                Step-by-step video explanations that help you think like NSAT expects not just memorize answers.
+                            </p>
                         </div>
                     </div>
                 </section>
@@ -538,8 +613,6 @@ export default function HomeClient() {
                             </p>
                         </div>
                     </div>
-
-
                 </section>
 
                 {/* Testimonials Section */}
@@ -568,7 +641,8 @@ export default function HomeClient() {
                             Ready to Prepare for NSAT the Right Way?
                         </h2>
                         <p style={{ color: '#94a3b8', marginBottom: '32px', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 32px' }}>
-                            Stop guessing. Start preparing with structure, clarity, and real NST guidance.            </p>
+                            Stop guessing. Start preparing with structure, clarity, and real NST guidance.
+                        </p>
                         <Link href={isLoggedIn ? "/dashboard" : "/signup"}>
                             <Button style={{
                                 padding: '16px 40px',
@@ -581,7 +655,6 @@ export default function HomeClient() {
                             </Button>
                         </Link>
                     </div>
-
 
                     {/* Decorative circles */}
                     <div style={{

@@ -92,25 +92,6 @@ export default function Courses() {
                                     flexDirection: 'column',
                                     position: 'relative'
                                 }}>
-                                    {/* Badge for first course */}
-                                    {index === 0 && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '12px',
-                                            left: '12px',
-                                            zIndex: 2,
-                                            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                                            color: '#b45309',
-                                            padding: '4px 12px',
-                                            borderRadius: '100px',
-                                            fontSize: '0.7rem',
-                                            fontWeight: '700',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.02em'
-                                        }}>
-                                            Popular
-                                        </div>
-                                    )}
                                     <div style={{
                                         height: '180px',
                                         background: '#f1f5f9',
