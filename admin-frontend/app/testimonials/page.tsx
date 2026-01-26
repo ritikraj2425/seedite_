@@ -176,7 +176,7 @@ export default function ManageTestimonials() {
                                     <label className="block text-sm font-medium mb-1">Name</label>
                                     <input
                                         type="text"
-                                        value={formData.name}
+                                        value={formData?.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                         required
@@ -186,7 +186,7 @@ export default function ManageTestimonials() {
                                     <label className="block text-sm font-medium mb-1">Role (e.g. Student)</label>
                                     <input
                                         type="text"
-                                        value={formData.role}
+                                        value={formData?.role}
                                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                         className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                         required
@@ -197,7 +197,7 @@ export default function ManageTestimonials() {
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Rating (1-5)</label>
                                     <select
-                                        value={formData.rating}
+                                        value={formData?.rating}
                                         onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
                                         className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
                                     >
@@ -248,14 +248,14 @@ export default function ManageTestimonials() {
                                     </div>
                                     <input
                                         type="hidden"
-                                        value={formData.image}
+                                        value={formData?.image}
                                     />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Content</label>
                                 <textarea
-                                    value={formData.content}
+                                    value={formData?.content}
                                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                                     className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white h-32"
                                     required
@@ -270,15 +270,15 @@ export default function ManageTestimonials() {
 
                 {loading ? <div className="text-center text-gray-400">Loading...</div> : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {testimonials.map((t: any) => (
-                            <div key={t._id} className="p-4 bg-gray-900 border border-gray-800 rounded-lg relative">
+                        {testimonials?.map((t: any) => (
+                            <div key={t?._id} className="p-4 bg-gray-900 border border-gray-800 rounded-lg relative">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="w-10 h-10 bg-gray-700 rounded-full overflow-hidden">
-                                        {t.image ? <img src={t.image} className="w-full h-full object-cover" /> : null}
+                                        {t?.image ? <img src={t?.image} className="w-full h-full object-cover" /> : null}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold">{t.name} <span className="text-yellow-500 text-sm">{'★'.repeat(t.rating)}</span></h3>
-                                        <p className="text-xs text-gray-500">{t.role}</p>
+                                        <h3 className="font-bold">{t?.name} <span className="text-yellow-500 text-sm">{'★'.repeat(t?.rating)}</span></h3>
+                                        <p className="text-xs text-gray-500">{t?.role}</p>
                                     </div>
                                 </div>
                                 <p className="text-sm text-gray-400 mb-8">"{t.content}"</p>
@@ -291,13 +291,13 @@ export default function ManageTestimonials() {
                                         Edit
                                     </button>
                                     <button
-                                        onClick={() => handleToggleVisibility(t._id, t.isVisible)}
-                                        className={`text-xs px-2 py-1 rounded border ${t.isVisible ? 'border-green-800 text-green-500' : 'border-gray-700 text-gray-500'}`}
+                                        onClick={() => handleToggleVisibility(t?._id, t?.isVisible)}
+                                        className={`text-xs px-2 py-1 rounded border ${t?.isVisible ? 'border-green-800 text-green-500' : 'border-gray-700 text-gray-500'}`}
                                     >
-                                        {t.isVisible ? 'Visible' : 'Hidden'}
+                                        {t?.isVisible ? 'Visible' : 'Hidden'}
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(t._id)}
+                                        onClick={() => handleDelete(t?._id)}
                                         className="text-red-400 text-xs hover:text-red-300"
                                     >
                                         Delete

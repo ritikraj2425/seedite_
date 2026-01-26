@@ -82,10 +82,10 @@ export default function Courses() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
                             {Array(6).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)}
                         </div>
-                    ) : courses.length > 0 ? (
+                    ) : courses?.length > 0 ? (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
-                            {courses.map((course, index) => (
-                                <div key={course._id} className="modern-card" style={{
+                            {courses?.map((course, index) => (
+                                <div key={course?._id} className="modern-card" style={{
                                     padding: '0',
                                     overflow: 'hidden',
                                     display: 'flex',
@@ -130,9 +130,9 @@ export default function Courses() {
                                             WebkitBoxOrient: 'vertical',
                                             overflow: 'hidden'
                                         }}>
-                                            {course.description.substring(0, 100)}...
+                                            {course?.description?.substring(0, 100)}...
                                         </p>
-                                        {course.launchLater ? (
+                                        {course?.launchLater ? (
                                             <div style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -150,7 +150,7 @@ export default function Courses() {
                                                     borderRadius: '100px',
                                                     border: '1px solid #fef08a'
                                                 }}>
-                                                    {course.launchDateText || "Coming Soon"}
+                                                    {course?.launchDateText || "Coming Soon"}
                                                 </span>
                                             </div>
                                         ) : (
@@ -163,7 +163,7 @@ export default function Courses() {
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <span style={{ fontSize: '0.9rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>
-                                                        ₹{course.originalPrice || Math.round(course.price * 1.5)}
+                                                        ₹{course?.originalPrice || Math.round(course?.price * 1.5)}
                                                     </span>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <span style={{
@@ -171,7 +171,7 @@ export default function Courses() {
                                                             fontWeight: '700',
                                                             color: '#0f172a'
                                                         }}>
-                                                            ₹{course.price}
+                                                            ₹{course?.price}
                                                         </span>
                                                         <span style={{
                                                             fontSize: '0.75rem',
@@ -181,11 +181,11 @@ export default function Courses() {
                                                             padding: '2px 6px',
                                                             borderRadius: '4px'
                                                         }}>
-                                                            {Math.round(((course.originalPrice || Math.round(course.price * 1.5)) - course.price) / (course.originalPrice || Math.round(course.price * 1.5)) * 100)}% OFF
+                                                            {Math.round(((course?.originalPrice || Math.round(course?.price * 1.5)) - course?.price) / (course?.originalPrice || Math.round(course?.price * 1.5)) * 100)}% OFF
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <Link href={`/courses/${course._id}`}>
+                                                <Link href={`/courses/${course?._id}`}>
                                                     <Button variant="outline" style={{
                                                         fontSize: '0.85rem',
                                                         padding: '10px 16px',

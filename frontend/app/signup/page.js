@@ -125,6 +125,19 @@ export default function Signup() {
                     </div>
                 )}
 
+                <GoogleLoginButton text="Sign up with Google" disabled={loading} />
+
+                {/* Divider */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    margin: '24px 0'
+                }}>
+                    <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>or</span>
+                    <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+                </div>
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '20px' }}>
                         <label style={{
@@ -263,20 +276,6 @@ export default function Signup() {
                     </Button>
                 </form>
 
-                {/* Divider */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    margin: '24px 0'
-                }}>
-                    <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>or</span>
-                    <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-                </div>
-
-                {/* Google Signup */}
-                <GoogleLoginButton text="Sign up with Google" disabled={loading} />
 
                 <div style={{
                     marginTop: '24px',

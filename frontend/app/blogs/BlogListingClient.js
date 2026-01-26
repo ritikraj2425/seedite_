@@ -98,14 +98,14 @@ export default function BlogListingClient({ initialBlogs }) {
             </div>
 
             {/* Popular Tags */}
-            {tags.length > 0 && (
+            {tags?.length > 0 && (
                 <div style={{ marginBottom: '40px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                         <TrendingUp size={20} color="#64748b" />
                         <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a' }}>Popular Topics</h3>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {tags.slice(0, 10).map((tag, index) => (
+                        {tags?.slice(0, 10)?.map((tag, index) => (
                             <button
                                 key={index}
                                 onClick={() => handleCategoryChange(tag)}
@@ -129,16 +129,16 @@ export default function BlogListingClient({ initialBlogs }) {
             )}
 
             {/* Blog Grid */}
-            {currentPosts.length === 0 ? (
+            {currentPosts?.length === 0 ? (
                 <div style={{ textAlign: 'center', color: '#64748b', padding: '60px' }}>
                     <p>No posts found. Try a different search term or category.</p>
                 </div>
             ) : (
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '32px', marginBottom: '60px' }}>
-                        {currentPosts.map(blog => (
+                        {currentPosts?.map(blog => (
                             <article
-                                key={blog._id}
+                                key={blog?._id}
                                 itemScope
                                 itemType="https://schema.org/BlogPosting"
                                 style={{ textDecoration: 'none', height: '100%' }}
@@ -158,10 +158,10 @@ export default function BlogListingClient({ initialBlogs }) {
                                             position: 'relative',
                                             overflow: 'hidden'
                                         }}>
-                                            {blog.image ? (
+                                            {blog?.image ? (
                                                 <img
-                                                    src={blog.image}
-                                                    alt={blog.title}
+                                                    src={blog?.image}
+                                                    alt={blog?.title}
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
@@ -189,8 +189,8 @@ export default function BlogListingClient({ initialBlogs }) {
                                             <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', color: '#64748b', marginBottom: '16px', flexWrap: 'wrap' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                     <Calendar size={14} />
-                                                    <time dateTime={new Date(blog.createdAt).toISOString()}>
-                                                        {new Date(blog.createdAt).toLocaleDateString('en-US', {
+                                                    <time dateTime={new Date(blog?.createdAt).toISOString()}>
+                                                        {new Date(blog?.createdAt).toLocaleDateString('en-US', {
                                                             month: 'short',
                                                             day: 'numeric',
                                                             year: 'numeric'
@@ -199,12 +199,12 @@ export default function BlogListingClient({ initialBlogs }) {
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                     <Clock size={14} />
-                                                    {calculateReadTime(blog.content)} min read
+                                                    {calculateReadTime(blog?.content)} min read
                                                 </div>
-                                                {blog.tags && blog.tags.length > 0 && (
+                                                {blog?.tags && blog?.tags?.length > 0 && (
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                         <Tag size={14} />
-                                                        {blog.tags[0]}
+                                                        {blog?.tags[0]}
                                                     </div>
                                                 )}
                                             </div>
@@ -215,7 +215,7 @@ export default function BlogListingClient({ initialBlogs }) {
                                                 marginBottom: '12px',
                                                 lineHeight: '1.4'
                                             }}>
-                                                {blog.title}
+                                                {blog?.title}
                                             </h2>
                                             <p style={{
                                                 color: '#64748b',
@@ -224,7 +224,7 @@ export default function BlogListingClient({ initialBlogs }) {
                                                 marginBottom: '24px',
                                                 flex: 1
                                             }}>
-                                                {blog.content.substring(0, 120).replace(/[#*_`]/g, '')}...
+                                                {blog?.content?.substring(0, 120)?.replace(/[#*_`]/g, '')}...
                                             </p>
                                             <div style={{
                                                 color: '#2563eb',
@@ -240,8 +240,8 @@ export default function BlogListingClient({ initialBlogs }) {
                                     </div>
                                 </Link>
                                 {/* Microdata for search engines */}
-                                <meta itemProp="datePublished" content={blog.createdAt} />
-                                <meta itemProp="author" content={blog.author || 'Seedite Team'} />
+                                <meta itemProp="datePublished" content={blog?.createdAt} />
+                                <meta itemProp="author" content={blog?.author || 'Seedite Team'} />
                             </article>
                         ))}
                     </div>

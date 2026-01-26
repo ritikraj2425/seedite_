@@ -105,7 +105,7 @@ export default function Dashboard() {
                             fontWeight: '700',
                             boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)'
                         }}>
-                            {user.name.charAt(0).toUpperCase()}
+                            {user?.name?.charAt(0)?.toUpperCase()}
                         </div>
                         <div>
                             <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '4px' }}>Welcome back,</p>
@@ -117,7 +117,7 @@ export default function Dashboard() {
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text'
                             }}>
-                                {user.name}
+                                {user?.name}
                             </h1>
                         </div>
                     </div>
@@ -158,7 +158,7 @@ export default function Dashboard() {
                                 fontWeight: '400',
                                 marginLeft: '8px'
                             }}>
-                                ({user.enrolledCourses?.length || 0})
+                                ({user?.enrolledCourses?.length || 0})
                             </span>
                         </h2>
                     </div>
@@ -176,10 +176,10 @@ export default function Dashboard() {
                     </Link>
                 </div>
 
-                {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
+                {user?.enrolledCourses && user?.enrolledCourses?.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
-                        {[...user.enrolledCourses]?.reverse().map(course => (
-                            <div key={course._id} className="modern-card" style={{
+                        {[...user?.enrolledCourses]?.reverse().map(course => (
+                            <div key={course?._id} className="modern-card" style={{
                                 padding: '0',
                                 overflow: 'hidden',
                                 display: 'flex',
@@ -210,10 +210,10 @@ export default function Dashboard() {
                                         color: '#0f172a',
                                         fontWeight: '700'
                                     }}>
-                                        {course.title}
+                                        {course?.title}
                                     </h3>
                                     <div style={{ marginTop: 'auto' }}>
-                                        <Link href={`/courses/${course._id}`}>
+                                        <Link href={`/courses/${course?._id}`}>
                                             <Button style={{
                                                 width: '100%',
                                                 fontSize: '1.1rem',

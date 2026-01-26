@@ -60,18 +60,18 @@ export default function UsersPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-800">
-                            {users.map(user => (
-                                <tr key={user._id} className="hover:bg-gray-800">
-                                    <td className="px-6 py-4">{user.name}</td>
-                                    <td className="px-6 py-4 text-gray-400">{user.email}</td>
+                            {users?.map(user => (
+                                <tr key={user?._id} className="hover:bg-gray-800">
+                                    <td className="px-6 py-4">{user?.name}</td>
+                                    <td className="px-6 py-4 text-gray-400">{user?.email}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded text-xs ${user.role === 'admin' ? 'bg-white text-black' : 'bg-gray-700'}`}>
-                                            {user.role}
+                                        <span className={`px-2 py-1 rounded text-xs ${user?.role === 'admin' ? 'bg-white text-black' : 'bg-gray-700'}`}>
+                                            {user?.role}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-400">{user.enrolledCourses?.length || 0}</td>
+                                    <td className="px-6 py-4 text-gray-400">{user?.enrolledCourses?.length || 0}</td>
                                     <td className="px-6 py-4 text-gray-400">
-                                        {new Date(user.createdAt).toLocaleDateString()}
+                                        {new Date(user?.createdAt).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ))}

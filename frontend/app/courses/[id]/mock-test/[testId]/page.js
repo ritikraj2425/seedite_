@@ -14,7 +14,8 @@ import {
     XCircle
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import useMockTestPersistence from '../../../../../hooks/useMockTestPersistence';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
 import MarkdownRenderer from '../../../../../components/ui/MarkdownRenderer';
@@ -48,6 +49,18 @@ export default function MockTestPage() {
     const [markedForReview, setMarkedForReview] = useState(new Set());
     const [viewedQuestions, setViewedQuestions] = useState(new Set([0]));
     const [zoomedImage, setZoomedImage] = useState(null);
+    const [isRestoringProgress, setIsRestoringProgress] = useState(true);
+
+    // Ref to track current answers for timer auto-submit (avoids stale closure)
+    const answersRef = useRef({});
+    const timeRemainingRef = useRef(180 * 60);
+
+    // Get userId for persistence
+    const savedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
+    const userId = savedUser.id || savedUser._id || 'anonymous';
+
+    // Persistence hook
+    const { saveProgress, restoreProgress, clearProgress, hasProgress } = useMockTestPersistence(userId, testId);
 
     const testContainerRef = useRef(null);
 
@@ -65,9 +78,55 @@ export default function MockTestPage() {
                 const testData = await testRes.json();
                 setTest(testData);
 
-                if (testData.duration || testData.durationMinutes) {
-                    setTimeRemaining((testData.duration || testData.durationMinutes) * 60);
+                const testDuration = (testData.duration || testData.durationMinutes || 180) * 60;
+
+                // PRIORITY RESTORATION: Check localStorage FIRST
+                const restoredProgress = restoreProgress();
+
+                if (restoredProgress) {
+                    // Check if time expired during browser closure
+                    if (restoredProgress.timeExpired) {
+                        // Auto-submit with saved answers
+                        setAnswers(restoredProgress.answers);
+                        answersRef.current = restoredProgress.answers;
+                        setCurrentQuestion(restoredProgress.currentQuestion);
+                        setMarkedForReview(restoredProgress.markedForReview);
+                        setViewedQuestions(restoredProgress.viewedQuestions);
+                        setTimeRemaining(0);
+                        timeRemainingRef.current = 0;
+                        // Will trigger auto-submit via timer effect
+                        setViewMode('test');
+                        setIsRestoringProgress(false);
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Restore progress and resume test
+                    setAnswers(restoredProgress.answers);
+                    answersRef.current = restoredProgress.answers;
+                    setCurrentQuestion(restoredProgress.currentQuestion);
+                    setTimeRemaining(restoredProgress.timeRemaining);
+                    timeRemainingRef.current = restoredProgress.timeRemaining;
+                    setMarkedForReview(restoredProgress.markedForReview);
+                    setViewedQuestions(restoredProgress.viewedQuestions);
+                    setViewMode('test');
+                    setIsRestoringProgress(false);
+
+                    // Still fetch course for display
+                    const courseRes = await fetch(`${API_URL}/api/courses/${id}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (courseRes.ok) {
+                        setCourse(await courseRes.json());
+                    }
+                    setLoading(false);
+                    return;
                 }
+
+                // No local progress - set default timer
+                setTimeRemaining(testDuration);
+                timeRemainingRef.current = testDuration;
+                setIsRestoringProgress(false);
 
                 // Fetch Course Data for Image
                 const courseRes = await fetch(`${API_URL}/api/courses/${id}`, {
@@ -78,6 +137,7 @@ export default function MockTestPage() {
                     setCourse(courseData);
                 }
 
+                // Only check for previous results if NO local progress exists
                 const resultRes = await fetch(`${API_URL}/api/users/me/mock-test-results/${testId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -92,13 +152,14 @@ export default function MockTestPage() {
             } catch (error) {
                 console.error(error);
                 setViewMode('instructions');
+                setIsRestoringProgress(false);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchData();
-    }, [testId]);
+    }, [testId, restoreProgress, id]);
 
     // Timer countdown
     useEffect(() => {
@@ -122,11 +183,14 @@ export default function MockTestPage() {
 
         const timer = setInterval(() => {
             setTimeRemaining(prev => {
-                if (prev <= 1) {
-                    handleSubmit();
+                const newTime = prev - 1;
+                timeRemainingRef.current = newTime;
+                if (newTime <= 0) {
+                    // CRITICAL: Use answersRef.current to avoid stale closure
+                    handleSubmitWithAnswers(answersRef.current);
                     return 0;
                 }
-                return prev - 1;
+                return newTime;
             });
         }, 1000);
 
@@ -135,6 +199,19 @@ export default function MockTestPage() {
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, [viewMode, submitted]);
+
+    // Save progress to localStorage whenever state changes
+    useEffect(() => {
+        if (viewMode !== 'test' || submitted || isRestoringProgress) return;
+
+        saveProgress({
+            answers,
+            currentQuestion,
+            timeRemaining: timeRemainingRef.current,
+            markedForReview,
+            viewedQuestions
+        });
+    }, [answers, currentQuestion, markedForReview, viewedQuestions, viewMode, submitted, isRestoringProgress, saveProgress]);
 
     // Track viewed questions
     useEffect(() => {
@@ -205,7 +282,9 @@ export default function MockTestPage() {
 
     const handleOptionSelect = (optionIndex) => {
         if (submitted) return;
-        setAnswers({ ...answers, [currentQuestion]: optionIndex });
+        const newAnswers = { ...answers, [currentQuestion]: optionIndex };
+        setAnswers(newAnswers);
+        answersRef.current = newAnswers;
     };
 
     const toggleMarkForReview = () => {
@@ -222,6 +301,7 @@ export default function MockTestPage() {
         const newAnswers = { ...answers };
         delete newAnswers[currentQuestion];
         setAnswers(newAnswers);
+        answersRef.current = newAnswers;
     };
 
     const calculateScore = () => {
@@ -248,15 +328,38 @@ export default function MockTestPage() {
         return { raw: rawScore, normalized: parseFloat(normalized.toFixed(2)), totalMarks: maxPossible };
     };
 
-    const handleSubmit = async () => {
+    // Submit handler that accepts answers parameter (for timer auto-submit with ref)
+    const handleSubmitWithAnswers = async (answersToSubmit) => {
         if (!test) return;
         if (document.fullscreenElement) document.exitFullscreen().catch(console.error);
 
-        const { raw, normalized, totalMarks } = calculateScore();
-        setScore(raw);
-        setNormalizedScore(normalized);
+        // Calculate score with provided answers
+        let rawScore = 0;
+        const cMarks = test.correctMarks !== undefined ? parseInt(test.correctMarks) : 4;
+        const iMarks = test.incorrectMarks !== undefined ? parseInt(test.incorrectMarks) : -1;
+
+        test.questions.forEach((q, index) => {
+            if (q.isUnrated) return;
+            if (answersToSubmit[index] !== undefined) {
+                const isCorrect = answersToSubmit[index] == (q.correctOption || q.correctOptionIndex);
+                if (isCorrect) {
+                    rawScore += (q.marks !== undefined ? parseInt(q.marks) : cMarks);
+                } else {
+                    rawScore += iMarks;
+                }
+            }
+        });
+        const ratedQuestions = test.questions.filter(q => !q.isUnrated);
+        const maxPossible = ratedQuestions.reduce((sum, q) => sum + (q.marks !== undefined ? parseInt(q.marks) : cMarks), 0);
+        const normalized = maxPossible > 0 ? Math.max(0, Math.min(10, (rawScore / maxPossible) * 10)) : 0;
+
+        setScore(rawScore);
+        setNormalizedScore(parseFloat(normalized.toFixed(2)));
         setSubmitted(true);
         setViewMode('result');
+
+        // Clear localStorage progress after submission
+        clearProgress();
 
         const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
         try {
@@ -267,11 +370,11 @@ export default function MockTestPage() {
                     'Authorization': `Bearer ${savedUser.token}`
                 },
                 body: JSON.stringify({
-                    score: raw,
-                    totalMarks: totalMarks,
-                    normalizedScore: normalized,
+                    score: rawScore,
+                    totalMarks: maxPossible,
+                    normalizedScore: parseFloat(normalized.toFixed(2)),
                     totalQuestions: test.questions.length,
-                    answers: answers
+                    answers: answersToSubmit
                 })
             });
         } catch (error) {
@@ -279,10 +382,22 @@ export default function MockTestPage() {
         }
     };
 
+    // Regular submit (uses current answers state)
+    const handleSubmit = async () => {
+        await handleSubmitWithAnswers(answersRef.current);
+    };
+
     const handleRetake = () => {
-        setAnswers({});
+        // CRITICAL: Clear progress FIRST to ensure reload doesn't restore old progress
+        clearProgress();
+
+        const newAnswers = {};
+        setAnswers(newAnswers);
+        answersRef.current = newAnswers;
         setCurrentQuestion(0);
-        setTimeRemaining((test?.duration || test?.durationMinutes || 180) * 60);
+        const newTime = (test?.duration || test?.durationMinutes || 180) * 60;
+        setTimeRemaining(newTime);
+        timeRemainingRef.current = newTime;
         setSubmitted(false);
         setScore(0);
         setMarkedForReview(new Set());
@@ -641,7 +756,11 @@ export default function MockTestPage() {
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Write your code below:</label>
                                 <textarea
                                     value={answers[currentQuestion] || ''}
-                                    onChange={(e) => setAnswers({ ...answers, [currentQuestion]: e.target.value })}
+                                    onChange={(e) => {
+                                        const newAnswers = { ...answers, [currentQuestion]: e.target.value };
+                                        setAnswers(newAnswers);
+                                        answersRef.current = newAnswers;
+                                    }}
                                     placeholder="// Paste your code here..."
                                     style={{
                                         width: '100%',

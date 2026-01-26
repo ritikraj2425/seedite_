@@ -86,9 +86,9 @@ export default function Profile() {
                             fontWeight: '700',
                             boxShadow: '0 8px 30px -4px rgba(37, 99, 235, 0.35)'
                         }}>
-                            {user.name.charAt(0).toUpperCase()}
+                            {user.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
-                        <h2 style={{ marginBottom: '8px', fontSize: '1.4rem', color: '#0f172a' }}>{user.name}</h2>
+                        <h2 style={{ marginBottom: '8px', fontSize: '1.4rem', color: '#0f172a' }}>{user.name || 'User'}</h2>
                         <p style={{ color: '#64748b', marginBottom: '16px', fontSize: '0.95rem' }}>{user.email}</p>
                         <span style={{
                             background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)',
@@ -128,7 +128,7 @@ export default function Profile() {
                                     color: '#2563eb',
                                     marginBottom: '4px'
                                 }}>
-                                    {user.enrolledCourses?.length || 0}
+                                    {user?.enrolledCourses?.length || 0}
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Courses</div>
                             </div>
@@ -144,7 +144,7 @@ export default function Profile() {
                                     color: '#7c3aed',
                                     marginBottom: '4px'
                                 }}>
-                                    {user.mockTestResults?.length || 0}
+                                    {user?.mockTestResults?.length || 0}
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Tests Taken</div>
                             </div>
@@ -176,25 +176,24 @@ export default function Profile() {
                             <h3 style={{ margin: 0, fontSize: '1.25rem' }}>
                                 Enrolled Courses
                                 <span style={{ color: '#64748b', fontWeight: '400', marginLeft: '8px' }}>
-                                    ({user.enrolledCourses ? user.enrolledCourses.length : 0})
+                                    ({user?.enrolledCourses ? user?.enrolledCourses.length : 0})
                                 </span>
                             </h3>
                         </div>
 
-                        {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
+                        {user?.enrolledCourses && user?.enrolledCourses.length > 0 ? (
                             <div style={{ display: 'grid', gap: '16px' }}>
                                 {[...user.enrolledCourses]?.reverse().map(course => (
-                                    <Card key={course._id} style={{
+                                    <Card key={course._id} className="course-card" style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        flexWrap: 'wrap',
-                                        gap: '16px',
-                                        padding: '16px',
+                                        gap: '12px',
+                                        padding: '12px',
                                         transition: 'all 0.2s ease'
                                     }}>
                                         <div style={{
-                                            width: '90px',
-                                            height: '65px',
+                                            width: '80px',
+                                            height: '60px',
                                             borderRadius: '8px',
                                             overflow: 'hidden',
                                             flexShrink: 0
@@ -212,17 +211,19 @@ export default function Profile() {
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <h4 style={{
                                                 marginBottom: '4px',
-                                                fontSize: '1rem',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
+                                                fontSize: '0.95rem',
+                                                lineHeight: '1.3',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden'
                                             }}>
                                                 {course.title}
                                             </h4>
                                             <Link
                                                 href={`/courses/${course._id}`}
                                                 style={{
-                                                    fontSize: '0.9rem',
+                                                    fontSize: '0.85rem',
                                                     color: '#2563eb',
                                                     fontWeight: '500',
                                                     display: 'inline-flex',
@@ -281,24 +282,24 @@ export default function Profile() {
                             </h3>
                         </div>
 
-                        {user.mockTestResults && user.mockTestResults.length > 0 ? (
+                        {user?.mockTestResults && user?.mockTestResults.length > 0 ? (
                             <div style={{ display: 'grid', gap: '12px' }}>
-                                {[...user.mockTestResults]?.reverse().map((result, index) => (
-                                    <Card key={index} style={{
-                                        padding: '20px',
+                                {[...user?.mockTestResults]?.reverse().map((result, index) => (
+                                    <Card key={index} className="test-result-card" style={{
+                                        padding: '16px 20px',
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                         flexWrap: 'wrap',
-                                        gap: '16px'
+                                        gap: '12px'
                                     }}>
-                                        <div style={{ minWidth: '200px' }}>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
                                             <h4 style={{
                                                 marginBottom: '6px',
                                                 fontSize: '1rem',
                                                 color: '#0f172a'
                                             }}>
-                                                {result.test ? result.test.title : 'Test Removed'}
+                                                {result?.test ? result?.test?.title : 'Test Removed'}
                                             </h4>
                                             <div style={{
                                                 display: 'flex',
@@ -316,23 +317,24 @@ export default function Profile() {
                                             </div>
                                         </div>
                                         <div style={{
-                                            textAlign: 'right',
-                                            background: result.score >= 0 ? 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)' : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
-                                            padding: '12px 20px',
-                                            borderRadius: '12px',
-                                            minWidth: '100px'
+                                            textAlign: 'center',
+                                            background: result?.score >= 0 ? 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)' : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                                            padding: '10px 16px',
+                                            borderRadius: '10px',
+                                            minWidth: '80px',
+                                            flexShrink: 0
                                         }}>
                                             <span style={{
                                                 fontSize: '1.3rem',
                                                 fontWeight: 'bold',
-                                                color: result.score >= 0 ? '#16a34a' : '#dc2626'
+                                                color: result?.score >= 0 ? '#16a34a' : '#dc2626'
                                             }}>
-                                                {result.score}/{result.totalMarks || (result.totalQuestions * 4)}
+                                                {result?.score}/{result?.totalMarks || (result?.totalQuestions * 4)}
                                             </span>
                                             <span style={{
                                                 display: 'block',
                                                 fontSize: '0.75rem',
-                                                color: result.score >= 0 ? '#166534' : '#991b1b',
+                                                color: result?.score >= 0 ? '#166534' : '#991b1b',
                                                 fontWeight: '500',
                                                 marginTop: '2px'
                                             }}>

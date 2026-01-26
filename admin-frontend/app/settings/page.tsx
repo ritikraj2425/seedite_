@@ -130,7 +130,7 @@ export default function SettingsPage() {
                             <label className="block font-medium mb-2">Banner Text</label>
                             <input
                                 type="text"
-                                value={banner.text}
+                                value={banner?.text}
                                 onChange={(e) => setBanner(prev => ({ ...prev, text: e.target.value }))}
                                 placeholder="Enter your announcement text..."
                                 className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg focus:border-white focus:outline-none"
@@ -142,7 +142,7 @@ export default function SettingsPage() {
                             <label className="block font-medium mb-2">Link (Optional)</label>
                             <input
                                 type="url"
-                                value={banner.link}
+                                value={banner?.link}
                                 onChange={(e) => setBanner(prev => ({ ...prev, link: e.target.value }))}
                                 placeholder="https://example.com/more-info"
                                 className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg focus:border-white focus:outline-none"
@@ -155,7 +155,7 @@ export default function SettingsPage() {
                             <label className="block font-medium mb-2">Expires At (Optional)</label>
                             <input
                                 type="datetime-local"
-                                value={banner.expiresAt}
+                                value={banner?.expiresAt}
                                 onChange={(e) => setBanner(prev => ({ ...prev, expiresAt: e.target.value }))}
                                 className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg focus:border-white focus:outline-none text-white"
                                 style={{ colorScheme: 'dark' }}
@@ -164,7 +164,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Preview */}
-                        {banner.text && (
+                        {banner?.text && (
                             <div>
                                 <label className="block font-medium mb-2">Preview</label>
                                 <div
@@ -173,7 +173,7 @@ export default function SettingsPage() {
                                         background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 50%, #ec4899 100%)'
                                     }}
                                 >
-                                    📢 {banner.text} {banner.link && <span className="underline ml-2">Learn More →</span>}
+                                    📢 {banner?.text} {banner?.link && <span className="underline ml-2">Learn More →</span>}
                                 </div>
                             </div>
                         )}

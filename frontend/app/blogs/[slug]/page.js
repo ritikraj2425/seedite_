@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { API_URL } from '@/lib/api';
 import Loader from '../../../components/ui/Loader';
-import MarkdownRenderer from '../../../components/ui/MarkdownRenderer';
+import BlogMarkdownRenderer from '../../../components/ui/BlogMarkdownRenderer';
 import TableOfContents from '../../../components/ui/TableOfContents';
 import AuthorBio from '../../../components/ui/AuthorBio';
 import ShareButtons from '../../../components/ui/ShareButtons';
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }) {
         };
     }
 
-    const description = blog.content.substring(0, 160).replace(/[#*_`]/g, '');
+    const description = (blog.content || '').substring(0, 160).replace(/[#*_`]/g, '');
 
     return {
         title: `${blog.title} | Seedite Blog`,
@@ -93,20 +93,20 @@ export default async function BlogPost({ params }) {
         notFound();
     }
 
-    const headings = extractHeadings(blog.content);
+    const headings = extractHeadings(blog.content || '');
     // Use server-side calculation or passing content to ReadTime component if it handles calculation
     // The previous code had `setReadTime(calculateReadTime(data.content))` and passed nothing to `<ReadTime content={blog.content} />`?
     // Wait, line 184 in original was `<ReadTime content={blog.content} />`. 
     // But line 23 was `const [readTime, setReadTime] = useState(0);`.
     // And line 122 used `readTime` state for schema: `"timeRequired": PT${readTime}M`.
     // So I need the value for Schema, but the component might calculate it itself for display.
-    const readTimeVal = calculateReadTime(blog.content);
+    const readTimeVal = calculateReadTime(blog.content || '');
 
     const schema = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         "headline": blog.title,
-        "description": blog.content.substring(0, 200).replace(/[#*_`]/g, ''),
+        "description": (blog.content || '').substring(0, 200).replace(/[#*_`]/g, ''),
         "image": blog.image || '',
         "author": {
             "@type": "Person",
@@ -126,8 +126,8 @@ export default async function BlogPost({ params }) {
             "@type": "WebPage",
             "@id": `https://www.seedite.in/blogs/${slug}`
         },
-        "articleBody": blog.content.replace(/[#*_`]/g, ''),
-        "wordCount": blog.content.split(/\s+/).length,
+        "articleBody": (blog.content || '').replace(/[#*_`]/g, ''),
+        "wordCount": (blog.content || '').split(/\s+/).length,
         "timeRequired": `PT${readTimeVal}M`
     };
 
@@ -172,7 +172,7 @@ export default async function BlogPost({ params }) {
 
             <div style={{ paddingBottom: '100px' }}>
                 {/* Breadcrumb */}
-                <div className="container" style={{ maxWidth: '1200px', paddingTop: '60px', paddingBottom: '20px' }}>
+                <div className="blog-container" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
                     <Breadcrumb
                         items={[
                             { label: 'Home', href: '/' },
@@ -184,8 +184,8 @@ export default async function BlogPost({ params }) {
 
                 {/* Minimal Header */}
                 <div style={{ background: '#f8fafc', paddingBottom: '60px', borderBottom: '1px solid #e2e8f0' }}>
-                    <div className="container" style={{ maxWidth: '800px' }}>
-                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', color: '#64748b', fontSize: '0.9rem', marginBottom: '24px', flexWrap: 'wrap' }}>
+                    <div className="blog-container blog-header">
+                        <div className="blog-meta" style={{ display: 'flex', gap: '16px', alignItems: 'center', color: '#64748b', fontSize: '0.9rem', marginBottom: '24px', flexWrap: 'wrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Calendar size={16} />
                                 {new Date(blog.createdAt).toLocaleDateString('en-US', {
@@ -204,18 +204,12 @@ export default async function BlogPost({ params }) {
                             </div>
                         </div>
 
-                        <h1 style={{
-                            fontSize: '2.5rem',
-                            fontWeight: '800',
-                            color: '#0f172a',
-                            lineHeight: '1.2',
-                            marginBottom: '32px'
-                        }}>
+                        <h1 className="blog-title">
                             {blog.title}
                         </h1>
 
                         {blog.tags && blog.tags.length > 0 && (
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <div className="blog-tags" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                 {blog.tags.map((tag, i) => (
                                     <Link
                                         key={i}
@@ -246,10 +240,10 @@ export default async function BlogPost({ params }) {
                 </div>
 
                 {/* Content Body with Sidebar */}
-                <div className="container" style={{ maxWidth: '1200px', display: 'flex', gap: '48px', paddingTop: '60px' }}>
+                <div className="blog-container blog-layout">
                     {/* Table of Contents Sidebar */}
                     {headings.length > 2 && (
-                        <aside style={{ width: '250px', flexShrink: 0, position: 'sticky', top: '120px', height: 'fit-content' }}>
+                        <aside className="blog-sidebar">
                             <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#0f172a' }}>
                                     <BookOpen size={18} />
@@ -261,25 +255,12 @@ export default async function BlogPost({ params }) {
                     )}
 
                     {/* Main Content */}
-                    <div style={{ flex: 1 }}>
+                    <div className="blog-main">
                         {blog.image && (
-                            <div style={{
-                                width: '100%',
-                                height: '400px',
-                                borderRadius: '16px',
-                                overflow: 'hidden',
-                                marginBottom: '60px',
-                                position: 'relative'
-                            }}>
+                            <div className="blog-image">
                                 <img
                                     src={blog.image}
                                     alt={blog.title}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover'
-                                    }}
-                                // loading="lazy" - default in modern browsers or use Next.js Image
                                 />
                                 {imageSchema && (
                                     <script
@@ -291,7 +272,7 @@ export default async function BlogPost({ params }) {
                         )}
 
                         <div className="blog-content" style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#334155' }}>
-                            <MarkdownRenderer content={blog.content} />
+                            <BlogMarkdownRenderer content={blog.content} />
                         </div>
 
                         {/* Author Bio */}
@@ -306,7 +287,7 @@ export default async function BlogPost({ params }) {
                             <ShareButtons
                                 title={blog.title}
                                 url={`https://www.seedite.in/blogs/${slug}`}
-                                description={blog.content.substring(0, 100).replace(/[#*_`]/g, '')}
+                                description={(blog.content || '').substring(0, 100).replace(/[#*_`]/g, '')}
                             />
                         </div>
 

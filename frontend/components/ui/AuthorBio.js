@@ -16,8 +16,8 @@ export default function AuthorBio({
         github: 'https://github.com/ritikraj2425'
     },
     stats = {
-        posts: 50,
-        students: 10000,
+        posts: 20,
+        students: 1000,
         experience: '3+ years'
     }
 }) {

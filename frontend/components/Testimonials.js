@@ -69,8 +69,8 @@ export default function Testimonials() {
 
                 <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-                        {testimonials.map((t) => (
-                            <Card key={t._id} className="modern-card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                        {testimonials?.map((t) => (
+                            <Card key={t?._id} className="modern-card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', height: '100%' }}>
                                 <div style={{ marginBottom: '24px', color: '#2563eb' }}>
                                     <Quote size={32} />
                                 </div>
@@ -83,18 +83,18 @@ export default function Testimonials() {
                                     ))}
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid #f1f5f9' }}>
-                                    {t.image ? (
+                                    {t?.image ? (
                                         <div style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden', background: '#e2e8f0' }}>
-                                            <img src={t.image} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={t?.image} alt={t?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                     ) : (
                                         <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                            {t.name.charAt(0)}
+                                            {t?.name?.charAt(0)}
                                         </div>
                                     )}
                                     <div>
-                                        <h4 style={{ fontWeight: '700', color: '#0f172a', margin: 0 }}>{t.name}</h4>
-                                        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>{t.role}</p>
+                                        <h4 style={{ fontWeight: '700', color: '#0f172a', margin: 0 }}>{t?.name}</h4>
+                                        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>{t?.role}</p>
                                     </div>
                                 </div>
                             </Card>

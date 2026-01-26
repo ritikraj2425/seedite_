@@ -134,8 +134,7 @@ export default function HomeClient() {
                             letterSpacing: '-0.03em',
                             fontWeight: 800,
                         }}>
-                            Crack NSAT with Real NST Students
-                        </h1>
+                            NSAT, Interviews & Pre-College Foundations               </h1>
 
                         <p className="hero-subtitle" style={{
                             fontSize: '1.2rem',
@@ -144,8 +143,7 @@ export default function HomeClient() {
                             margin: '0 auto 40px',
                             lineHeight: '1.7'
                         }}>
-                            Prepare for Newton School of Technology using structured mocks, clear concepts, and interview guidance designed from real NSAT experience.
-                        </p>
+                            Prepare for NST with structured NSAT mocks, interview guidance, and pre-college foundations built from real student experience.                            </p>
 
                         <div className="hero-cta" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '60px' }}>
                             <Link href="/courses">
@@ -159,7 +157,7 @@ export default function HomeClient() {
                                     alignItems: 'center',
                                     gap: '8px'
                                 }}>
-                                    👉 Start NSAT Preparation
+                                    Start NSAT Preparation
                                     <ArrowRight size={20} />
                                 </Button>
                             </Link>
@@ -376,7 +374,7 @@ export default function HomeClient() {
                             Array(3).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)
                         ) : courses?.length > 0 ? (
                             [...courses].reverse().slice(0, 3).map((course, index) => (
-                                <div key={course._id} className="modern-card" style={{
+                                <div key={course?._id} className="modern-card" style={{
                                     padding: '0',
                                     overflow: 'hidden',
                                     display: 'flex',
@@ -411,8 +409,8 @@ export default function HomeClient() {
                                         overflow: 'hidden'
                                     }}>
                                         <img
-                                            src={course.thumbnail}
-                                            alt={course.title}
+                                            src={course?.thumbnail}
+                                            alt={course?.title}
                                             style={{
                                                 width: '100%',
                                                 height: '100%',
@@ -459,7 +457,7 @@ export default function HomeClient() {
                                             }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <span style={{ fontSize: '0.9rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                                                        ₹{course?.originalPrice || Math.round(course.price * 1.5)}
+                                                        ₹{course?.originalPrice || Math.round(course?.price * 1.5)}
                                                     </span>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <span style={{ fontSize: '1.35rem', fontWeight: '700', color: '#0f172a' }}>₹{course.price}</span>
@@ -471,11 +469,11 @@ export default function HomeClient() {
                                                             padding: '2px 6px',
                                                             borderRadius: '4px'
                                                         }}>
-                                                            {Math.round(((course.originalPrice || Math.round(course.price * 1.5)) - course.price) / (course.originalPrice || Math.round(course.price * 1.5)) * 100)}% OFF
+                                                            {Math.round(((course?.originalPrice || Math.round(course?.price * 1.5)) - course?.price) / (course?.originalPrice || Math.round(course?.price * 1.5)) * 100)}% OFF
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <Link href={`/courses/${course._id}`}>
+                                                <Link href={`/courses/${course?._id}`}>
                                                     <span style={{
                                                         fontSize: '0.95rem',
                                                         fontWeight: '600',
