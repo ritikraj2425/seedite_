@@ -34,7 +34,9 @@ export default function EditCoursePage() {
 
     // Lecture State
     const [newLectureTitle, setNewLectureTitle] = useState('');
+    const [newLectureType, setNewLectureType] = useState('video'); // 'video' | 'pdf'
     const [newLectureVideoKey, setNewLectureVideoKey] = useState('');
+    const [newLecturePdfUrl, setNewLecturePdfUrl] = useState('');
     const [newLectureDuration, setNewLectureDuration] = useState('');
     const [newLectureIsFree, setNewLectureIsFree] = useState(false);
     const [selectedSectionId, setSelectedSectionId] = useState(''); // New: Selection for adding lecture
@@ -171,6 +173,22 @@ export default function EditCoursePage() {
         }
     };
 
+    const handleLecturePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+
+        try {
+            setUploadingLecture(true);
+            const { url } = await uploadFile(file, 'pdf');
+            setNewLecturePdfUrl(url);
+            toast.success('Lecture PDF uploaded successfully!');
+        } catch (error) {
+            toast.error('Failed to upload lecture PDF');
+        } finally {
+            setUploadingLecture(false);
+        }
+    };
+
     const handleUpdateCourse = async (e: React.FormEvent) => {
         e.preventDefault();
         const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
@@ -243,8 +261,18 @@ export default function EditCoursePage() {
 
     const handleAddLecture = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newLectureVideoKey || !newLectureTitle) {
-            toast.error('Please enter lecture title and upload a video');
+        if (!newLectureTitle) {
+            toast.error('Please enter lecture title');
+            return;
+        }
+
+        if (newLectureType === 'video' && !newLectureVideoKey) {
+            toast.error('Please upload a video for video lecture');
+            return;
+        }
+
+        if (newLectureType === 'pdf' && !newLecturePdfUrl) {
+            toast.error('Please upload a PDF for PDF lecture');
             return;
         }
 
@@ -261,7 +289,9 @@ export default function EditCoursePage() {
                 },
                 body: JSON.stringify({
                     title: newLectureTitle,
+                    type: newLectureType,
                     videoKey: newLectureVideoKey,
+                    pdfUrl: newLecturePdfUrl,
                     duration: newLectureDuration,
                     isFree: newLectureIsFree,
                     courseId: courseId,
@@ -272,7 +302,9 @@ export default function EditCoursePage() {
             if (lectureRes.ok) {
                 toast.success('Lecture added successfully!');
                 setNewLectureTitle('');
+                setNewLectureType('video');
                 setNewLectureVideoKey('');
+                setNewLecturePdfUrl('');
                 setNewLectureDuration('');
                 setNewLectureIsFree(false);
                 // No need to reset selectedSectionId so user can add multiple to same section
@@ -582,6 +614,9 @@ export default function EditCoursePage() {
                                             ) : (
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center gap-2">
+                                                        <span className={`text-[10px] px-1 py-0.5 rounded ${lecture.type === 'pdf' ? 'bg-red-900/50 text-red-200' : 'bg-blue-900/50 text-blue-200'}`}>
+                                                            {lecture.type === 'pdf' ? 'PDF' : 'VIDEO'}
+                                                        </span>
                                                         <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
                                                         {lecture.isFree && <span className="px-1.5 py-0.5 bg-green-600/20 text-green-400 text-xs rounded">Demo</span>}
                                                     </div>
@@ -652,6 +687,9 @@ export default function EditCoursePage() {
                                         ) : (
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-2">
+                                                    <span className={`text-[10px] px-1 py-0.5 rounded ${lecture.type === 'pdf' ? 'bg-red-900/50 text-red-200' : 'bg-blue-900/50 text-blue-200'}`}>
+                                                        {lecture.type === 'pdf' ? 'PDF' : 'VIDEO'}
+                                                    </span>
                                                     <span className="truncate text-sm">{lecture.title || 'Untitled Lecture'}</span>
                                                     {lecture.isFree && <span className="px-1.5 py-0.5 bg-green-600/20 text-green-400 text-xs rounded">Demo</span>}
                                                 </div>
@@ -724,19 +762,64 @@ export default function EditCoursePage() {
                                 <p className="text-xs text-gray-500 mt-1">Select where this lecture belongs</p>
                             </div>
                             <div>
-                                <label className="block text-xs text-gray-400 mb-1">Lecture Video</label>
-                                {newLectureVideoKey && (
-                                    <p className="text-xs text-green-400 mb-2">✓ Video Uploaded: {newLectureVideoKey}</p>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="video/*"
-                                    onChange={handleLectureVideoUpload}
-                                    disabled={uploadingLecture}
-                                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
-                                />
-                                {uploadingLecture && <p className="text-sm text-blue-400 mt-1">Uploading video (this may take a while)...</p>}
+                                <label className="block text-xs text-gray-400 mb-1">Lecture Type</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="lectureType"
+                                            value="video"
+                                            checked={newLectureType === 'video'}
+                                            onChange={(e) => setNewLectureType(e.target.value)}
+                                            className="w-4 h-4 text-blue-600"
+                                        />
+                                        <span className="text-sm text-gray-300">Video</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="lectureType"
+                                            value="pdf"
+                                            checked={newLectureType === 'pdf'}
+                                            onChange={(e) => setNewLectureType(e.target.value)}
+                                            className="w-4 h-4 text-blue-600"
+                                        />
+                                        <span className="text-sm text-gray-300">PDF Document</span>
+                                    </label>
+                                </div>
                             </div>
+
+                            {newLectureType === 'video' ? (
+                                <div>
+                                    <label className="block text-xs text-gray-400 mb-1">Lecture Video</label>
+                                    {newLectureVideoKey && (
+                                        <p className="text-xs text-green-400 mb-2">✓ Video Uploaded: {newLectureVideoKey}</p>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={handleLectureVideoUpload}
+                                        disabled={uploadingLecture}
+                                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                    />
+                                    {uploadingLecture && <p className="text-sm text-blue-400 mt-1">Uploading video (this may take a while)...</p>}
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="block text-xs text-gray-400 mb-1">Lecture PDF</label>
+                                    {newLecturePdfUrl && (
+                                        <p className="text-xs text-green-400 mb-2 truncate">✓ PDF Uploaded: {newLecturePdfUrl}</p>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="application/pdf"
+                                        onChange={handleLecturePdfUpload}
+                                        disabled={uploadingLecture}
+                                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                    />
+                                    {uploadingLecture && <p className="text-sm text-blue-400 mt-1">Uploading PDF...</p>}
+                                </div>
+                            )}
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs text-gray-400 mb-1">Duration (optional)</label>

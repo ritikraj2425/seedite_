@@ -10,6 +10,12 @@ import { VideoSkeleton } from '../../../../../components/ui/Skeleton';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { convertToYouTubeEmbed, isIframeVideo, isBunnyVideo } from '../../../../../lib/videoUtils';
+import dynamic from 'next/dynamic';
+
+const PdfViewer = dynamic(() => import('../../../../../components/PdfViewer'), {
+    ssr: false,
+    loading: () => <div className="text-white p-8 text-center">Loading PDF Support...</div>
+});
 
 export default function LecturePlayer() {
     const params = useParams();
@@ -23,6 +29,12 @@ export default function LecturePlayer() {
     const [expandedSections, setExpandedSections] = useState({});
     const [isPlaying, setIsPlaying] = useState(false);
     const iframeRef = useRef(null);
+    const [userDetails, setUserDetails] = useState(null);
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        setUserDetails(user);
+    }, []);
 
     // Handle keyboard events - focus the iframe for player's built-in keyboard shortcuts
     useEffect(() => {
@@ -152,8 +164,37 @@ export default function LecturePlayer() {
             </div>
         </div>
     );
-    if (!course || !currentLecture) return <div className="container" style={{ paddingTop: '40px' }}>Lecture not found</div>;
+    if (!course || !currentLecture) return <div className="container" style={{ paddingTop: '40px', color: 'white' }}>Lecture not found</div>;
 
+    // FULL SCREEN PDF LAYOUT
+    if (currentLecture.type === 'pdf') {
+        return (
+            <div className="fixed inset-0 z-50 bg-gray-900 flex flex-col h-[100dvh]">
+                <div className="flex items-center justify-between p-3 bg-gray-800 border-b border-gray-700 shadow-md z-10 shrink-0">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <Link href={`/courses/${courseId}`}>
+                            <button className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white transition-colors" style={{ width: '32px', height: '32px', borderRadius: '10%' }}>
+                                <ArrowLeft size={18} />
+                            </button>
+                        </Link>
+                        <div className="flex flex-col overflow-hidden">
+                            <h1 className="text-white text-sm md:text-base font-medium truncate">{currentLecture.title}</h1>
+                        </div>
+                    </div>
+                </div>
+
+                {/* PDF Viewer Container */}
+                <div className="flex-1 relative bg-gray-900 overflow-hidden">
+                    <PdfViewer
+                        url={currentLecture.pdfUrl}
+                        userDetails={userDetails}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // STANDARD VIDEO LAYOUT
     return (
         <div style={{ background: '#000', minHeight: '100vh', paddingTop: '10px' }}>
             {/* Main Content Grid */}

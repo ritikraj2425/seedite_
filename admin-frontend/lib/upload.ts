@@ -1,7 +1,7 @@
 
 import { API_URL } from '@/lib/api';
 
-export const uploadFile = async (file: File, type: 'image' | 'video' = 'image'): Promise<{ url: string; key: string; videoId?: string }> => {
+export const uploadFile = async (file: File, type: 'image' | 'video' | 'pdf' = 'image'): Promise<{ url: string; key: string; videoId?: string }> => {
     const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
     const token = adminUser.token;
 

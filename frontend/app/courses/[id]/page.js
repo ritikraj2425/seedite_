@@ -11,6 +11,12 @@ import Loader from '../../../components/ui/Loader';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { convertToYouTubeEmbed } from '../../../lib/videoUtils';
+import dynamic from 'next/dynamic';
+
+const PdfViewer = dynamic(() => import('../../../components/PdfViewer'), {
+    ssr: false,
+    loading: () => <div className="text-white p-8 text-center bg-gray-900">Loading PDF Viewer...</div>
+});
 
 export default function CourseDetails() {
     const params = useParams();
@@ -20,6 +26,7 @@ export default function CourseDetails() {
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEnrolled, setIsEnrolled] = useState(false);
+    const [user, setUser] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -28,6 +35,7 @@ export default function CourseDetails() {
         const fetchCourse = async () => {
             const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
             const token = savedUser.token;
+            setUser(savedUser);
 
             // 1. Strict Auth Check
             if (!token) {
@@ -157,16 +165,6 @@ export default function CourseDetails() {
                         {course.courseDetails && course.courseDetails.length > 0 && (
                             <div className="learn-box" style={{ marginBottom: '40px' }}>
                                 <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)',
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '1rem'
-                                    }}>📝</span>
                                     What you'll learn
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
@@ -220,7 +218,9 @@ export default function CourseDetails() {
                                                                             <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
                                                                             <span style={{ fontWeight: 500 }}>{lecture.title}</span>
                                                                         </div>
-                                                                        <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Watch</Button>
+                                                                        <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>
+                                                                            {lecture.type === 'pdf' ? 'View PDF' : 'Watch'}
+                                                                        </Button>
                                                                     </Card>
                                                                 </Link>
                                                             ))}
@@ -238,7 +238,9 @@ export default function CourseDetails() {
                                                     <span style={{ fontWeight: 500 }}>{lecture.title}</span>
                                                 </div>
                                                 <Link href={`/courses/${id}/lecture/${lecture._id || index}`}>
-                                                    <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>Watch</Button>
+                                                    <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>
+                                                        {lecture.type === 'pdf' ? 'View PDF' : 'Watch'}
+                                                    </Button>
                                                 </Link>
                                             </Card>
                                         ))}
@@ -299,32 +301,41 @@ export default function CourseDetails() {
                                             <div style={{ marginBottom: '32px' }}>
                                                 <h2 style={{ marginBottom: '20px' }}>Free Preview</h2>
 
-                                                {/* Demo Video Player */}
+                                                {/* Demo Video Player or PDF Viewer */}
                                                 <Card style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
-                                                    <div style={{
-                                                        position: 'relative',
-                                                        paddingTop: '56.25%',
-                                                        background: '#000'
-                                                    }}>
-                                                        <iframe
-                                                            src={convertToYouTubeEmbed(currentDemo.videoUrl)}
-                                                            style={{
-                                                                position: 'absolute',
-                                                                top: 0,
-                                                                left: 0,
-                                                                width: '100%',
-                                                                height: '100%',
-                                                                border: 'none'
-                                                            }}
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
-                                                            allowFullScreen
-                                                            loading="lazy"
-                                                            referrerPolicy="no-referrer"
-                                                            tabIndex="0"
-                                                            playsInline
-                                                            title={currentDemo.title || 'Demo Video'}
-                                                        />
-                                                    </div>
+                                                    {currentDemo.type === 'pdf' ? (
+                                                        <div style={{ height: '400px', overflowY: 'auto', background: '#111' }}>
+                                                            <PdfViewer
+                                                                url={currentDemo.pdfUrl}
+                                                                userDetails={user}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{
+                                                            position: 'relative',
+                                                            paddingTop: '56.25%',
+                                                            background: '#000'
+                                                        }}>
+                                                            <iframe
+                                                                src={convertToYouTubeEmbed(currentDemo.videoUrl)}
+                                                                style={{
+                                                                    position: 'absolute',
+                                                                    top: 0,
+                                                                    left: 0,
+                                                                    width: '100%',
+                                                                    height: '100%',
+                                                                    border: 'none'
+                                                                }}
+                                                                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
+                                                                allowFullScreen
+                                                                loading="lazy"
+                                                                referrerPolicy="no-referrer"
+                                                                tabIndex="0"
+                                                                playsInline
+                                                                title={currentDemo.title || 'Demo Video'}
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <div style={{ padding: '16px' }}>
                                                         <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{currentDemo.title}</p>
                                                         <span style={{
@@ -371,7 +382,7 @@ export default function CourseDetails() {
                                                                 onClick={() => setSelectedDemoVideo(lecture)}
                                                                 style={{ fontSize: '0.9rem', padding: '8px 12px' }}
                                                             >
-                                                                {currentDemo._id === lecture._id ? 'Playing' : 'Watch'}
+                                                                {currentDemo._id === lecture._id ? 'Playing' : (lecture.type === 'pdf' ? 'View' : 'Watch')}
                                                             </Button>
                                                         </Card>
                                                     ))}
