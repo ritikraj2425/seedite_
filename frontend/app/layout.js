@@ -39,7 +39,7 @@ export const metadata = {
     siteName: 'Seedite',
     images: [
       {
-        url: '/og-image.jpg', // Ensure this file exists in public/ folder or update path
+        url: '/logo.png', // Ensure this file exists in public/ folder or update path
         width: 1200,
         height: 630,
         alt: 'Seedite - NSAT Preparation Platform',

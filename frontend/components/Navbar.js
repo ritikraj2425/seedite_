@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import Button from './ui/Button';
 import { useState, useEffect, useRef } from 'react';
 import { User, LogOut, LayoutDashboard, ChevronDown, Menu } from 'lucide-react';
+import Image from 'next/image';
 
 const NavLink = ({ href, children, active }) => (
     <Link
@@ -108,7 +109,13 @@ const Navbar = () => {
             <div className="navbar-desktop" style={{ width: '100%', height: '100%' }}>
                 <div className="navbar-inner">
                     <Link href="/" className="navbar__logo">
-                        <div className="navbar__logo-icon">S</div>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '8px'
+                        }}>
+                            <Image src="/logo.png" alt="Logo" width={40} height={40} />
+                        </div>
                         <span>Seedite</span>
                     </Link>
 
@@ -249,8 +256,13 @@ const Navbar = () => {
                             <Menu size={24} strokeWidth={2} />
                         </button>
                         <Link href="/" className="navbar-mobile__logo" onClick={closeSidebar}>
-                            <div className="navbar__logo-icon">S</div>
-                            <span>Seedite</span>
+                            <div style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px'
+                            }}>
+                                <Image src="/logo.png" alt="Logo" width={32} height={32} />
+                            </div>                            <span>Seedite</span>
                         </Link>
                     </div>
 
