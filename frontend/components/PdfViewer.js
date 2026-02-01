@@ -1,980 +1,391 @@
 'use client';
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import {
-    ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight,
-    Grid, Moon, Sun, Shield, Lock, Move
-} from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight, Grid, Moon, Sun, Maximize, Minimize, X } from 'lucide-react';
 
-// Set worker source to CDN
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-const PdfViewer = ({ url, userDetails }) => {
-    // Core states
+export default function PdfViewer({ url, userDetails }) {
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(1.0);
-    const [containerWidth, setContainerWidth] = useState(600);
-    const containerRef = useRef(null);
-    const pdfContainerRef = useRef(null);
-    const pdfContentRef = useRef(null);
-
-    // Dragging states
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [startY, setStartY] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
-    const [scrollTop, setScrollTop] = useState(0);
-
-    // Feature states
     const [rotation, setRotation] = useState(0);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showThumbnails, setShowThumbnails] = useState(false);
     const [darkMode, setDarkMode] = useState(true);
-    const [pdfInfo, setPdfInfo] = useState(null);
     const [isMobile, setIsMobile] = useState(false);
-    const [enableDrag, setEnableDrag] = useState(true);
+    const [pageWidth, setPageWidth] = useState(500);
 
-    // Check mobile view
+    const containerRef = useRef(null);
+    const viewerRef = useRef(null);
+
+    // Mobile check
     useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-
-        checkMobile();
-        const resizeHandler = () => checkMobile();
-        window.addEventListener('resize', resizeHandler);
-        return () => window.removeEventListener('resize', resizeHandler);
+        const check = () => setIsMobile(window.innerWidth <= 768);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
     }, []);
 
-
-
-    // Document info handler
-    function onDocumentLoadSuccess({ numPages, ...info }) {
-        setNumPages(numPages);
-        setPdfInfo(info);
-    }
-
-    // Responsive Width Handler
+    // Calculate page width based on viewer size
     useEffect(() => {
-        const updateWidth = () => {
-            if (containerRef.current) {
-                const width = containerRef.current.clientWidth;
-                setContainerWidth(Math.min(width, isMobile ? width - 20 : 1200) - 40);
+        const updatePageWidth = () => {
+            if (viewerRef.current) {
+                const width = viewerRef.current.clientWidth;
+                setPageWidth(Math.max(280, width - (isMobile ? 24 : 48)));
             }
         };
 
-        updateWidth();
-        window.addEventListener('resize', updateWidth);
+        updatePageWidth();
+        window.addEventListener('resize', updatePageWidth);
+
+        // Update after state changes that affect layout
+        const timer = setTimeout(updatePageWidth, 100);
 
         return () => {
-            window.removeEventListener('resize', updateWidth);
+            window.removeEventListener('resize', updatePageWidth);
+            clearTimeout(timer);
         };
-    }, [isMobile]);
+    }, [isMobile, showThumbnails, isFullscreen]);
 
-    // FIXED: Fullscreen handler
-    const toggleFullscreen = useCallback(() => {
-        const element = pdfContainerRef.current;
+    // Fullscreen toggle - uses CSS fullscreen mode
+    const toggleFullscreen = () => {
+        setIsFullscreen(!isFullscreen);
+    };
 
-        if (!element) return;
-
-        if (!isFullscreen) {
-            // Enter fullscreen
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.webkitRequestFullscreen) {
-                element.webkitRequestFullscreen();
-            }
-            setIsFullscreen(true);
-        } else {
-            // Exit fullscreen
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-            setIsFullscreen(false);
-        }
-    }, [isFullscreen]);
-
-    // Handle fullscreen change events
+    // Security
     useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-        };
+        const prevent = (e) => e.preventDefault();
+        document.addEventListener('contextmenu', prevent);
+        document.addEventListener('selectstart', prevent);
 
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-
-        return () => {
-            document.removeEventListener('fullscreenchange', handleFullscreenChange);
-            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-        };
-    }, []);
-
-    // SECURITY MEASURES
-    useEffect(() => {
-        const preventDefault = (e) => e.preventDefault();
-
-        // Disable right-click and text selection
-        document.addEventListener('contextmenu', preventDefault);
-        document.addEventListener('selectstart', preventDefault);
-
-        // Prevent keyboard shortcuts
-        const handleKeyDown = (e) => {
+        const handleKey = (e) => {
             if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'c', 'a'].includes(e.key.toLowerCase())) {
                 e.preventDefault();
             }
         };
-
-        document.addEventListener('keydown', handleKeyDown);
-
-        // Add CSS to prevent selection
-        const style = document.createElement('style');
-        style.innerHTML = '* { user-select: none !important; -webkit-user-select: none !important; }';
-        document.head.appendChild(style);
+        document.addEventListener('keydown', handleKey);
 
         return () => {
-            document.removeEventListener('contextmenu', preventDefault);
-            document.removeEventListener('selectstart', preventDefault);
-            document.removeEventListener('keydown', handleKeyDown);
-            document.head.removeChild(style);
+            document.removeEventListener('contextmenu', prevent);
+            document.removeEventListener('selectstart', prevent);
+            document.removeEventListener('keydown', handleKey);
         };
     }, []);
 
-    // FIXED: Dragging functionality
-    const handleMouseDown = (e) => {
-        if (!enableDrag) return;
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKey = (e) => {
+            if (e.target.tagName === 'INPUT') return;
 
-        setIsDragging(true);
-        setStartX(e.pageX);
-        setStartY(e.pageY);
-        setScrollLeft(containerRef.current.scrollLeft);
-        setScrollTop(containerRef.current.scrollTop);
+            switch (e.key) {
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    if (pageNumber > 1) { e.preventDefault(); setPageNumber(p => p - 1); }
+                    break;
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case ' ':
+                    if (pageNumber < numPages) { e.preventDefault(); setPageNumber(p => p + 1); }
+                    break;
+                case 'Home':
+                    e.preventDefault(); setPageNumber(1);
+                    break;
+                case 'End':
+                    e.preventDefault(); setPageNumber(numPages || 1);
+                    break;
+                case 'Escape':
+                    if (isFullscreen) { e.preventDefault(); setIsFullscreen(false); }
+                    break;
+            }
+        };
 
-        // Set cursor
-        e.currentTarget.style.cursor = 'grabbing';
-    };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [pageNumber, numPages, isFullscreen]);
 
-    const handleMouseMove = (e) => {
-        if (!isDragging || !enableDrag) return;
-
-        e.preventDefault();
-        const x = e.pageX;
-        const y = e.pageY;
-        const walkX = (startX - x) * 2; // Multiply for faster dragging
-        const walkY = (startY - y) * 2;
-
-        if (containerRef.current) {
-            containerRef.current.scrollLeft = scrollLeft + walkX;
-            containerRef.current.scrollTop = scrollTop + walkY;
-        }
-    };
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
-        if (containerRef.current) {
-            containerRef.current.style.cursor = 'grab';
-        }
-    };
-
-    // Zoom presets - FIXED with proper percentages
-    const zoomPresets = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
-
-    // Handle zoom changes
-    const handleZoomIn = () => {
-        setScale(prev => Math.min(5, Math.round((prev + 0.1) * 10) / 10));
-    };
-
-    const handleZoomOut = () => {
-        setScale(prev => Math.max(0.1, Math.round((prev - 0.1) * 10) / 10));
-    };
-
-    // Watermark date
-    const watermarkDate = new Date().toLocaleDateString();
-
-    // Generate watermark positions for 10 emails
-    const watermarkPositions = useMemo(() => {
-        const positions = [];
-        // Create positions for 10 watermarks
-        for (let i = 0; i < 10; i++) {
-            positions.push({
-                top: `${(i * 10) % 100}%`,
-                left: `${(i * 12) % 100}%`,
-                rotation: i % 2 === 0 ? -45 : 45,
-                fontSize: isMobile ? 14 : 16 + (i % 4),
-                opacity: 0.08 + (i % 5) * 0.02,
-                emailIndex: i,
-                variant: i % 3
+    // Watermarks
+    const watermarks = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < 6; i++) {
+            arr.push({
+                top: `${15 + (i * 15) % 70}%`,
+                left: `${10 + (i * 18) % 80}%`,
+                rotation: i % 2 === 0 ? -25 : 25,
             });
         }
-        return positions;
-    }, [isMobile]);
+        return arr;
+    }, []);
 
-    // Handle page number input
-    const handlePageInput = (e) => {
-        const val = parseInt(e.target.value);
-        if (val >= 1 && val <= numPages) {
-            setPageNumber(val);
-        }
-    };
+    const zoomPresets = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    const bg = darkMode ? '#0f172a' : '#f1f5f9';
+    const toolbar = darkMode ? '#1e293b' : '#fff';
+    const text = darkMode ? '#f1f5f9' : '#0f172a';
+    const btn = darkMode ? '#334155' : '#e2e8f0';
 
-    // Toggle drag mode
-    const toggleDragMode = () => {
-        setEnableDrag(!enableDrag);
-        if (containerRef.current) {
-            containerRef.current.style.cursor = enableDrag ? 'default' : 'grab';
-        }
-    };
+    const ToolButton = ({ onClick, active, disabled, children, title }) => (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            title={title}
+            style={{
+                padding: '6px',
+                borderRadius: '6px',
+                background: active ? '#3b82f6' : btn,
+                color: active ? '#fff' : text,
+                border: 'none',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.4 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
+            {children}
+        </button>
+    );
 
     return (
         <div
-            ref={pdfContainerRef}
-            className="pdf-viewer-container"
+            ref={containerRef}
             style={{
+                // Use fixed positioning when fullscreen, relative otherwise
+                position: isFullscreen ? 'fixed' : 'relative',
+                top: isFullscreen ? 0 : 'auto',
+                left: isFullscreen ? 0 : 'auto',
+                right: isFullscreen ? 0 : 'auto',
+                bottom: isFullscreen ? 0 : 'auto',
+                zIndex: isFullscreen ? 9999 : 1,
+                width: isFullscreen ? '100vw' : '100%',
+                height: isFullscreen ? '100vh' : '100%',
+                minHeight: isFullscreen ? 'auto' : '500px',
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100vh',
-                width: '100vw',
-                backgroundColor: darkMode ? '#111827' : '#f9fafb',
+                backgroundColor: bg,
                 overflow: 'hidden',
-                position: 'relative',
                 userSelect: 'none',
-                WebkitUserSelect: 'none'
             }}
         >
-            {/* Thumbnails Sidebar */}
-            {showThumbnails && (
-                <div style={{
-                    width: isMobile ? '100%' : '280px',
-                    backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-                    borderRight: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-                    overflowY: 'auto',
-                    padding: isMobile ? '12px' : '16px',
-                    zIndex: 40,
-                    position: isMobile ? 'fixed' : 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: isMobile ? 0 : 'auto',
-                    boxShadow: isMobile ? '0 4px 20px rgba(0,0,0,0.3)' : 'none'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '16px',
-                        color: darkMode ? '#f3f4f6' : '#111827'
-                    }}>
-                        <h3 style={{
-                            margin: 0,
-                            fontSize: isMobile ? '14px' : '16px',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}>
-                            <Grid size={isMobile ? 16 : 18} />
-                            Pages ({numPages || 0})
-                        </h3>
-                        <button
-                            onClick={() => setShowThumbnails(false)}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: darkMode ? '#9ca3af' : '#6b7280',
-                                cursor: 'pointer',
-                                fontSize: isMobile ? '16px' : '14px',
-                                padding: isMobile ? '8px' : '4px'
-                            }}
-                        >
-                            ✕
-                        </button>
-                    </div>
-
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
-                        gap: isMobile ? '8px' : '12px'
-                    }}>
-                        {Array.from(new Array(numPages), (el, index) => (
-                            <button
-                                key={index}
-                                onClick={() => {
-                                    setPageNumber(index + 1);
-                                    if (isMobile) setShowThumbnails(false);
-                                }}
-                                style={{
-                                    cursor: 'pointer',
-                                    padding: isMobile ? '8px' : '12px',
-                                    borderRadius: '8px',
-                                    backgroundColor: pageNumber === index + 1
-                                        ? darkMode ? '#3b82f6' : '#3b82f6'
-                                        : darkMode ? '#374151' : '#f3f4f6',
-                                    border: `2px solid ${pageNumber === index + 1
-                                        ? '#3b82f6'
-                                        : darkMode ? '#4b5563' : '#d1d5db'}`,
-                                    position: 'relative',
-                                    textAlign: 'left',
-                                    color: pageNumber === index + 1 ? 'white' : 'inherit'
-                                }}
-                            >
-                                <div style={{
-                                    backgroundColor: darkMode ? '#4b5563' : '#e5e7eb',
-                                    borderRadius: '6px',
-                                    padding: isMobile ? '12px 4px' : '20px 8px',
-                                    textAlign: 'center',
-                                    marginBottom: isMobile ? '4px' : '8px',
-                                    minHeight: isMobile ? '60px' : '80px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <span style={{
-                                        fontSize: isMobile ? '10px' : '12px',
-                                        color: darkMode ? '#d1d5db' : '#4b5563'
-                                    }}>
-                                        Page {index + 1}
-                                    </span>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Main Content */}
+            {/* Toolbar */}
             <div style={{
-                flex: 1,
                 display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                marginLeft: showThumbnails && !isMobile ? '280px' : '0',
-                transition: 'margin-left 0.3s ease'
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: isMobile ? '8px 10px' : '10px 16px',
+                backgroundColor: toolbar,
+                borderBottom: `1px solid ${darkMode ? '#334155' : '#e2e8f0'}`,
+                gap: '8px',
+                flexWrap: 'wrap',
+                flexShrink: 0,
             }}>
-                {/* Toolbar */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: isMobile ? '8px 12px' : '12px 20px',
-                    backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-                    borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-                    color: darkMode ? '#f3f4f6' : '#111827',
-                    zIndex: 50,
-                    flexWrap: 'wrap',
-                    gap: isMobile ? '8px' : '12px'
-                }}>
-                    {/* Left Controls */}
-                    <div style={{
-                        display: 'flex',
-                        gap: isMobile ? '8px' : '12px',
-                        alignItems: 'center',
-                        flexWrap: 'wrap'
-                    }}>
-                        <button
-                            onClick={() => setShowThumbnails(!showThumbnails)}
-                            style={{
-                                padding: isMobile ? '6px 12px' : '8px 16px',
-                                borderRadius: '6px',
-                                background: darkMode ? '#374151' : '#f3f4f6',
-                                color: darkMode ? '#f3f4f6' : '#111827',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                fontSize: isMobile ? '12px' : '14px',
-                                fontWeight: '500'
+                {/* Left */}
+                <ToolButton onClick={() => setShowThumbnails(!showThumbnails)} active={showThumbnails} title="Pages">
+                    <Grid size={14} />
+                </ToolButton>
+
+                {/* Center - Navigation */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <ToolButton onClick={() => setPageNumber(p => p - 1)} disabled={pageNumber <= 1} title="Previous">
+                        <ChevronLeft size={16} />
+                    </ToolButton>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: text }}>
+                        <input
+                            type="number"
+                            value={pageNumber}
+                            min={1}
+                            max={numPages || 1}
+                            onChange={(e) => {
+                                const v = parseInt(e.target.value);
+                                if (v >= 1 && v <= numPages) setPageNumber(v);
                             }}
-                        >
-                            <Grid size={isMobile ? 16 : 18} />
-                            {isMobile ? (showThumbnails ? '✕' : '📄') : (showThumbnails ? 'Hide Pages' : 'Show Pages')}
-                        </button>
-
-                        {/* Drag Mode Toggle */}
-                        <button
-                            onClick={toggleDragMode}
                             style={{
-                                padding: isMobile ? '6px 12px' : '8px 16px',
-                                borderRadius: '6px',
-                                background: enableDrag ? '#3b82f6' : (darkMode ? '#374151' : '#f3f4f6'),
-                                color: enableDrag ? 'white' : (darkMode ? '#f3f4f6' : '#111827'),
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                fontSize: isMobile ? '12px' : '14px',
-                                fontWeight: '500'
-                            }}
-                        >
-                            <Move size={isMobile ? 14 : 16} />
-                            {isMobile ? 'Drag' : enableDrag ? 'Dragging ON' : 'Dragging OFF'}
-                        </button>
-                    </div>
-
-                    {/* Center Controls - Navigation */}
-                    <div style={{
-                        display: 'flex',
-                        gap: isMobile ? '6px' : '12px',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : '8px' }}>
-                            <button
-                                disabled={pageNumber <= 1}
-                                onClick={() => setPageNumber(prev => prev - 1)}
-                                style={{
-                                    padding: isMobile ? '6px 8px' : '8px 12px',
-                                    borderRadius: '6px',
-                                    background: darkMode ? '#374151' : '#f3f4f6',
-                                    color: darkMode ? '#f3f4f6' : '#111827',
-                                    border: 'none',
-                                    opacity: pageNumber <= 1 ? 0.5 : 1,
-                                    cursor: pageNumber <= 1 ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <ChevronLeft size={isMobile ? 16 : 18} />
-                            </button>
-
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: isMobile ? '4px' : '8px',
-                                minWidth: isMobile ? '100px' : '140px',
-                                justifyContent: 'center'
-                            }}>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max={numPages}
-                                    value={pageNumber}
-                                    onChange={handlePageInput}
-                                    style={{
-                                        width: isMobile ? '40px' : '60px',
-                                        padding: isMobile ? '6px' : '8px',
-                                        borderRadius: '6px',
-                                        background: darkMode ? '#374151' : '#f3f4f6',
-                                        color: darkMode ? '#f3f4f6' : '#111827',
-                                        border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`,
-                                        textAlign: 'center',
-                                        fontSize: isMobile ? '12px' : '14px'
-                                    }}
-                                />
-                                <span style={{
-                                    fontSize: isMobile ? '12px' : '14px',
-                                    color: darkMode ? '#d1d5db' : '#6b7280'
-                                }}>
-                                    / {numPages || '--'}
-                                </span>
-                            </div>
-
-                            <button
-                                disabled={pageNumber >= numPages}
-                                onClick={() => setPageNumber(prev => prev + 1)}
-                                style={{
-                                    padding: isMobile ? '6px 8px' : '8px 12px',
-                                    borderRadius: '6px',
-                                    background: darkMode ? '#374151' : '#f3f4f6',
-                                    color: darkMode ? '#f3f4f6' : '#111827',
-                                    border: 'none',
-                                    opacity: pageNumber >= numPages ? 0.5 : 1,
-                                    cursor: pageNumber >= numPages ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <ChevronRight size={isMobile ? 16 : 18} />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Right Controls */}
-                    <div style={{
-                        display: 'flex',
-                        gap: isMobile ? '4px' : '8px',
-                        alignItems: 'center',
-                        flexWrap: 'wrap'
-                    }}>
-                        {/* Zoom Controls - FIXED with proper percentage display */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '2px',
-                            background: darkMode ? '#374151' : '#f3f4f6',
-                            borderRadius: '6px',
-                            padding: '2px'
-                        }}>
-                            <button
-                                onClick={handleZoomOut}
-                                style={{
-                                    padding: isMobile ? '4px 6px' : '6px 8px',
-                                    background: 'transparent',
-                                    color: darkMode ? '#f3f4f6' : '#111827',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    borderRadius: '4px'
-                                }}
-                                title="Zoom Out"
-                            >
-                                <ZoomOut size={isMobile ? 14 : 18} />
-                            </button>
-
-                            {/* FIXED: Display current zoom percentage */}
-                            <div style={{
-                                padding: isMobile ? '4px 8px' : '6px 12px',
+                                width: '40px',
+                                padding: '4px',
                                 borderRadius: '4px',
-                                background: darkMode ? '#1f2937' : '#ffffff',
-                                color: darkMode ? '#f3f4f6' : '#111827',
-                                fontSize: isMobile ? '12px' : '14px',
-                                minWidth: isMobile ? '70px' : '90px',
+                                background: btn,
+                                color: text,
+                                border: `1px solid ${darkMode ? '#475569' : '#cbd5e1'}`,
                                 textAlign: 'center',
-                                fontWeight: '600'
-                            }}>
-                                {Math.round(scale * 100)}%
-                            </div>
-
-                            <button
-                                onClick={handleZoomIn}
-                                style={{
-                                    padding: isMobile ? '4px 6px' : '6px 8px',
-                                    background: 'transparent',
-                                    color: darkMode ? '#f3f4f6' : '#111827',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    borderRadius: '4px'
-                                }}
-                                title="Zoom In"
-                            >
-                                <ZoomIn size={isMobile ? 14 : 18} />
-                            </button>
-
-                            {/* Zoom Presets Dropdown - FIXED */}
-                            <select
-                                value={scale}
-                                onChange={(e) => setScale(parseFloat(e.target.value))}
-                                style={{
-                                    padding: isMobile ? '4px 6px' : '6px 12px',
-                                    borderRadius: '4px',
-                                    background: darkMode ? '#1f2937' : '#ffffff',
-                                    color: darkMode ? '#f3f4f6' : '#111827',
-                                    border: `1px solid ${darkMode ? '#4b5563' : '#d1d5db'}`,
-                                    fontSize: isMobile ? '12px' : '14px',
-                                    minWidth: isMobile ? '60px' : '80px',
-                                    outline: 'none',
-                                    cursor: 'pointer',
-                                    marginLeft: '4px'
-                                }}
-                            >
-                                {zoomPresets.map((preset) => (
-                                    <option key={preset} value={preset}>
-                                        {Math.round(preset * 100)}%
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <button
-                            onClick={() => setRotation((r) => (r + 90) % 360)}
-                            style={{
-                                padding: isMobile ? '6px 8px' : '8px 12px',
-                                borderRadius: '6px',
-                                background: darkMode ? '#374151' : '#f3f4f6',
-                                color: darkMode ? '#f3f4f6' : '#111827',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                fontSize: isMobile ? '12px' : '14px'
+                                fontSize: '12px',
                             }}
-                            title="Rotate"
-                        >
-                            <RotateCw size={isMobile ? 14 : 18} />
-                        </button>
-
-                        <button
-                            onClick={() => setDarkMode(!darkMode)}
-                            style={{
-                                padding: isMobile ? '6px 8px' : '8px 12px',
-                                borderRadius: '6px',
-                                background: darkMode ? '#374151' : '#f3f4f6',
-                                color: darkMode ? '#f3f4f6' : '#111827',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                fontSize: isMobile ? '12px' : '14px'
-                            }}
-                            title={darkMode ? 'Light Mode' : 'Dark Mode'}
-                        >
-                            {darkMode ? <Sun size={isMobile ? 14 : 18} /> : <Moon size={isMobile ? 14 : 18} />}
-                        </button>
-
-                        <button
-                            onClick={toggleFullscreen}
-                            style={{
-                                padding: isMobile ? '6px 8px' : '8px 12px',
-                                borderRadius: '6px',
-                                background: isFullscreen ? '#3b82f6' : (darkMode ? '#374151' : '#f3f4f6'),
-                                color: isFullscreen ? 'white' : (darkMode ? '#f3f4f6' : '#111827'),
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                fontSize: isMobile ? '12px' : '14px'
-                            }}
-                            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-                        >
-                            {isFullscreen ? (
-                                <span style={{ fontSize: isMobile ? '14px' : '16px' }}>⎋</span>
-                            ) : (
-                                <span style={{ fontSize: isMobile ? '14px' : '16px' }}>⛶</span>
-                            )}
-                        </button>
+                        />
+                        <span style={{ opacity: 0.7 }}>/ {numPages || '-'}</span>
                     </div>
+                    <ToolButton onClick={() => setPageNumber(p => p + 1)} disabled={pageNumber >= numPages} title="Next">
+                        <ChevronRight size={16} />
+                    </ToolButton>
                 </div>
 
-                {/* Viewer Area - FIXED with proper dragging */}
+                {/* Right - Zoom & Actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', background: btn, borderRadius: '6px', padding: '2px' }}>
+                        <ToolButton onClick={() => setScale(s => Math.max(0.5, s - 0.25))} title="Zoom Out">
+                            <ZoomOut size={14} />
+                        </ToolButton>
+                        <select
+                            value={scale}
+                            onChange={(e) => setScale(parseFloat(e.target.value))}
+                            style={{
+                                padding: '4px',
+                                background: 'transparent',
+                                color: text,
+                                border: 'none',
+                                fontSize: '11px',
+                                cursor: 'pointer',
+                                outline: 'none',
+                            }}
+                        >
+                            {zoomPresets.map(z => <option key={z} value={z}>{Math.round(z * 100)}%</option>)}
+                        </select>
+                        <ToolButton onClick={() => setScale(s => Math.min(3, s + 0.25))} title="Zoom In">
+                            <ZoomIn size={14} />
+                        </ToolButton>
+                    </div>
+                    <ToolButton onClick={() => setRotation(r => (r + 90) % 360)} title="Rotate">
+                        <RotateCw size={14} />
+                    </ToolButton>
+                    <ToolButton onClick={() => setDarkMode(!darkMode)} title="Theme">
+                        {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+                    </ToolButton>
+                    <ToolButton onClick={toggleFullscreen} active={isFullscreen} title="Fullscreen">
+                        {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
+                    </ToolButton>
+                </div>
+            </div>
+
+            {/* Main Area */}
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+                {/* Thumbnails */}
+                {showThumbnails && (
+                    <div style={{
+                        width: isMobile ? '100%' : '180px',
+                        backgroundColor: toolbar,
+                        borderRight: `1px solid ${darkMode ? '#334155' : '#e2e8f0'}`,
+                        overflowY: 'auto',
+                        padding: '12px',
+                        position: isMobile ? 'absolute' : 'relative',
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        zIndex: 50,
+                        boxShadow: isMobile ? '4px 0 20px rgba(0,0,0,0.3)' : 'none',
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', color: text }}>
+                            <span style={{ fontWeight: 600, fontSize: '13px' }}>Pages</span>
+                            <button onClick={() => setShowThumbnails(false)} style={{ background: btn, border: 'none', color: text, padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(5, 1fr)' : 'repeat(2, 1fr)', gap: '6px' }}>
+                            {Array.from({ length: numPages || 0 }, (_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => { setPageNumber(i + 1); if (isMobile) setShowThumbnails(false); }}
+                                    style={{
+                                        padding: '8px 4px',
+                                        borderRadius: '4px',
+                                        backgroundColor: pageNumber === i + 1 ? '#3b82f6' : btn,
+                                        border: 'none',
+                                        color: pageNumber === i + 1 ? '#fff' : text,
+                                        fontSize: '12px',
+                                        fontWeight: 500,
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* PDF Viewer */}
                 <div
-                    ref={containerRef}
+                    ref={viewerRef}
                     style={{
                         flex: 1,
                         overflow: 'auto',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'flex-start',
-                        padding: isMobile ? '10px' : '20px',
-                        position: 'relative',
-                        backgroundColor: darkMode ? '#111827' : '#f9fafb',
-                        WebkitOverflowScrolling: 'touch',
-                        cursor: enableDrag ? 'grab' : 'default'
+                        padding: isMobile ? '12px' : '20px',
+                        backgroundColor: bg,
                     }}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                    onTouchStart={(e) => {
-                        if (!enableDrag) return;
-                        const touch = e.touches[0];
-                        setIsDragging(true);
-                        setStartX(touch.pageX);
-                        setStartY(touch.pageY);
-                        setScrollLeft(containerRef.current.scrollLeft);
-                        setScrollTop(containerRef.current.scrollTop);
-                    }}
-                    onTouchMove={(e) => {
-                        if (!isDragging || !enableDrag) return;
-                        e.preventDefault();
-                        const touch = e.touches[0];
-                        const x = touch.pageX;
-                        const y = touch.pageY;
-                        const walkX = (startX - x) * 2;
-                        const walkY = (startY - y) * 2;
-
-                        if (containerRef.current) {
-                            containerRef.current.scrollLeft = scrollLeft + walkX;
-                            containerRef.current.scrollTop = scrollTop + walkY;
-                        }
-                    }}
-                    onTouchEnd={handleMouseUp}
                 >
-                    {/* PDF Container with 10 Email Copyright Watermarks */}
-                    <div
-                        ref={pdfContentRef}
-                        style={{
-                            position: 'relative',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                            backgroundColor: 'white',
-                            maxWidth: '100%',
-                            userSelect: 'none'
-                        }}
-                    >
-                        {/* Enhanced Watermark Container with 10 emails */}
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            pointerEvents: 'none',
-                            zIndex: 10,
-                            overflow: 'hidden',
-                            userSelect: 'none'
-                        }}>
-                            {/* 10 Email Watermarks in Grid Pattern */}
-                            {watermarkPositions.map((pos, index) => (
-                                <div
-                                    key={index}
-                                    style={{
-                                        position: 'absolute',
-                                        top: pos.top,
-                                        left: pos.left,
-                                        transform: `translate(-50%, -50%) rotate(${pos.rotation}deg)`,
-                                        color: darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
-                                        fontSize: `${pos.fontSize}px`,
-                                        fontWeight: 'bold',
-                                        whiteSpace: 'nowrap',
-                                        textAlign: 'center',
-                                        pointerEvents: 'none',
-                                        opacity: pos.opacity,
-                                        fontFamily: 'Arial, sans-serif',
-                                        letterSpacing: '0.5px',
-                                        zIndex: 1,
-                                        textShadow: darkMode
-                                            ? '1px 1px 2px rgba(0,0,0,0.3)'
-                                            : '1px 1px 2px rgba(255,255,255,0.5)',
-                                    }}
-                                >
-                                    {pos.variant === 0 && `© ${userDetails?.email}`}
-                                    {pos.variant === 1 && `${userDetails?.email} • ${watermarkDate}`}
+                    <div style={{ position: 'relative', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#fff' }}>
+                        {/* Watermarks */}
+                        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
+                            {watermarks.map((w, i) => (
+                                <div key={i} style={{
+                                    position: 'absolute',
+                                    top: w.top,
+                                    left: w.left,
+                                    transform: `translate(-50%, -50%) rotate(${w.rotation}deg)`,
+                                    color: 'rgba(0,0,0,0.06)',
+                                    fontSize: isMobile ? '10px' : '11px',
+                                    fontWeight: 'bold',
+                                    whiteSpace: 'nowrap',
+                                }}>
+                                    {i % 2 === 0 ? `© ${userDetails?.email || 'User'}` : userDetails?.email || 'Protected'}
                                 </div>
                             ))}
-
-                            {/* Dense Background Watermarks */}
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                backgroundImage: `repeating-linear-gradient(
-                                    45deg,
-                                    transparent,
-                                    transparent 100px,
-                                    rgba(0,0,0,0.02) 100px,
-                                    rgba(0,0,0,0.02) 200px
-                                )`,
-                                pointerEvents: 'none',
-                                opacity: 0.3
-                            }} />
-
-                            {/* Large Center Watermark */}
                             <div style={{
                                 position: 'absolute',
                                 top: '50%',
                                 left: '50%',
                                 transform: 'translate(-50%, -50%)',
-                                color: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                                fontSize: isMobile ? '36px' : '48px',
-                                fontWeight: '900',
-                                textAlign: 'center',
-                                pointerEvents: 'none',
-                                fontFamily: 'Arial, sans-serif',
-                                textTransform: 'uppercase',
-                                letterSpacing: '4px',
-                                lineHeight: 1.2,
-                                maxWidth: '80%',
-                                wordBreak: 'break-word'
+                                color: 'rgba(0,0,0,0.025)',
+                                fontSize: isMobile ? '20px' : '32px',
+                                fontWeight: 900,
+                                letterSpacing: '3px',
                             }}>
-                                COPYRIGHT PROTECTED
+                                PROTECTED
                             </div>
                         </div>
 
                         {/* PDF Document */}
                         <Document
                             file={url ? `/api/pdf-proxy?url=${encodeURIComponent(url)}` : null}
-                            onLoadSuccess={onDocumentLoadSuccess}
-                            loading={
-                                <div style={{
-                                    padding: isMobile ? '40px' : '60px',
-                                    color: darkMode ? '#e5e7eb' : '#4b5563',
-                                    textAlign: 'center',
-                                    fontSize: isMobile ? '14px' : '16px',
-                                    minWidth: isMobile ? '200px' : '400px',
-                                    minHeight: isMobile ? '300px' : '600px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <div style={{
-                                        width: isMobile ? '40px' : '60px',
-                                        height: isMobile ? '40px' : '60px',
-                                        border: `4px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-                                        borderTopColor: '#3b82f6',
-                                        borderRadius: '50%',
-                                        animation: 'spin 1s linear infinite',
-                                        marginBottom: isMobile ? '16px' : '20px'
-                                    }} />
-                                    <div style={{ marginBottom: isMobile ? '8px' : '10px', fontWeight: '600' }}>
-                                        Loading Secure Document...
-                                    </div>
-                                </div>
-                            }
-                            error={
-                                <div style={{
-                                    padding: isMobile ? '40px' : '60px',
-                                    color: '#ef4444',
-                                    textAlign: 'center',
-                                    fontSize: isMobile ? '14px' : '16px',
-                                    minWidth: isMobile ? '200px' : '400px',
-                                    minHeight: isMobile ? '300px' : '600px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <div style={{ fontSize: isMobile ? '36px' : '48px', marginBottom: isMobile ? '16px' : '20px' }}>⚠️</div>
-                                    <div style={{ fontWeight: '600', marginBottom: isMobile ? '8px' : '10px' }}>
-                                        Error Loading PDF
-                                    </div>
-                                </div>
-                            }
+                            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                            loading={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b', minWidth: '300px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}
+                            error={<div style={{ padding: '40px', textAlign: 'center', color: '#ef4444', minWidth: '280px' }}>Failed to load PDF</div>}
                         >
                             <Page
                                 pageNumber={pageNumber}
                                 scale={scale}
-                                width={containerWidth}
+                                rotate={rotation}
+                                width={pageWidth}
                                 renderTextLayer={false}
                                 renderAnnotationLayer={false}
-                                rotate={rotation}
-                                className={darkMode ? 'pdf-dark-theme' : 'pdf-light-theme'}
-                                style={{
-                                    backgroundColor: 'white',
-                                    userSelect: 'none'
-                                }}
+                                loading={<div style={{ width: pageWidth, minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>Loading page...</div>}
                             />
                         </Document>
                     </div>
                 </div>
-
-                {/* Status Bar */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: isMobile ? '8px 12px' : '10px 20px',
-                    backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-                    borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-                    color: darkMode ? '#d1d5db' : '#6b7280',
-                    fontSize: isMobile ? '11px' : '13px',
-                    flexWrap: 'wrap',
-                    gap: isMobile ? '6px' : '10px'
-                }}>
-
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: isMobile ? '8px' : '16px',
-                        flexWrap: 'wrap'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontWeight: '600' }}>Zoom:</span>
-                            <span>{Math.round(scale * 100)}%</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontWeight: '600' }}>Rot:</span>
-                            <span>{rotation}°</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontWeight: '600' }}>Drag:</span>
-                            <span>{enableDrag ? 'ON' : 'OFF'}</span>
-                        </div>
-                        <div style={{
-                            padding: '2px 8px',
-                            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                            color: 'white',
-                            borderRadius: '12px',
-                            fontSize: isMobile ? '9px' : '11px',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            whiteSpace: 'nowrap'
-                        }}>
-                            <Shield size={isMobile ? 10 : 12} />
-                            {isMobile ? 'SECURE' : 'PROTECTED'}
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            {/* Mobile Fullscreen Exit Button */}
-            {isFullscreen && isMobile && (
-                <button
-                    onClick={toggleFullscreen}
-                    style={{
-                        position: 'fixed',
-                        top: '50px',
-                        right: '2px',
-                        zIndex: 10001,
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        background: 'rgba(0,0,0,0.7)',
-                        color: 'white',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontSize: '14px'
-                    }}
-                >
-                    ✕ Exit
-                </button>
+            {/* Mobile page indicator */}
+            {isMobile && !isFullscreen && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: '12px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(0,0,0,0.7)',
+                    color: '#fff',
+                    padding: '6px 12px',
+                    borderRadius: '16px',
+                    fontSize: '12px',
+                    zIndex: 30,
+                }}>
+                    {pageNumber} / {numPages}
+                </div>
             )}
 
-            {/* Global Styles */}
-            <style jsx>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
+            {/* Exit fullscreen button (visible in fullscreen) */}
 
-                .pdf-dark-theme .react-pdf__Page__textContent {
-                    filter: invert(1) hue-rotate(180deg);
-                }
 
-                .pdf-dark-theme .react-pdf__Page__annotations {
-                    filter: invert(1) hue-rotate(180deg);
-                }
-
-                /* Improve scrolling */
-                .pdf-viewer-container {
-                    -webkit-overflow-scrolling: touch;
-                }
-
-                /* Mobile optimizations */
-                @media (max-width: 768px) {
-                    /* Prevent iOS zoom on input focus */
-                    input[type="number"] {
-                        font-size: 16px !important;
-                    }
-                }
-
-                /* Fullscreen styles */
-                :fullscreen .pdf-viewer-container {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    background-color: ${darkMode ? '#111827' : '#f9fafb'} !important;
-                }
-
-                :-webkit-full-screen .pdf-viewer-container {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    background-color: ${darkMode ? '#111827' : '#f9fafb'} !important;
-                }
-
-                /* Better cursor for dragging */
-                .pdf-viewer-container [style*="cursor: grab"]:active {
-                    cursor: grabbing !important;
-                }
-            `}</style>
+            <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
-};
-
-export default PdfViewer;
+}

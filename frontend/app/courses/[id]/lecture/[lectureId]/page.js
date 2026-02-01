@@ -184,7 +184,7 @@ export default function LecturePlayer() {
                 </div>
 
                 {/* PDF Viewer Container */}
-                <div className="flex-1 relative bg-gray-900 overflow-hidden">
+                <div className="flex-1 relative bg-gray-900 overflow-hidden" style={{ height: '100%' }}>
                     <PdfViewer
                         url={currentLecture.pdfUrl}
                         userDetails={userDetails}

@@ -9,7 +9,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Loader from '../../../components/ui/Loader';
 import toast from 'react-hot-toast';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, X, ArrowLeft } from 'lucide-react';
 import { convertToYouTubeEmbed } from '../../../lib/videoUtils';
 import dynamic from 'next/dynamic';
 
@@ -93,6 +93,7 @@ export default function CourseDetails() {
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
     const [expandedSections, setExpandedSections] = useState({});
     const [selectedDemoVideo, setSelectedDemoVideo] = useState(null);
+    const [fullPagePdf, setFullPagePdf] = useState(null);
 
     const toggleSection = (sectionId) => {
         setExpandedSections(prev => ({
@@ -193,14 +194,13 @@ export default function CourseDetails() {
                                             return (
                                                 <div key={section._id}>
                                                     {/* Section Row */}
-                                                    <Card style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <Card onClick={() => toggleSection(section._id)} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
                                                         <div>
                                                             <span style={{ fontWeight: 500 }}>{section.title}</span>
                                                             <span style={{ color: '#94a3b8', fontSize: '0.85rem', marginLeft: '12px' }}>({section.lectures?.length || 0} lectures)</span>
                                                         </div>
                                                         <Button
                                                             variant="outline"
-                                                            onClick={() => toggleSection(section._id)}
                                                             style={{ fontSize: '0.9rem', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                                                         >
                                                             {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -218,7 +218,7 @@ export default function CourseDetails() {
                                                                             <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
                                                                             <span style={{ fontWeight: 500 }}>{lecture.title}</span>
                                                                         </div>
-                                                                        <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>
+                                                                        <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px', width: '130px', justifyContent: 'center' }}>
                                                                             {lecture.type === 'pdf' ? 'View PDF' : 'Watch'}
                                                                         </Button>
                                                                     </Card>
@@ -232,17 +232,17 @@ export default function CourseDetails() {
 
                                         {/* Ungrouped Lectures */}
                                         {course.lectures && course.lectures.map((lecture, index) => (
-                                            <Card key={lecture._id || index} style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
-                                                    <span style={{ fontWeight: 500 }}>{lecture.title}</span>
-                                                </div>
-                                                <Link href={`/courses/${id}/lecture/${lecture._id || index}`}>
+                                            <Link key={lecture._id || index} href={`/courses/${id}/lecture/${lecture._id || index}`}>
+                                                <Card style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                                                    <div>
+                                                        <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
+                                                        <span style={{ fontWeight: 500 }}>{lecture.title}</span>
+                                                    </div>
                                                     <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>
                                                         {lecture.type === 'pdf' ? 'View PDF' : 'Watch'}
                                                     </Button>
-                                                </Link>
-                                            </Card>
+                                                </Card>
+                                            </Link>
                                         ))}
                                     </div>
 
@@ -302,30 +302,23 @@ export default function CourseDetails() {
                                                 <h2 style={{ marginBottom: '20px' }}>Free Preview</h2>
 
                                                 {/* Demo Video Player or PDF Viewer */}
-                                                <Card style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
-                                                    {currentDemo.type === 'pdf' ? (
-                                                        <div style={{ height: '400px', overflowY: 'auto', background: '#111' }}>
-                                                            <PdfViewer
-                                                                url={currentDemo.pdfUrl}
-                                                                userDetails={user}
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{
-                                                            position: 'relative',
-                                                            paddingTop: '56.25%',
-                                                            background: '#000'
-                                                        }}>
+                                                {currentDemo.type === 'pdf' ? (
+                                                    <Card
+                                                        onClick={() => setFullPagePdf(currentDemo)}
+                                                        style={{ padding: '24px', marginBottom: '24px', cursor: 'pointer', textAlign: 'center', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '2px solid #334155' }}
+                                                    >
+                                                        <div style={{ fontSize: '48px', marginBottom: '12px' }}>📄</div>
+                                                        <p style={{ fontWeight: 600, margin: 0, fontSize: '1.1rem', color: '#f1f5f9' }}>{currentDemo.title}</p>
+                                                        <p style={{ color: '#94a3b8', margin: '8px 0 16px', fontSize: '0.9rem' }}>Click to open PDF in full screen</p>
+                                                        <Button style={{ padding: '10px 24px' }}>View PDF</Button>
+                                                        <span style={{ display: 'block', marginTop: '12px', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, width: 'fit-content', margin: '12px auto 0' }}>FREE PREVIEW</span>
+                                                    </Card>
+                                                ) : (
+                                                    <Card style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
+                                                        <div style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
                                                             <iframe
                                                                 src={convertToYouTubeEmbed(currentDemo.videoUrl)}
-                                                                style={{
-                                                                    position: 'absolute',
-                                                                    top: 0,
-                                                                    left: 0,
-                                                                    width: '100%',
-                                                                    height: '100%',
-                                                                    border: 'none'
-                                                                }}
+                                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                                                                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
                                                                 allowFullScreen
                                                                 loading="lazy"
@@ -335,33 +328,26 @@ export default function CourseDetails() {
                                                                 title={currentDemo.title || 'Demo Video'}
                                                             />
                                                         </div>
-                                                    )}
-                                                    <div style={{ padding: '16px' }}>
-                                                        <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{currentDemo.title}</p>
-                                                        <span style={{
-                                                            display: 'inline-block',
-                                                            marginTop: '8px',
-                                                            background: 'rgba(34, 197, 94, 0.2)',
-                                                            color: '#22c55e',
-                                                            padding: '4px 8px',
-                                                            borderRadius: '4px',
-                                                            fontSize: '0.75rem',
-                                                            fontWeight: 600
-                                                        }}>FREE PREVIEW</span>
-                                                    </div>
-                                                </Card>
+                                                        <div style={{ padding: '16px' }}>
+                                                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{currentDemo.title}</p>
+                                                            <span style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>FREE PREVIEW</span>
+                                                        </div>
+                                                    </Card>
+                                                )}
 
                                                 {/* Demo Lectures List */}
                                                 <h3 style={{ fontSize: '1.2rem', color: '#6366f1', marginBottom: '16px' }}>Available Previews</h3>
                                                 <div style={{ display: 'grid', gap: '12px' }}>
                                                     {demoLectures.map((lecture, index) => (
                                                         <Card
+                                                            onClick={() => setSelectedDemoVideo(lecture)}
                                                             key={lecture._id || index}
                                                             style={{
                                                                 padding: '16px',
                                                                 display: 'flex',
                                                                 justifyContent: 'space-between',
                                                                 alignItems: 'center',
+                                                                cursor: 'pointer',
                                                                 border: currentDemo._id === lecture._id ? '2px solid #6366f1' : undefined
                                                             }}
                                                         >
@@ -379,10 +365,17 @@ export default function CourseDetails() {
                                                             </div>
                                                             <Button
                                                                 variant={currentDemo._id === lecture._id ? 'primary' : 'outline'}
-                                                                onClick={() => setSelectedDemoVideo(lecture)}
                                                                 style={{ fontSize: '0.9rem', padding: '8px 12px' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (lecture.type === 'pdf') {
+                                                                        setFullPagePdf(lecture);
+                                                                    } else {
+                                                                        setSelectedDemoVideo(lecture);
+                                                                    }
+                                                                }}
                                                             >
-                                                                {currentDemo._id === lecture._id ? 'Playing' : (lecture.type === 'pdf' ? 'View' : 'Watch')}
+                                                                {lecture.type === 'pdf' ? 'View PDF' : (currentDemo._id === lecture._id ? 'Playing' : 'Watch')}
                                                             </Button>
                                                         </Card>
                                                     ))}
@@ -540,6 +533,80 @@ export default function CourseDetails() {
                     </div>
                 </div>
             </div>
+
+            {/* Full Page PDF Overlay */}
+            {fullPagePdf && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 9999,
+                    backgroundColor: '#0f172a',
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}>
+                    {/* Header */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '12px 16px',
+                        backgroundColor: '#1e293b',
+                        borderBottom: '1px solid #334155',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <button
+                                onClick={() => setFullPagePdf(null)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '8px',
+                                    backgroundColor: '#334155',
+                                    border: 'none',
+                                    color: '#f1f5f9',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                <ArrowLeft size={18} />
+                            </button>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1rem', color: '#f1f5f9' }}>{fullPagePdf.title}</h3>
+                                <span style={{ fontSize: '0.75rem', color: '#22c55e' }}>FREE PREVIEW</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setFullPagePdf(null)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                backgroundColor: '#334155',
+                                border: 'none',
+                                color: '#f1f5f9',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                            }}
+                        >
+                            <X size={16} /> Close
+                        </button>
+                    </div>
+
+                    {/* PDF Viewer */}
+                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <PdfViewer
+                            url={fullPagePdf.pdfUrl}
+                            userDetails={user}
+                        />
+                    </div>
+                </div>
+            )}
         </>
     );
 }

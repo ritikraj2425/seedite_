@@ -55,10 +55,21 @@ export const metadata = {
     creator: '@seedite_edu', // Update if specific handle exists
   },
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-    shortcut: '/logo.png',
+    icon: [
+      { url: '/logo.png' },
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo.png' },
+    ],
+    other: [
+      {
+        rel: 'apple-touch-icon-precomposed',
+        url: '/logo.png',
+      },
+    ],
   },
+  manifest: '/manifest.json',
 };
 
 export const viewport = {

@@ -179,41 +179,42 @@ export default function Dashboard() {
                 {user?.enrolledCourses && user?.enrolledCourses?.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
                         {[...user?.enrolledCourses]?.reverse().map(course => (
-                            <div key={course?._id} className="modern-card" style={{
-                                padding: '0',
-                                overflow: 'hidden',
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}>
-                                <div style={{
-                                    height: '170px',
-                                    background: '#f1f5f9',
-                                    overflow: 'hidden'
+                            <Link key={course?._id} href={`/courses/${course?._id}`}>
+
+                                <div className="modern-card" style={{
+                                    padding: '0',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    flexDirection: 'column'
                                 }}>
-                                    <img
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover',
-                                            transition: 'transform 0.3s ease'
-                                        }}
-                                        onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                                        onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-                                    />
-                                </div>
-                                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <h3 style={{
-                                        fontSize: '1.15rem',
-                                        marginBottom: '16px',
-                                        color: '#0f172a',
-                                        fontWeight: '700'
+                                    <div style={{
+                                        height: '170px',
+                                        background: '#f1f5f9',
+                                        overflow: 'hidden'
                                     }}>
-                                        {course?.title}
-                                    </h3>
-                                    <div style={{ marginTop: 'auto' }}>
-                                        <Link href={`/courses/${course?._id}`}>
+                                        <img
+                                            src={course.thumbnail}
+                                            alt={course.title}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                transition: 'transform 0.3s ease'
+                                            }}
+                                            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                                            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                                        />
+                                    </div>
+                                    <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                        <h3 style={{
+                                            fontSize: '1.15rem',
+                                            marginBottom: '16px',
+                                            color: '#0f172a',
+                                            fontWeight: '700'
+                                        }}>
+                                            {course?.title}
+                                        </h3>
+                                        <div style={{ marginTop: 'auto' }}>
                                             <Button style={{
                                                 width: '100%',
                                                 fontSize: '1.1rem',
@@ -228,10 +229,10 @@ export default function Dashboard() {
                                                 Continue Learning
                                                 <ArrowRight size={18} />
                                             </Button>
-                                        </Link>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 ) : (

@@ -34,8 +34,28 @@ export default async function sitemap() {
         if (error.digest === 'DYNAMIC_SERVER_USAGE') {
             throw error;
         }
-        console.error('Failed to generate blog sitemap:', error);
+        console.log('Failed to generate blog sitemap:', error);
     }
 
-    return [...routes, ...blogRoutes];
+    // Dynamic routes (Courses)
+    let courseRoutes = [];
+    try {
+        const res = await fetch(`${API_URL}/api/courses`, { cache: 'no-store' });
+        if (res.ok) {
+            const courses = await res.json();
+            courseRoutes = courses.map((course) => ({
+                url: `${baseUrl}/courses/${course._id}`,
+                lastModified: course.updatedAt || course.createdAt || new Date().toISOString(),
+                changeFrequency: 'weekly',
+                priority: 0.9,
+            }));
+        }
+    } catch (error) {
+        if (error.digest === 'DYNAMIC_SERVER_USAGE') {
+            throw error;
+        }
+        console.log('Failed to generate course sitemap:', error);
+    }
+
+    return [...routes, ...courseRoutes, ...blogRoutes];
 }
