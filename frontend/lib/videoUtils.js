@@ -5,7 +5,8 @@ export const convertToYouTubeEmbed = (url) => {
     // Already an embed URL (YouTube, Vimeo, or Bunny.net)
     if (url.includes('youtube.com/embed/') ||
         url.includes('vimeo.com/video/') ||
-        url.includes('iframe.mediadelivery.net/embed/')) {
+        url.includes('iframe.mediadelivery.net/embed/') ||
+        url.includes('player.mediadelivery.net/embed/')) {
         return url;
     }
 
