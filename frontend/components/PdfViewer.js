@@ -21,6 +21,10 @@ export default function PdfViewer({ url, userDetails }) {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
 
+    // Drag-to-pan state
+    const isDragging = useRef(false);
+    const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
+
     // Mobile check
     useEffect(() => {
         const check = () => setIsMobile(window.innerWidth <= 768);
@@ -118,6 +122,65 @@ export default function PdfViewer({ url, userDetails }) {
         }
         return arr;
     }, []);
+
+    // Drag-to-pan handlers
+    // Drag-to-pan handlers
+    const handleDragMove = (e) => {
+        if (!isDragging.current) return;
+        const viewer = viewerRef.current;
+        if (!viewer) return;
+
+        const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+        const dx = clientX - dragStart.current.x;
+        const dy = clientY - dragStart.current.y;
+
+        viewer.scrollLeft = dragStart.current.scrollLeft - dx;
+        viewer.scrollTop = dragStart.current.scrollTop - dy;
+    };
+
+    const handleDragEnd = () => {
+        isDragging.current = false;
+        const viewer = viewerRef.current;
+        if (viewer) {
+            viewer.style.cursor = 'grab';
+        }
+
+        // Remove window listeners
+        window.removeEventListener('mousemove', handleDragMove);
+        window.removeEventListener('mouseup', handleDragEnd);
+        window.removeEventListener('touchmove', handleDragMove);
+        window.removeEventListener('touchend', handleDragEnd);
+    };
+
+    const handleDragStart = (e) => {
+        const viewer = viewerRef.current;
+        if (!viewer) return;
+
+        // Force enable drag - browser handles scroll clamping
+        isDragging.current = true;
+        const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+
+        dragStart.current = {
+            x: clientX,
+            y: clientY,
+            scrollLeft: viewer.scrollLeft,
+            scrollTop: viewer.scrollTop,
+        };
+
+        viewer.style.cursor = 'grabbing';
+
+        // Attach window listeners to catch events outside element
+        window.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('mouseup', handleDragEnd);
+        window.addEventListener('touchmove', handleDragMove, { passive: false });
+        window.addEventListener('touchend', handleDragEnd);
+
+        // Prevent text selection
+        e.preventDefault();
+    };
 
     const zoomPresets = [0.5, 0.75, 1, 1.25, 1.5, 2];
     const bg = darkMode ? '#0f172a' : '#f1f5f9';
@@ -299,67 +362,76 @@ export default function PdfViewer({ url, userDetails }) {
                     </div>
                 )}
 
-                {/* PDF Viewer */}
                 <div
                     ref={viewerRef}
+                    onMouseDown={handleDragStart}
+                    onTouchStart={handleDragStart}
+                    // MouseMove/Up are now on window
                     style={{
                         flex: 1,
                         overflow: 'auto',
+                        position: 'relative',
+                        backgroundColor: bg,
+                        cursor: 'grab',
+                        userSelect: 'none', // Force no selection
+                        touchAction: 'none', // Prevent browser touch actions like scrolling
+                    }}
+                >
+                    <div style={{
+                        minWidth: '100%',
+                        minHeight: '100%',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'flex-start',
                         padding: isMobile ? '12px' : '20px',
-                        backgroundColor: bg,
-                    }}
-                >
-                    <div style={{ position: 'relative', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#fff' }}>
-                        {/* Watermarks */}
-                        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
-                            {watermarks.map((w, i) => (
-                                <div key={i} style={{
-                                    position: 'absolute',
-                                    top: w.top,
-                                    left: w.left,
-                                    transform: `translate(-50%, -50%) rotate(${w.rotation}deg)`,
-                                    color: 'rgba(0,0,0,0.06)',
-                                    fontSize: isMobile ? '10px' : '11px',
-                                    fontWeight: 'bold',
-                                    whiteSpace: 'nowrap',
-                                }}>
-                                    {i % 2 === 0 ? `© ${userDetails?.email || 'User'}` : userDetails?.email || 'Protected'}
-                                </div>
-                            ))}
-                            <div style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                color: 'rgba(0,0,0,0.025)',
-                                fontSize: isMobile ? '20px' : '32px',
-                                fontWeight: 900,
-                                letterSpacing: '3px',
-                            }}>
-                                PROTECTED
-                            </div>
-                        </div>
+                        boxSizing: 'border-box'
+                    }}>
+                        <div style={{
+                            position: 'relative',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                            borderRadius: '4px',
+                            overflow: 'hidden',
+                            backgroundColor: '#fff',
+                            flexShrink: 0,
+                            maxWidth: 'none'
+                        }}>
+                            {/* Watermarks */}
+                            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
+                                {watermarks.map((w, i) => (
+                                    <div key={i} style={{
+                                        position: 'absolute',
+                                        top: w.top,
+                                        left: w.left,
+                                        transform: `translate(-50%, -50%) rotate(${w.rotation}deg)`,
+                                        color: 'rgba(0,0,0,0.06)',
+                                        fontSize: isMobile ? '10px' : '11px',
+                                        fontWeight: 'bold',
+                                        whiteSpace: 'nowrap',
+                                    }}>
+                                        {i % 2 === 0 ? `© ${userDetails?.email || 'User'}` : userDetails?.email}
+                                    </div>
+                                ))}
 
-                        {/* PDF Document */}
-                        <Document
-                            file={url ? `/api/pdf-proxy?url=${encodeURIComponent(url)}` : null}
-                            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                            loading={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b', minWidth: '300px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}
-                            error={<div style={{ padding: '40px', textAlign: 'center', color: '#ef4444', minWidth: '280px' }}>Failed to load PDF</div>}
-                        >
-                            <Page
-                                pageNumber={pageNumber}
-                                scale={scale}
-                                rotate={rotation}
-                                width={pageWidth}
-                                renderTextLayer={false}
-                                renderAnnotationLayer={false}
-                                loading={<div style={{ width: pageWidth, minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>Loading page...</div>}
-                            />
-                        </Document>
+                            </div>
+
+                            {/* PDF Document */}
+                            <Document
+                                file={url ? `/api/pdf-proxy?url=${encodeURIComponent(url)}` : null}
+                                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                                loading={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b', minWidth: '300px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}
+                                error={<div style={{ padding: '40px', textAlign: 'center', color: '#ef4444', minWidth: '280px' }}>Failed to load PDF</div>}
+                            >
+                                <Page
+                                    pageNumber={pageNumber}
+                                    scale={scale}
+                                    rotate={rotation}
+                                    width={pageWidth}
+                                    renderTextLayer={false}
+                                    renderAnnotationLayer={false}
+                                    loading={<div style={{ width: pageWidth, minHeight: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>Loading page...</div>}
+                                />
+                            </Document>
+                        </div>
                     </div>
                 </div>
             </div>

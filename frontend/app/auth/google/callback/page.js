@@ -75,7 +75,20 @@ function GoogleCallbackContent() {
                 minHeight: '100vh',
                 gap: '20px'
             }}>
-                <Loader />
+                <div className="spinner"></div>
+                <style jsx>{`
+                    .spinner {
+                        width: 40px;
+                        height: 40px;
+                        border: 3px solid rgba(37, 99, 235, 0.3);
+                        border-radius: 50%;
+                        border-top-color: #2563eb;
+                        animation: spin 1s ease-in-out infinite;
+                    }
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `}</style>
                 <p style={{ color: '#64748b', fontSize: '1rem' }}>
                     Signing you in with Google...
                 </p>

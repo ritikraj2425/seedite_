@@ -11,6 +11,7 @@ import CourseCardSkeleton from '../components/ui/CourseCardSkeleton';
 import Testimonials from '../components/Testimonials';
 import { BookOpen, Users, Award, CheckCircle, ArrowRight, Sparkles, Play, Target } from 'lucide-react';
 
+
 // StatCard component with counting animation
 function StatCard({ number, suffix, label }) {
     const [count, setCount] = useState(0);
@@ -74,6 +75,11 @@ export default function HomeClient() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [founderVideoUrl, setFounderVideoUrl] = useState('');
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // Static thumbnail path - user to upload file here
+    const THUMBNAIL_PATH = '/intro-thumbnail.png';
 
     useEffect(() => {
         // Check if user is logged in
@@ -92,6 +98,14 @@ export default function HomeClient() {
                 console.error('Failed to fetch courses', err);
                 setLoading(false);
             });
+
+        // Fetch signed embed URL for founder video
+        fetch(`${API_URL}/api/public/founder-video`)
+            .then(res => res.json())
+            .then(data => {
+                if (data?.embedUrl) setFounderVideoUrl(data.embedUrl);
+            })
+            .catch(err => console.error('Failed to fetch founder video URL', err));
     }, []);
 
 
@@ -290,6 +304,186 @@ export default function HomeClient() {
                         <StatCard number={30} suffix="+" label="Hours of Content" />
                         <StatCard number={10} suffix="+" label="Mock Tests" />
                         <StatCard number={95} suffix="%" label="Success Rate" />
+                    </div>
+                </section>
+
+                {/* Founder Video Section */}
+                <section style={{ marginBottom: '120px' }}>
+                    {/* Header */}
+                    <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: '#f1f5f9',
+                            padding: '6px 14px',
+                            borderRadius: '100px',
+                            marginBottom: '16px',
+                        }}>
+                            <Play size={13} color="#2563eb" fill="#2563eb" />
+                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', letterSpacing: '0.05em' }}>From the Founders</span>
+                        </div>
+                        <h2 className="section-title" style={{ marginBottom: '12px' }}>Why We Built Seedite</h2>
+
+                    </div>
+
+                    {/* Video card */}
+                    <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative' }}>
+                        {/* Gradient border effect */}
+                        <div style={{
+                            position: 'absolute',
+                            inset: '-2px',
+                            borderRadius: '22px',
+                            background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #06b6d4 100%)',
+                            zIndex: 0,
+                            opacity: 0.6,
+                        }} />
+
+                        {/* Card shell */}
+                        <div style={{
+                            position: 'relative',
+                            zIndex: 1,
+                            borderRadius: '20px',
+                            overflow: 'hidden',
+                            background: '#0f172a',
+                            boxShadow: '0 32px 64px -16px rgba(37,99,235,0.2), 0 0 0 1px rgba(255,255,255,0.06)',
+                        }}>
+                            {/* Top bar — like a browser chrome */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '12px 16px',
+                                background: 'rgba(255,255,255,0.04)',
+                                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                            }}>
+                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f57' }} />
+                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#febc2e' }} />
+                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28c840' }} />
+                                <div style={{
+                                    flex: 1,
+                                    marginLeft: '8px',
+                                    height: '24px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    paddingLeft: '10px',
+                                    gap: '6px',
+                                }}>
+                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 6px #22d3ee' }} />
+                                    <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>seedite.in · founders video</span>
+                                </div>
+                            </div>
+
+                            {/* Video iframe — uses signed URL from backend, same as lecture page */}
+                            <div className="video-container">
+                                {!isPlaying ? (
+                                    <div
+                                        onClick={() => setIsPlaying(true)}
+                                        style={{
+                                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                            cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}
+                                    >
+                                        <Image
+                                            src={THUMBNAIL_PATH}
+                                            alt="Founder Video Thumbnail"
+                                            fill
+                                            style={{ objectFit: 'cover' }}
+                                            sizes="(max-width: 768px) 100vw, 900px"
+                                            priority
+                                            onError={(e) => {
+                                                // Fallback if image not found
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                        {/* Overlay gradient */}
+                                        <div style={{
+                                            position: 'absolute', inset: 0,
+                                            background: 'linear-gradient(to top, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.2) 50%, rgba(15,23,42,0.4) 100%)',
+                                        }} />
+
+                                        {/* Play Button */}
+                                        <div style={{
+                                            position: 'relative', zIndex: 2,
+                                            width: '80px', height: '80px',
+                                            borderRadius: '50%',
+                                            background: 'rgba(255, 255, 255, 0.2)',
+                                            backdropFilter: 'blur(8px)',
+                                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                                            transition: 'transform 0.3s ease, background 0.3s ease'
+                                        }} className="play-button-hover">
+                                            <div style={{
+                                                width: '64px', height: '64px',
+                                                borderRadius: '50%',
+                                                background: '#fff',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                            }}>
+                                                <Play size={28} fill="#2563eb" color="#2563eb" style={{ marginLeft: '4px' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    founderVideoUrl ? (
+                                        <iframe
+                                            src={`${founderVideoUrl}&autoplay=true`}
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
+                                            allowFullScreen
+                                            loading="eager"
+                                            referrerPolicy="no-referrer"
+                                            tabIndex="0"
+                                            playsInline
+                                            title="Seedite Founders Video"
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: '#94a3b8', fontSize: '0.9rem'
+                                        }}>
+                                            Loading video...
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Founder credit */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px',
+                        marginTop: '28px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div style={{
+                                width: '34px', height: '34px', borderRadius: '50%',
+                                overflow: 'hidden', border: '2px solid #e2e8f0',
+                                position: 'relative', flexShrink: 0,
+                                boxShadow: '0 0 0 3px rgba(37,99,235,0.1)',
+                            }}>
+                                <Image src="/ritik.png" alt="Ritik Raj" fill style={{ objectFit: 'cover' }} />
+                            </div>
+                            <div style={{
+                                width: '34px', height: '34px', borderRadius: '50%',
+                                overflow: 'hidden', border: '2px solid #e2e8f0',
+                                position: 'relative', flexShrink: 0, marginLeft: '-10px',
+                                boxShadow: '0 0 0 3px rgba(124,58,237,0.1)',
+                            }}>
+                                <Image src="/amod.jpg" alt="Amod Ranjan" fill style={{ objectFit: 'cover' }} />
+                            </div>
+                        </div>
+                        <span style={{ fontSize: '0.88rem', color: '#64748b', fontWeight: '500' }}>
+                            <strong style={{ color: '#0f172a' }}>Ritik & Amod</strong> · Co-founders, NST students
+                        </span>
                     </div>
                 </section>
 

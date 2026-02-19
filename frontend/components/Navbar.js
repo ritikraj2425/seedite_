@@ -309,8 +309,13 @@ const Navbar = () => {
                     <aside className={`navbar-sidebar ${isSidebarOpen ? 'navbar-sidebar--open' : ''}`}>
                         <div className="navbar-sidebar__header">
                             <Link href="/" className="navbar-sidebar__logo" onClick={closeSidebar}>
-                                <div className="navbar__logo-icon">S</div>
-                                <span>Seedite</span>
+                                <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '8px'
+                                }}>
+                                    <Image src="/logo.png" alt="Logo" width={32} height={32} />
+                                </div>                            <span>Seedite</span>
                             </Link>
                         </div>
 

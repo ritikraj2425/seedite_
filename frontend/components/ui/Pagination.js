@@ -187,8 +187,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange, maxV
                 gap: '8px'
             }}>
                 <span>Page {currentPage} of {totalPages}</span>
-                <span style={{ color: '#cbd5e1' }}>•</span>
-                <span>Total articles: {totalPages * 10}</span>
             </div>
         </nav>
     );
