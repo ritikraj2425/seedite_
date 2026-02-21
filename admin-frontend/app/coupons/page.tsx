@@ -17,6 +17,9 @@ interface Coupon {
     isActive: boolean;
     isValid: boolean;
     createdAt: string;
+    assignedTo: { _id: string; name: string; email: string }[];
+    assignedAmount: number;
+    paymentHistory: { amount: number; date: string; note: string }[];
 }
 
 export default function CouponsPage() {
@@ -143,73 +146,100 @@ export default function CouponsPage() {
                     </div>
                 ) : (
                     <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
-                        <table className="w-full">
+                        <table className="w-full table-fixed">
                             <thead className="bg-gray-800">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Code</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Discount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Course</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Usage</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Expiry</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[120px]">Code</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[80px]">Discount</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[140px]">Course</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[70px]">Usage</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[150px]">Assigned / Earnings</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[100px]">Expiry</th>
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase w-[80px]">Status</th>
+                                    <th className="px-3 py-3 text-right text-xs font-medium text-gray-400 uppercase w-[160px]">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-800">
                                 {coupons.map((coupon) => (
                                     <tr key={coupon._id} className="hover:bg-gray-800/50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="font-mono text-lg font-bold text-blue-400">{coupon.code}</span>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <span className="font-mono text-sm font-bold text-blue-400">{coupon.code}</span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-green-400 font-semibold">
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <span className="text-green-400 font-semibold text-sm">
                                                 {coupon.discountType === 'percentage'
                                                     ? `${coupon.discountValue}%`
                                                     : `₹${coupon.discountValue}`}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-3 py-3">
                                             {coupon.course ? (
-                                                <span className="text-gray-300">{coupon.course.title}</span>
+                                                <span className="text-gray-300 text-sm truncate block">{coupon.course.title}</span>
                                             ) : (
-                                                <span className="text-gray-500 italic">All Courses</span>
+                                                <span className="text-gray-500 italic text-sm">All</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-gray-300">
-                                                {coupon.usedCount} / {coupon.usageLimit || '∞'}
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <span className="text-gray-300 text-sm">
+                                                {coupon.usedCount}/{coupon.usageLimit || '∞'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={isExpired(coupon.expiryDate) ? 'text-red-400' : 'text-gray-300'}>
+                                        <td className="px-3 py-3">
+                                            {coupon.assignedTo && coupon.assignedTo.length > 0 ? (
+                                                <div>
+                                                    <div className="flex flex-wrap gap-1 mb-1">
+                                                        {coupon.assignedTo.slice(0, 2).map(user => (
+                                                            <span key={user._id} className="px-1.5 py-0.5 text-[10px] rounded-full bg-blue-900/50 text-blue-300 border border-blue-800 truncate max-w-[60px]" title={user.name}>
+                                                                {user.name}
+                                                            </span>
+                                                        ))}
+                                                        {coupon.assignedTo.length > 2 && (
+                                                            <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-gray-700 text-gray-300" title={coupon.assignedTo.slice(2).map(u => u.name).join(', ')}>
+                                                                +{coupon.assignedTo.length - 2}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {coupon.assignedAmount > 0 && (
+                                                        <div className="text-[10px] text-gray-500">
+                                                            ₹{Math.max(0, (coupon.assignedAmount - coupon.discountValue) * coupon.usedCount)} earned
+                                                            {' / ₹'}{(coupon.paymentHistory || []).reduce((s: number, p: { amount: number }) => s + p.amount, 0)} paid
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-500 text-xs italic">None</span>
+                                            )}
+                                        </td>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <span className={`text-sm ${isExpired(coupon.expiryDate) ? 'text-red-400' : 'text-gray-300'}`}>
                                                 {formatDate(coupon.expiryDate)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-3 py-3 whitespace-nowrap">
                                             {isExpired(coupon.expiryDate) ? (
-                                                <span className="px-2 py-1 text-xs rounded-full bg-red-900 text-red-300">Expired</span>
+                                                <span className="px-2 py-0.5 text-[10px] rounded-full bg-red-900 text-red-300">Expired</span>
                                             ) : coupon.isActive ? (
-                                                <span className="px-2 py-1 text-xs rounded-full bg-green-900 text-green-300">Active</span>
+                                                <span className="px-2 py-0.5 text-[10px] rounded-full bg-green-900 text-green-300">Active</span>
                                             ) : (
-                                                <span className="px-2 py-1 text-xs rounded-full bg-gray-700 text-gray-400">Inactive</span>
+                                                <span className="px-2 py-0.5 text-[10px] rounded-full bg-gray-700 text-gray-400">Inactive</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                                        <td className="px-3 py-3 whitespace-nowrap text-right space-x-1">
                                             <button
                                                 onClick={() => toggleActive(coupon)}
-                                                className="text-gray-400 hover:text-white text-sm"
+                                                className="text-gray-400 hover:text-white text-xs"
                                             >
                                                 {coupon.isActive ? 'Disable' : 'Enable'}
                                             </button>
                                             <Link
                                                 href={`/coupons/${coupon._id}/edit`}
-                                                className="text-blue-400 hover:text-blue-300 text-sm"
+                                                className="text-blue-400 hover:text-blue-300 text-xs"
                                             >
                                                 Edit
                                             </Link>
                                             <button
                                                 onClick={() => handleDelete(coupon._id, coupon.code)}
-                                                className="text-red-400 hover:text-red-300 text-sm"
+                                                className="text-red-400 hover:text-red-300 text-xs"
                                             >
                                                 Delete
                                             </button>

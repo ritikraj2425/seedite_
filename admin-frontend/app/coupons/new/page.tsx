@@ -11,6 +11,12 @@ interface Course {
     title: string;
 }
 
+interface User {
+    _id: string;
+    name: string;
+    email: string;
+}
+
 export default function CreateCouponPage() {
     const router = useRouter();
 
@@ -22,12 +28,19 @@ export default function CreateCouponPage() {
     const [usageLimit, setUsageLimit] = useState('');
     const [minPurchaseAmount, setMinPurchaseAmount] = useState('');
     const [description, setDescription] = useState('');
+    const [assignedAmount, setAssignedAmount] = useState('');
 
     const [courses, setCourses] = useState<Course[]>([]);
     const [submitting, setSubmitting] = useState(false);
 
+    // User assignment state
+    const [users, setUsers] = useState<User[]>([]);
+    const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+    const [userSearch, setUserSearch] = useState('');
+
     useEffect(() => {
         fetchCourses();
+        fetchUsers();
         // Set default expiry date to 30 days from now
         const defaultExpiry = new Date();
         defaultExpiry.setDate(defaultExpiry.getDate() + 30);
@@ -45,6 +58,35 @@ export default function CreateCouponPage() {
             console.error('Error fetching courses:', error);
         }
     };
+
+    const fetchUsers = async () => {
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+        try {
+            const res = await fetch(`${API_URL}/api/admin/users`, {
+                headers: { 'Authorization': `Bearer ${adminUser.token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUsers(data);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
+
+    const toggleUserSelection = (user: User) => {
+        setSelectedUsers(prev =>
+            prev.find(u => u._id === user._id)
+                ? prev.filter(u => u._id !== user._id)
+                : [...prev, user]
+        );
+    };
+
+    const filteredUsers = users.filter(u =>
+        (u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.email?.toLowerCase().includes(userSearch.toLowerCase())) &&
+        !selectedUsers.find(su => su._id === u._id)
+    );
 
     const generateCode = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -86,7 +128,9 @@ export default function CreateCouponPage() {
                     expiryDate,
                     usageLimit: usageLimit ? parseInt(usageLimit) : null,
                     minPurchaseAmount: minPurchaseAmount ? parseInt(minPurchaseAmount) : 0,
-                    description
+                    description,
+                    assignedTo: selectedUsers.map(u => u._id),
+                    assignedAmount: assignedAmount ? parseInt(assignedAmount) : 0
                 })
             });
 
@@ -241,6 +285,76 @@ export default function CreateCouponPage() {
                                 className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white resize-none"
                             />
                         </div>
+
+                        {/* Assigned Amount (Commission) */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Assigned Amount per Referral (₹)</label>
+                            <input
+                                type="number"
+                                value={assignedAmount}
+                                onChange={(e) => setAssignedAmount(e.target.value)}
+                                placeholder="e.g., 350"
+                                min="0"
+                                className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Total amount per referral. Commission = Assigned Amount - Discount. Cannot be changed after creation.</p>
+                            {assignedAmount && discountType === 'fixed' && discountValue && (
+                                <div className="mt-2 p-3 bg-gray-800 rounded-lg text-sm">
+                                    <span className="text-gray-400">Commission per use: </span>
+                                    <span className="text-green-400 font-bold">₹{Math.max(0, parseInt(assignedAmount) - parseFloat(discountValue))}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Assign to Users */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Assign to Users</label>
+                            {selectedUsers.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    {selectedUsers.map(user => (
+                                        <span key={user._id} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full text-sm border border-blue-700">
+                                            {user.name}
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleUserSelection(user)}
+                                                className="ml-1 text-blue-400 hover:text-red-400 font-bold"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                            <input
+                                type="text"
+                                value={userSearch}
+                                onChange={(e) => setUserSearch(e.target.value)}
+                                placeholder="Search users by name or email..."
+                                className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white mb-2"
+                            />
+                            {userSearch && filteredUsers.length > 0 && (
+                                <div className="max-h-40 overflow-y-auto bg-black border border-gray-700 rounded-lg divide-y divide-gray-800">
+                                    {filteredUsers.slice(0, 10).map(user => (
+                                        <button
+                                            key={user._id}
+                                            type="button"
+                                            onClick={() => {
+                                                toggleUserSelection(user);
+                                                setUserSearch('');
+                                            }}
+                                            className="w-full text-left px-4 py-2 hover:bg-gray-800 transition-colors"
+                                        >
+                                            <span className="text-white">{user.name}</span>
+                                            <span className="text-gray-500 text-sm ml-2">{user.email}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {userSearch && filteredUsers.length === 0 && (
+                                <p className="text-gray-500 text-sm py-2">No users found</p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">Assigned users can track this coupon from their account</p>
+                        </div>
                     </div>
 
                     {/* Preview */}
@@ -266,8 +380,8 @@ export default function CreateCouponPage() {
                             type="submit"
                             disabled={submitting}
                             className={`px-8 py-3 rounded-lg font-bold ${submitting
-                                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
                                 }`}
                         >
                             {submitting ? 'Creating...' : 'Create Coupon'}
