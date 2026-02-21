@@ -9,11 +9,11 @@ const Footer = () => {
     const socialLinks = [
         {
             icon: Youtube,
-            href: 'https://www.youtube.com/@ritikraj_2425'
+            href: 'https://www.youtube.com/@Seedite'
         },
         {
             icon: Instagram,
-            href: 'https://www.instagram.com/ritik_raj2425'
+            href: 'https://www.instagram.com/seedite_official'
         },
         {
             icon: Linkedin,

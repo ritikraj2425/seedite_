@@ -9,6 +9,7 @@ import Card from '../components/ui/Card';
 import Loader from '../components/ui/Loader';
 import CourseCardSkeleton from '../components/ui/CourseCardSkeleton';
 import Testimonials from '../components/Testimonials';
+import Chatbot from '../components/ui/Chatbot';
 import { BookOpen, Users, Award, CheckCircle, ArrowRight, Sparkles, Play, Target } from 'lucide-react';
 
 
@@ -808,6 +809,11 @@ export default function HomeClient() {
 
                 {/* Testimonials Section */}
                 <Testimonials />
+
+                {/* Chatbot Section — placed after testimonials, right before CTA for maximum conversion */}
+                <div style={{ marginBottom: '80px' }}>
+                    <Chatbot />
+                </div>
 
                 {/* CTA Section */}
                 <section style={{
