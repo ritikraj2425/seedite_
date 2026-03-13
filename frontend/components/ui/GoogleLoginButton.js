@@ -12,6 +12,7 @@ import { API_URL } from '@/lib/api';
 export default function GoogleLoginButton({
     text = 'Continue with Google',
     disabled = false,
+    redirectUrl = '/',
     style = {},
     className = ''
 }) {
@@ -33,7 +34,8 @@ export default function GoogleLoginButton({
             response_type: 'code',
             scope: 'openid email profile',
             access_type: 'offline',
-            prompt: 'select_account', // Always show account selector
+            prompt: 'select_account',
+            state: redirectUrl || '/',
         });
 
         const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

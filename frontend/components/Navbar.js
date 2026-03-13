@@ -231,10 +231,10 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <>
-                                <Link href="/login">
+                                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`}>
                                     <Button variant="outline" style={{ borderColor: '#e2e8f0', color: 'var(--text-muted)' }}>Login</Button>
                                 </Link>
-                                <Link href="/signup">
+                                <Link href={`/signup?redirect=${encodeURIComponent(pathname)}`}>
                                     <Button style={{ borderRadius: '10px', padding: '10px 22px' }}>Sign Up</Button>
                                 </Link>
                             </>
@@ -288,8 +288,8 @@ const Navbar = () => {
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login"><Button variant="outline" style={{ borderColor: '#e2e8f0', color: 'var(--text-muted)', padding: '8px 16px', fontSize: '0.9rem' }}>Login</Button></Link>
-                                <Link href="/signup"><Button style={{ borderRadius: '10px', padding: '8px 18px', fontSize: '0.9rem' }}>Sign Up</Button></Link>
+                                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`}><Button variant="outline" style={{ borderColor: '#e2e8f0', color: 'var(--text-muted)', padding: '8px 16px', fontSize: '0.9rem' }}>Login</Button></Link>
+                                <Link href={`/signup?redirect=${encodeURIComponent(pathname)}`}><Button style={{ borderRadius: '10px', padding: '8px 18px', fontSize: '0.9rem' }}>Sign Up</Button></Link>
                             </>
                         )}
                     </div>
@@ -354,10 +354,10 @@ const Navbar = () => {
                             </>
                         ) : (
                             <div className="navbar-sidebar__actions">
-                                <Link href="/login" onClick={closeSidebar}>
+                                <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} onClick={closeSidebar}>
                                     <Button variant="outline" style={{ width: '100%', justifyContent: 'center' }}>Login</Button>
                                 </Link>
-                                <Link href="/signup" onClick={closeSidebar}>
+                                <Link href={`/signup?redirect=${encodeURIComponent(pathname)}`} onClick={closeSidebar}>
                                     <Button style={{ width: '100%', justifyContent: 'center' }}>Sign Up</Button>
                                 </Link>
                             </div>

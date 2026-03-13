@@ -1574,3 +1574,112 @@ body.has-banner main {
     padding: 3px 10px !important;
   }
 }
+
+/* ====== Featured Courses Carousel ====== */
+.courses-carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.courses-scroll-track {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 8px 0;
+}
+
+@media (min-width: 769px) {
+  .infinite-carousel-track {
+    overflow: visible;
+    transform: var(--carousel-transform, translateX(0));
+    transition: var(--carousel-transition, none);
+  }
+}
+
+.courses-scroll-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-card {
+  flex-shrink: 0;
+  min-width: 360px;
+  max-width: 360px;
+}
+
+/* Disable hover-translate on carousel cards to prevent jumpiness */
+.carousel-card.modern-card:hover {
+  transform: none;
+}
+
+/* Arrow buttons — overlaid on the carousel */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  z-index: 5;
+}
+
+.carousel-arrow--left {
+  left: 8px;
+}
+
+.carousel-arrow--right {
+  right: 8px;
+}
+
+.carousel-arrow:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* On mobile: hide arrows, stack vertically, show max 3 items */
+@media (max-width: 768px) {
+  .courses-carousel-wrapper {
+    overflow: visible;
+  }
+
+  .carousel-arrow {
+    display: none;
+  }
+
+  .courses-scroll-track {
+    flex-direction: column;
+    gap: 20px;
+    padding: 8px 4px;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+
+  .carousel-card {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    scroll-snap-align: none;
+  }
+
+  /* Hide any cloned cards beyond the first 3 on mobile */
+  .carousel-card:nth-child(n+4) {
+    display: none !important;
+  }
+}

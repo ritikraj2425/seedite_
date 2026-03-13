@@ -124,7 +124,7 @@ function LoginContent() {
                     </div>
                 )}
 
-                <GoogleLoginButton text="Sign in with Google" disabled={loading} />
+                <GoogleLoginButton text="Sign in with Google" disabled={loading} redirectUrl={redirectUrl} />
 
                 {/* Divider */}
                 <div style={{
@@ -231,7 +231,7 @@ function LoginContent() {
                 }}>
                     <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
                         Don't have an account?{' '}
-                        <Link href="/signup" style={{ color: '#2563eb', fontWeight: '600' }}>
+                        <Link href={`/signup?redirect=${encodeURIComponent(redirectUrl)}`} style={{ color: '#2563eb', fontWeight: '600' }}>
                             Sign up
                         </Link>
                     </p>

@@ -15,6 +15,7 @@ function GoogleCallbackContent() {
         const handleCallback = async () => {
             const code = searchParams.get('code');
             const errorParam = searchParams.get('error');
+            const stateRedirect = searchParams.get('state') || '/';
 
             if (errorParam) {
                 setError('Google authentication was cancelled or failed.');
@@ -51,8 +52,8 @@ function GoogleCallbackContent() {
                 // Store user data (same as regular login)
                 localStorage.setItem('user', JSON.stringify(data));
 
-                // Redirect to homepage
-                router.push('/');
+                // Redirect to the original page the user was on
+                router.push(stateRedirect);
                 router.refresh();
 
             } catch (err) {

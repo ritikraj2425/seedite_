@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { API_URL } from '@/lib/api';
 import Button from '../../components/ui/Button';
@@ -11,7 +11,17 @@ import { UserPlus, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import GoogleLoginButton from '../../components/ui/GoogleLoginButton';
 
 export default function Signup() {
+    return (
+        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>Loading...</div>}>
+            <SignupContent />
+        </Suspense>
+    );
+}
+
+function SignupContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get('redirect') || '/courses';
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -63,7 +73,7 @@ export default function Signup() {
 
             localStorage.setItem('user', JSON.stringify(data));
 
-            router.push('/courses');
+            router.push(redirectUrl);
             setTimeout(() => window.location.reload(), 100);
         } catch (err) {
             setError(err.message);
@@ -125,7 +135,7 @@ export default function Signup() {
                     </div>
                 )}
 
-                <GoogleLoginButton text="Sign up with Google" disabled={loading} />
+                <GoogleLoginButton text="Sign up with Google" disabled={loading} redirectUrl={redirectUrl} />
 
                 {/* Divider */}
                 <div style={{
@@ -285,7 +295,7 @@ export default function Signup() {
                 }}>
                     <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
                         Already have an account?{' '}
-                        <Link href="/login" style={{ color: '#7c3aed', fontWeight: '600' }}>
+                        <Link href={`/login?redirect=${encodeURIComponent(redirectUrl)}`} style={{ color: '#7c3aed', fontWeight: '600' }}>
                             Sign in
                         </Link>
                     </p>

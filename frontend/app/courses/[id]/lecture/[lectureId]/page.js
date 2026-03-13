@@ -56,6 +56,36 @@ export default function LecturePlayer() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    // Auto-rotate to landscape when video goes fullscreen on mobile
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            try {
+                if (document.fullscreenElement) {
+                    // Entering fullscreen — lock to landscape
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(() => {
+                            // Silently fail if not supported (e.g. desktop browsers)
+                        });
+                    }
+                } else {
+                    // Exiting fullscreen — unlock orientation
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                }
+            } catch (e) {
+                // screen.orientation API not available
+            }
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        };
+    }, []);
+
     useEffect(() => {
         if (!courseId) return;
 
