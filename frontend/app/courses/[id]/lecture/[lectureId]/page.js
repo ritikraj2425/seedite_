@@ -8,6 +8,7 @@ import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
 import { VideoSkeleton } from '../../../../../components/ui/Skeleton';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
+import BunnyPlayer from '../../../../../components/ui/BunnyPlayer';
 import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { convertToYouTubeEmbed, isIframeVideo, isBunnyVideo } from '../../../../../lib/videoUtils';
 import dynamic from 'next/dynamic';
@@ -99,6 +100,16 @@ export default function LecturePlayer() {
             }
 
             try {
+                // Check if session is still valid explicitly, because course API swallows 401s
+                const profileRes = await fetch(`${API_URL}/api/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!profileRes.ok) {
+                    // Session is invalid. Global SessionProvider handles the 401 intercept and redirect.
+                    return;
+                }
+
                 const res = await fetch(`${API_URL}/api/courses/${courseId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -246,6 +257,13 @@ export default function LecturePlayer() {
                             {!currentLecture.videoUrl ? (
                                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                                     Video Unavailable
+                                </div>
+                            ) : isBunnyVideo(currentLecture.videoUrl) ? (
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                    <BunnyPlayer
+                                        src={currentLecture.videoUrl}
+                                        lectureId={currentLecture._id}
+                                    />
                                 </div>
                             ) : isIframeVideo(currentLecture.videoUrl) ? (
                                 <iframe

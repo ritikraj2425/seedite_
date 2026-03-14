@@ -10,7 +10,8 @@ import Card from '../../../components/ui/Card';
 import Loader from '../../../components/ui/Loader';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronRight, X, ArrowLeft } from 'lucide-react';
-import { convertToYouTubeEmbed } from '../../../lib/videoUtils';
+import { convertToYouTubeEmbed, isBunnyVideo } from '../../../lib/videoUtils';
+import BunnyPlayer from '../../../components/ui/BunnyPlayer';
 import dynamic from 'next/dynamic';
 
 const PdfViewer = dynamic(() => import('../../../components/PdfViewer'), {
@@ -218,7 +219,7 @@ export default function CourseDetails() {
                                                                             <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
                                                                             <span style={{ fontWeight: 500 }}>{lecture.title}</span>
                                                                         </div>
-                                                                        <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px', width: '130px', justifyContent: 'center' }}>
+                                                                        <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px', minWidth: '110px', width: '110px', justifyContent: 'center' }}>
                                                                             {lecture.type === 'pdf' ? 'View PDF' : 'Watch'}
                                                                         </Button>
                                                                     </Card>
@@ -238,7 +239,7 @@ export default function CourseDetails() {
                                                         <span style={{ color: '#94a3b8', marginRight: '12px' }}>{index + 1}.</span>
                                                         <span style={{ fontWeight: 500 }}>{lecture.title}</span>
                                                     </div>
-                                                    <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px' }}>
+                                                    <Button variant="outline" style={{ fontSize: '0.9rem', padding: '8px 12px', minWidth: '110px', width: '110px', justifyContent: 'center' }}>
                                                         {lecture.type === 'pdf' ? 'View PDF' : 'Watch'}
                                                     </Button>
                                                 </Card>
@@ -313,6 +314,21 @@ export default function CourseDetails() {
                                                         <Button style={{ padding: '10px 24px' }}>View PDF</Button>
                                                         <span style={{ display: 'block', marginTop: '12px', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, width: 'fit-content', margin: '12px auto 0' }}>FREE PREVIEW</span>
                                                     </Card>
+                                                ) : isBunnyVideo(currentDemo.videoUrl) ? (
+                                                    <Card style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
+                                                        <div style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
+                                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                                                <BunnyPlayer
+                                                                    src={currentDemo.videoUrl}
+                                                                    lectureId={currentDemo._id}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ padding: '16px' }}>
+                                                            <p style={{ fontWeight: 500, margin: 0, fontSize: '1.1rem' }}>{currentDemo.title}</p>
+                                                            <span style={{ display: 'inline-block', marginTop: '8px', background: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>FREE PREVIEW</span>
+                                                        </div>
+                                                    </Card>
                                                 ) : (
                                                     <Card style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
                                                         <div style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
@@ -365,7 +381,7 @@ export default function CourseDetails() {
                                                             </div>
                                                             <Button
                                                                 variant={currentDemo._id === lecture._id ? 'primary' : 'outline'}
-                                                                style={{ fontSize: '0.9rem', padding: '8px 12px' }}
+                                                                style={{ fontSize: '0.9rem', padding: '8px 12px', minWidth: '110px', width: '110px', justifyContent: 'center' }}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     if (lecture.type === 'pdf') {

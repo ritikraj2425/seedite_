@@ -178,7 +178,7 @@ export default function Dashboard() {
 
                 {user?.enrolledCourses && user?.enrolledCourses?.length > 0 ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
-                        {[...user?.enrolledCourses]?.reverse().map(course => (
+                        {[...user?.enrolledCourses]?.map(course => (
                             <Link key={course?._id} href={`/courses/${course?._id}`}>
 
                                 <div className="modern-card" style={{

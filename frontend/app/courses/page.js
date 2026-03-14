@@ -84,7 +84,7 @@ export default function Courses() {
                         </div>
                     ) : courses?.length > 0 ? (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
-                            {courses?.map((course, index) => (
+                            {[...courses]?.reverse().map((course, index) => (
                                 <div key={course?._id} className="modern-card" style={{
                                     padding: '0',
                                     overflow: 'hidden',
