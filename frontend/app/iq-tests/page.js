@@ -12,21 +12,18 @@ import * as THREE from 'three';
 import Link from 'next/link';
 
 // ═══════════════════════════════════════════════════════════════════
-// 3D BRAIN HEMISPHERE
+// 3D BRAIN HEMISPHERE — pure auto-animation, NO scroll dependency
 // ═══════════════════════════════════════════════════════════════════
-function BrainHemisphere({ side, splitProgress, color1, color2 }) {
+function BrainHemisphere({ side, color1, color2 }) {
     const meshRef = useRef();
     const glowRef = useRef();
 
     useFrame((state) => {
         if (!meshRef.current) return;
         const t = state.clock.elapsedTime;
-        const splitX = side * splitProgress * 2.5;
-        meshRef.current.position.x = splitX;
         meshRef.current.rotation.y = t * 0.15 + side * 0.3;
         meshRef.current.rotation.z = Math.sin(t * 0.3) * 0.1;
         if (glowRef.current) {
-            glowRef.current.position.x = splitX;
             glowRef.current.rotation.y = t * 0.15 + side * 0.3;
         }
     });
@@ -38,10 +35,10 @@ function BrainHemisphere({ side, splitProgress, color1, color2 }) {
                     <MeshDistortMaterial
                         color={color1}
                         emissive={color2}
-                        emissiveIntensity={0.3 + splitProgress * 0.5}
+                        emissiveIntensity={0.3}
                         roughness={0.2}
                         metalness={0.8}
-                        distort={0.35 + Math.sin(splitProgress * Math.PI) * 0.15}
+                        distort={0.35}
                         speed={2}
                         transparent
                         opacity={0.85}
@@ -53,7 +50,7 @@ function BrainHemisphere({ side, splitProgress, color1, color2 }) {
                     <meshBasicMaterial
                         color={color2}
                         transparent
-                        opacity={0.04 + splitProgress * 0.06}
+                        opacity={0.04}
                         side={THREE.BackSide}
                     />
                 </Sphere>
@@ -63,9 +60,9 @@ function BrainHemisphere({ side, splitProgress, color1, color2 }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// NEURAL PARTICLES
+// NEURAL PARTICLES — pure auto-animation
 // ═══════════════════════════════════════════════════════════════════
-function NeuralParticles({ count = 300, splitProgress }) {
+function NeuralParticles({ count = 150 }) {
     const pointsRef = useRef();
     const { positions, colors } = useMemo(() => {
         const pos = new Float32Array(count * 3);
@@ -90,14 +87,6 @@ function NeuralParticles({ count = 300, splitProgress }) {
         const t = state.clock.elapsedTime;
         pointsRef.current.rotation.y = t * 0.04;
         pointsRef.current.rotation.x = Math.sin(t * 0.05) * 0.1;
-        const geo = pointsRef.current.geometry;
-        const posAttr = geo.attributes.position;
-        for (let i = 0; i < count; i++) {
-            const ox = positions[i * 3];
-            const spreadX = ox > 0 ? splitProgress * 1.5 : -splitProgress * 1.5;
-            posAttr.array[i * 3] = ox + spreadX;
-        }
-        posAttr.needsUpdate = true;
     });
 
     return (
@@ -110,7 +99,7 @@ function NeuralParticles({ count = 300, splitProgress }) {
                 size={0.04}
                 vertexColors
                 transparent
-                opacity={0.6 + splitProgress * 0.3}
+                opacity={0.6}
                 sizeAttenuation
                 blending={THREE.AdditiveBlending}
                 depthWrite={false}
@@ -118,38 +107,35 @@ function NeuralParticles({ count = 300, splitProgress }) {
         </points>
     );
 }
-function EnergyCore({ splitProgress }) {
+
+function EnergyCore() {
     const coreRef = useRef();
 
     useFrame((state) => {
         if (!coreRef.current) return;
         const t = state.clock.elapsedTime;
-        const scale = splitProgress * 1.2;
-        coreRef.current.scale.setScalar(Math.max(scale, 0.01));
         coreRef.current.rotation.y = t * 2;
         coreRef.current.rotation.z = t * 0.5;
     });
-
-    if (splitProgress < 0.05) return null;
 
     return (
         <group ref={coreRef}>
             <mesh>
                 <sphereGeometry args={[0.3, 32, 32]} />
-                <meshBasicMaterial color="#93c5fd" transparent opacity={splitProgress} />
+                <meshBasicMaterial color="#93c5fd" transparent opacity={0.5} />
             </mesh>
             <mesh scale={1.5}>
                 <sphereGeometry args={[0.3, 32, 32]} />
-                <meshBasicMaterial color="#60a5fa" transparent opacity={splitProgress * 0.4} side={THREE.BackSide} />
+                <meshBasicMaterial color="#60a5fa" transparent opacity={0.2} side={THREE.BackSide} />
             </mesh>
             <mesh scale={3}>
                 <sphereGeometry args={[0.3, 16, 16]} />
-                <meshBasicMaterial color="#93c5fd" transparent opacity={splitProgress * 0.15} side={THREE.BackSide} />
+                <meshBasicMaterial color="#93c5fd" transparent opacity={0.08} side={THREE.BackSide} />
             </mesh>
             {[0, 1, 2].map((i) => (
                 <mesh key={i} rotation={[Math.PI / 2 * i * 0.7, i * 0.5, 0]}>
                     <torusGeometry args={[0.6 + i * 0.2, 0.008, 16, 100]} />
-                    <meshBasicMaterial color="#60a5fa" transparent opacity={splitProgress * 0.6} />
+                    <meshBasicMaterial color="#60a5fa" transparent opacity={0.3} />
                 </mesh>
             ))}
         </group>
@@ -157,33 +143,28 @@ function EnergyCore({ splitProgress }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// SCENE WRAPPER
+// SCENE — pure animation, no scroll, no props that trigger re-renders
 // ═══════════════════════════════════════════════════════════════════
-function BrainScene({ splitProgress }) {
-    const { camera } = useThree();
-    useFrame(() => {
-        camera.position.z = 5 + splitProgress * 1.5;
-    });
-
+function BrainScene() {
     return (
         <>
             <ambientLight intensity={0.3} />
             <pointLight position={[5, 5, 5]} intensity={1} color="#60a5fa" />
             <pointLight position={[-5, -3, 5]} intensity={0.8} color="#3b82f6" />
-            <pointLight position={[0, 0, 3]} intensity={0.5 + splitProgress * 2} color="#dbeafe" />
+            <pointLight position={[0, 0, 3]} intensity={0.5} color="#dbeafe" />
 
             <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.4}>
-                <BrainHemisphere side={-1} splitProgress={splitProgress} color1="#1e40af" color2="#3b82f6" />
+                <BrainHemisphere side={-1} color1="#bfdbfe" color2="#60a5fa" />
             </Float>
             <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.4} floatingRange={[0, 0.1]}>
-                <BrainHemisphere side={1} splitProgress={splitProgress} color1="#1d4ed8" color2="#2563eb" />
+                <BrainHemisphere side={1} color1="#93c5fd" color2="#3b82f6" />
             </Float>
 
-            <EnergyCore splitProgress={splitProgress} />
-            <NeuralParticles count={150} splitProgress={splitProgress} />
+            <EnergyCore />
+            <NeuralParticles count={150} />
 
             <EffectComposer>
-                <Bloom intensity={0.6 + splitProgress * 1.2} luminanceThreshold={0.3} luminanceSmoothing={0.9} radius={0.5} />
+                <Bloom intensity={0.4} luminanceThreshold={0.5} luminanceSmoothing={0.9} radius={0.5} />
             </EffectComposer>
         </>
     );
@@ -191,28 +172,12 @@ function BrainScene({ splitProgress }) {
 
 
 // ═══════════════════════════════════════════════════════════════════
-// MAIN PAGE COMPONENT
+// MAIN PAGE COMPONENT — NO scroll state, NO scroll listener at all
 // ═══════════════════════════════════════════════════════════════════
 export default function IQTestsIndex() {
     const [iqTests, setIqTests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [scrollY, setScrollY] = useState(0);
     const router = useRouter();
-
-    useEffect(() => {
-        let ticking = false;
-        const handleScroll = () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    setScrollY(window.scrollY);
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     useEffect(() => {
         const fetchIQTests = async () => {
@@ -231,10 +196,6 @@ export default function IQTestsIndex() {
         fetchIQTests();
     }, []);
 
-    const splitProgress = Math.min(Math.max(scrollY / 700, 0), 1);
-    const heroOpacity = Math.max(1 - scrollY * 0.0025, 0);
-    const contentReveal = Math.min(Math.max((scrollY - 300) / 400, 0), 1);
-
     return (
         <>
             <style>{`
@@ -243,36 +204,33 @@ export default function IQTestsIndex() {
             .iq-page {
                 background: #f8fafc;
                 position: relative;
-                overflow-x: hidden;
                 font-family: 'Inter', -apple-system, sans-serif;
                 color: #1e293b;
             }
 
-            /* ── Hero ── */
+            /* ── Hero Section ── */
             .iq-hero {
-                position: sticky;
-                top: 0;
+                position: relative;
                 height: 100vh;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                z-index: 1;
-                pointer-events: none;
+                overflow: hidden;
+                background: #f8fafc;
             }
 
             .iq-canvas-wrap {
-                width: 100%;
-                height: 100vh;
                 position: absolute;
                 inset: 0;
+                z-index: 0;
             }
 
+            /* Text wrapper with frosted glass card */
             .iq-hero-text-wrap {
                 position: relative;
                 z-index: 10;
                 text-align: center;
-                pointer-events: auto;
                 max-width: 780px;
                 padding: 0 24px;
             }
@@ -307,32 +265,30 @@ export default function IQTestsIndex() {
                 50% { opacity: 1; transform: scale(1.4); }
             }
 
-            /* Title — solid white with text-shadow for readability */
+            /* Title — white on dark background */
             .iq-title {
                 font-size: clamp(2.8rem, 6vw, 5.2rem);
                 font-weight: 900;
                 line-height: 1.05;
                 letter-spacing: -0.04em;
                 margin-bottom: 22px;
-                color: #fff;
-                text-shadow: 0 2px 40px rgba(15,23,42,0.6), 0 1px 8px rgba(0,0,0,0.4);
+                color: #111827;
                 animation: iqReveal 1s ease-out 0.2s both;
             }
             .iq-title em {
                 font-style: normal;
-                color: #93c5fd;
-                text-shadow: 0 0 60px rgba(59,130,246,0.5), 0 2px 40px rgba(15,23,42,0.6);
+                color: #1D4ED8;
             }
 
             .iq-subtitle {
-                color: rgba(255,255,255,0.8);
+                color: #1F2937;
                 font-size: 1.15rem;
+                font-weight: 500;
                 line-height: 1.7;
                 margin-bottom: 40px;
                 max-width: 540px;
                 margin-left: auto;
                 margin-right: auto;
-                text-shadow: 0 1px 12px rgba(0,0,0,0.3);
                 animation: iqReveal 0.8s ease-out 0.4s both;
             }
 
@@ -369,16 +325,22 @@ export default function IQTestsIndex() {
                 flex-direction: column;
                 align-items: center;
                 gap: 8px;
-                color: rgba(255,255,255,0.5);
+                color: rgba(15, 23, 42, 0.4);
                 font-size: 0.72rem;
                 font-weight: 500;
                 letter-spacing: 0.12em;
                 text-transform: uppercase;
                 animation: iqBounce 2s ease-in-out infinite;
+                margin-top: 32px;
+                position: absolute;
+                bottom: 32px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10;
             }
             @keyframes iqBounce {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(10px); }
+                0%, 100% { transform: translateX(-50%) translateY(0); }
+                50% { transform: translateX(-50%) translateY(10px); }
             }
 
             /* ── Content Section ── */
@@ -386,6 +348,7 @@ export default function IQTestsIndex() {
                 position: relative;
                 z-index: 5;
                 background: #f8fafc;
+                padding-top: 80px;
             }
 
             /* ── How It Works ── */
@@ -701,18 +664,6 @@ export default function IQTestsIndex() {
                 40% { transform: scale(1.2); opacity: 1; }
             }
 
-            .iq-fade {
-                opacity: 0;
-                transform: translateY(30px);
-                filter: blur(6px);
-                transition: opacity 0.8s cubic-bezier(0.2,0.8,0.2,1), transform 0.8s cubic-bezier(0.2,0.8,0.2,1), filter 0.8s cubic-bezier(0.2,0.8,0.2,1);
-            }
-            .iq-fade.visible {
-                opacity: 1;
-                transform: translateY(0);
-                filter: blur(0);
-            }
-
             /* ── Responsive ── */
             @media (max-width: 992px) {
                 .iq-how-grid { grid-template-columns: 1fr; gap: 28px; }
@@ -734,7 +685,7 @@ export default function IQTestsIndex() {
             <main className="iq-page">
                 <Navbar />
 
-                {/* ── Sticky Hero ── */}
+                {/* ── Hero — no scroll JS, just static layout ── */}
                 <section className="iq-hero">
                     <div className="iq-canvas-wrap">
                         <Canvas
@@ -743,18 +694,12 @@ export default function IQTestsIndex() {
                             style={{ background: 'transparent' }}
                         >
                             <Suspense fallback={null}>
-                                <BrainScene splitProgress={splitProgress} />
+                                <BrainScene />
                             </Suspense>
                         </Canvas>
                     </div>
 
-                    <div
-                        className="iq-hero-text-wrap"
-                        style={{
-                            opacity: heroOpacity,
-                            transform: `translateY(${scrollY * 0.25}px)`,
-                        }}
-                    >
+                    <div className="iq-hero-text-wrap">
                         <div className="iq-badge">
                             <div className="iq-badge-dot"></div>
                             Neural Assessment Suite
@@ -767,36 +712,27 @@ export default function IQTestsIndex() {
                             Advanced psychometric assessments measuring logic, pattern recognition, and analytical thinking — timed, scored, and ranked.
                         </p>
 
-                        {iqTests.length > 0 && scrollY < 100 && (
+                        {iqTests.length > 0 && (
                             <button className="iq-cta" onClick={() => {
                                 document.getElementById('iq-tests-grid')?.scrollIntoView({ behavior: 'smooth' });
                             }}>
                                 Begin Assessment <ArrowRight size={18} />
                             </button>
                         )}
+                    </div>
 
-                        {scrollY < 50 && (
-                            <div className="iq-scroll-indicator" style={{ marginTop: 48 }}>
-                                <span>Scroll to Explore</span>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 5v14M19 12l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        )}
+                    <div className="iq-scroll-indicator">
+                        <span>Scroll to Explore</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 5v14M19 12l-7 7-7-7" />
+                        </svg>
                     </div>
                 </section>
 
-                {/* ── Scrollable Content ── */}
-                <div
-                    className="iq-content"
-                    style={{
-                        opacity: contentReveal,
-                        transform: `translateY(${(1 - contentReveal) * 60}px)`,
-                        transition: 'opacity 0.15s, transform 0.15s',
-                    }}
-                >
+                {/* ── Content — normal flow, no scroll-linked transforms ── */}
+                <div className="iq-content">
                     {/* How It Works */}
-                    <div className={`iq-how iq-fade ${contentReveal > 0.3 ? 'visible' : ''}`} style={{ transitionDelay: '0.05s' }}>
+                    <div className="iq-how">
                         <div className="iq-how-title">How It Works</div>
                         <h3 className="iq-how-heading">Three simple steps to test your mind</h3>
                         <div className="iq-how-grid">
@@ -831,7 +767,7 @@ export default function IQTestsIndex() {
                             <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: 1.6 }}>New adaptive assessments are being prepared. Check back soon.</p>
                         </div>
                     ) : (
-                        <div id="iq-tests-grid" className={`iq-fade ${contentReveal > 0.5 ? 'visible' : ''}`} style={{ transitionDelay: '0.15s' }}>
+                        <div id="iq-tests-grid">
                             <div className="iq-section-hdr">
                                 <div className="iq-section-label">Assessments</div>
                                 <h2>Select Your Assessment</h2>
@@ -872,7 +808,7 @@ export default function IQTestsIndex() {
 
                     {/* Footer CTA */}
                     {iqTests.length > 0 && (
-                        <div className={`iq-footer-cta iq-fade ${contentReveal > 0.8 ? 'visible' : ''}`} style={{ transitionDelay: '0.3s' }}>
+                        <div className="iq-footer-cta">
                             <h3>Ready to Challenge Yourself?</h3>
                             <p>Take 15 minutes to discover your cognitive profile. No registration required — just start and get your score instantly.</p>
                             <button className="iq-footer-btn" onClick={() => {

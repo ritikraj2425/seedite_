@@ -104,6 +104,18 @@ button {
   background: rgba(99, 102, 241, 0.1);
 }
 
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  box-shadow: none;
+  transform: none;
+}
+
 .card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -631,7 +643,7 @@ h3 {
 .shimmer-link {
   position: relative;
   display: inline-block;
-  color: #fb6e28;
+  /* color: #fb6e28; */
   overflow: hidden;
 }
 
