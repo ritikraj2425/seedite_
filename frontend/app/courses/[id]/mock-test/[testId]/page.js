@@ -55,6 +55,9 @@ export default function MockTestPage() {
     const answersRef = useRef({});
     const timeRemainingRef = useRef(180 * 60);
 
+    // Time tracking for advanced analytics
+    const timeSpentOnQuestionsRef = useRef({});
+
     // Get userId for persistence
     const savedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : {};
     const userId = savedUser.id || savedUser._id || 'anonymous';
@@ -94,6 +97,7 @@ export default function MockTestPage() {
                         setViewedQuestions(restoredProgress.viewedQuestions);
                         setTimeRemaining(0);
                         timeRemainingRef.current = 0;
+                        if (restoredProgress.timeSpent) timeSpentOnQuestionsRef.current = restoredProgress.timeSpent;
                         // Will trigger auto-submit via timer effect
                         setViewMode('test');
                         setIsRestoringProgress(false);
@@ -109,6 +113,7 @@ export default function MockTestPage() {
                     timeRemainingRef.current = restoredProgress.timeRemaining;
                     setMarkedForReview(restoredProgress.markedForReview);
                     setViewedQuestions(restoredProgress.viewedQuestions);
+                    if (restoredProgress.timeSpent) timeSpentOnQuestionsRef.current = restoredProgress.timeSpent;
                     setViewMode('test');
                     setIsRestoringProgress(false);
 
@@ -185,9 +190,13 @@ export default function MockTestPage() {
             setTimeRemaining(prev => {
                 const newTime = prev - 1;
                 timeRemainingRef.current = newTime;
+
+                // Track time spent on current question
+                timeSpentOnQuestionsRef.current[currentQuestion] = (timeSpentOnQuestionsRef.current[currentQuestion] || 0) + 1;
+
                 if (newTime <= 0) {
                     // CRITICAL: Use answersRef.current to avoid stale closure
-                    handleSubmitWithAnswers(answersRef.current);
+                    handleSubmitWithAnswers(answersRef.current, timeSpentOnQuestionsRef.current);
                     return 0;
                 }
                 return newTime;
@@ -209,7 +218,8 @@ export default function MockTestPage() {
             currentQuestion,
             timeRemaining: timeRemainingRef.current,
             markedForReview,
-            viewedQuestions
+            viewedQuestions,
+            timeSpent: timeSpentOnQuestionsRef.current
         });
     }, [answers, currentQuestion, markedForReview, viewedQuestions, viewMode, submitted, isRestoringProgress, saveProgress]);
 
@@ -329,7 +339,7 @@ export default function MockTestPage() {
     };
 
     // Submit handler that accepts answers parameter (for timer auto-submit with ref)
-    const handleSubmitWithAnswers = async (answersToSubmit) => {
+    const handleSubmitWithAnswers = async (answersToSubmit, timeSpentToSubmit) => {
         if (!test) return;
         if (document.fullscreenElement) document.exitFullscreen().catch(console.error);
 
@@ -361,6 +371,9 @@ export default function MockTestPage() {
         // Clear localStorage progress after submission
         clearProgress();
 
+        const testDuration = (test.duration || test.durationMinutes || 180) * 60;
+        const totalTimeSpent = testDuration - timeRemainingRef.current;
+
         const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
         try {
             await fetch(`${API_URL}/api/mock-tests/${testId}/submit`, {
@@ -374,7 +387,9 @@ export default function MockTestPage() {
                     totalMarks: maxPossible,
                     normalizedScore: parseFloat(normalized.toFixed(2)),
                     totalQuestions: test.questions.length,
-                    answers: answersToSubmit
+                    answers: answersToSubmit,
+                    timeSpent: timeSpentToSubmit,
+                    totalTime: totalTimeSpent
                 })
             });
         } catch (error) {
@@ -384,7 +399,7 @@ export default function MockTestPage() {
 
     // Regular submit (uses current answers state)
     const handleSubmit = async () => {
-        await handleSubmitWithAnswers(answersRef.current);
+        await handleSubmitWithAnswers(answersRef.current, timeSpentOnQuestionsRef.current);
     };
 
     const handleRetake = () => {
@@ -394,6 +409,7 @@ export default function MockTestPage() {
         const newAnswers = {};
         setAnswers(newAnswers);
         answersRef.current = newAnswers;
+        timeSpentOnQuestionsRef.current = {};
         setCurrentQuestion(0);
         const newTime = (test?.duration || test?.durationMinutes || 180) * 60;
         setTimeRemaining(newTime);
@@ -1108,6 +1124,7 @@ export default function MockTestPage() {
 
                             <div style={{ marginTop: '16px' }}>
                                 <Button onClick={handleRetake} style={{ width: '100%' }}>Retake Test</Button>
+                                <Button onClick={() => router.push(`/courses/${id}/mock-test/${testId}/analytics`)} variant="outline" style={{ width: '100%', marginTop: '8px' }}>View Full Analytics</Button>
                             </div>
                         </Card>
 

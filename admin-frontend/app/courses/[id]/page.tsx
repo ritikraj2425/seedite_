@@ -41,6 +41,8 @@ export default function EditCoursePage() {
     const [newLectureIsFree, setNewLectureIsFree] = useState(false);
     const [selectedSectionId, setSelectedSectionId] = useState(''); // New: Selection for adding lecture
     const [newSectionTitle, setNewSectionTitle] = useState(''); // New: For creating section
+    const [newLectureVideoSource, setNewLectureVideoSource] = useState<'server' | 'youtube'>('server');
+    const [newLectureYoutubeUrl, setNewLectureYoutubeUrl] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [uploadingLecture, setUploadingLecture] = useState(false);
 
@@ -266,8 +268,13 @@ export default function EditCoursePage() {
             return;
         }
 
-        if (newLectureType === 'video' && !newLectureVideoKey) {
+        if (newLectureType === 'video' && newLectureVideoSource === 'server' && !newLectureVideoKey) {
             toast.error('Please upload a video for video lecture');
+            return;
+        }
+
+        if (newLectureType === 'video' && newLectureVideoSource === 'youtube' && !newLectureYoutubeUrl) {
+            toast.error('Please enter a YouTube URL');
             return;
         }
 
@@ -290,12 +297,14 @@ export default function EditCoursePage() {
                 body: JSON.stringify({
                     title: newLectureTitle,
                     type: newLectureType,
-                    videoKey: newLectureVideoKey,
+                    ...(newLectureVideoSource === 'youtube'
+                        ? { videoUrl: newLectureYoutubeUrl }
+                        : { videoKey: newLectureVideoKey }),
                     pdfUrl: newLecturePdfUrl,
                     duration: newLectureDuration,
                     isFree: newLectureIsFree,
                     courseId: courseId,
-                    sectionId: selectedSectionId || null // Pass sectionId if selected
+                    sectionId: selectedSectionId || null
                 })
             });
 
@@ -303,7 +312,9 @@ export default function EditCoursePage() {
                 toast.success('Lecture added successfully!');
                 setNewLectureTitle('');
                 setNewLectureType('video');
+                setNewLectureVideoSource('server');
                 setNewLectureVideoKey('');
+                setNewLectureYoutubeUrl('');
                 setNewLecturePdfUrl('');
                 setNewLectureDuration('');
                 setNewLectureIsFree(false);
@@ -790,19 +801,63 @@ export default function EditCoursePage() {
                             </div>
 
                             {newLectureType === 'video' ? (
-                                <div>
-                                    <label className="block text-xs text-gray-400 mb-1">Lecture Video</label>
-                                    {newLectureVideoKey && (
-                                        <p className="text-xs text-green-400 mb-2">✓ Video Uploaded: {newLectureVideoKey}</p>
+                                <div className="space-y-3">
+                                    <label className="block text-xs text-gray-400 mb-1">Video Source</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="videoSource"
+                                                value="server"
+                                                checked={newLectureVideoSource === 'server'}
+                                                onChange={() => setNewLectureVideoSource('server')}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <span className="text-sm text-gray-300">Upload to Server</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="videoSource"
+                                                value="youtube"
+                                                checked={newLectureVideoSource === 'youtube'}
+                                                onChange={() => setNewLectureVideoSource('youtube')}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <span className="text-sm text-gray-300">YouTube Link</span>
+                                        </label>
+                                    </div>
+
+                                    {newLectureVideoSource === 'server' ? (
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1">Lecture Video</label>
+                                            {newLectureVideoKey && (
+                                                <p className="text-xs text-green-400 mb-2">✓ Video Uploaded: {newLectureVideoKey}</p>
+                                            )}
+                                            <input
+                                                type="file"
+                                                accept="video/*"
+                                                onChange={handleLectureVideoUpload}
+                                                disabled={uploadingLecture}
+                                                className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                            />
+                                            {uploadingLecture && <p className="text-sm text-blue-400 mt-1">Uploading video (this may take a while)...</p>}
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1">YouTube URL</label>
+                                            <input
+                                                type="url"
+                                                placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                                                value={newLectureYoutubeUrl}
+                                                onChange={(e) => setNewLectureYoutubeUrl(e.target.value)}
+                                                className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                            />
+                                            {newLectureYoutubeUrl && (
+                                                <p className="text-xs text-green-400 mt-1">✓ YouTube link set</p>
+                                            )}
+                                        </div>
                                     )}
-                                    <input
-                                        type="file"
-                                        accept="video/*"
-                                        onChange={handleLectureVideoUpload}
-                                        disabled={uploadingLecture}
-                                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
-                                    />
-                                    {uploadingLecture && <p className="text-sm text-blue-400 mt-1">Uploading video (this may take a while)...</p>}
                                 </div>
                             ) : (
                                 <div>
@@ -867,7 +922,7 @@ export default function EditCoursePage() {
                             <div key={test._id} className="flex justify-between items-center p-4 bg-black border border-gray-700 rounded-lg">
                                 <div>
                                     <h3 className="font-semibold">{test.title}</h3>
-                                    <p className="text-sm text-gray-400">{test.questions?.length || 0} Questions • {test.duration} mins</p>
+                                    <p className="text-sm text-gray-400">{test.totalQuestions || test.questions?.length || 0} Questions • {test.duration} mins</p>
                                 </div>
                                 <div className="flex space-x-2">
                                     <Link href={`/courses/${courseId}/mock-tests/${test._id}`} className="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-700">

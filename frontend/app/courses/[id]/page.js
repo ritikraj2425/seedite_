@@ -164,7 +164,7 @@ export default function CourseDetails() {
                         {isEnrolled ? <></> : <p style={{ color: '#94a3b8', marginBottom: '24px', fontSize: '1.1rem' }}>{course.description}</p>}
 
                         {/* Course Highlights / What you'll learn */}
-                        {course.courseDetails && course.courseDetails.length > 0 && (
+                        {!isEnrolled && course.courseDetails && course.courseDetails.length > 0 && (
                             <div className="learn-box" style={{ marginBottom: '40px' }}>
                                 <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     What you'll learn
@@ -186,7 +186,7 @@ export default function CourseDetails() {
                                 <h2 style={{ marginBottom: '20px' }}>Course Content</h2>
 
                                 <div style={{ marginBottom: '32px' }}>
-                                    <h3 style={{ fontSize: '1.4rem', color: '#6366f1', marginBottom: '16px' }}>Lectures</h3>
+                                    <h3 style={{ fontSize: '1.4rem', color: '#2563eb', marginBottom: '16px' }}>Lectures</h3>
 
                                     <div style={{ display: 'grid', gap: '16px' }}>
                                         {/* Sections as Dropdown Rows */}
@@ -338,7 +338,7 @@ export default function CourseDetails() {
                                                                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
                                                                 allowFullScreen
                                                                 loading="lazy"
-                                                                referrerPolicy="no-referrer"
+                                                                referrerPolicy="origin"
                                                                 tabIndex="0"
                                                                 playsInline
                                                                 title={currentDemo.title || 'Demo Video'}
@@ -352,7 +352,7 @@ export default function CourseDetails() {
                                                 )}
 
                                                 {/* Demo Lectures List */}
-                                                <h3 style={{ fontSize: '1.2rem', color: '#6366f1', marginBottom: '16px' }}>Available Previews</h3>
+                                                <h3 style={{ fontSize: '1.2rem', color: '#2563eb', marginBottom: '16px' }}>Available Previews</h3>
                                                 <div style={{ display: 'grid', gap: '12px' }}>
                                                     {demoLectures.map((lecture, index) => (
                                                         <Card
@@ -364,7 +364,7 @@ export default function CourseDetails() {
                                                                 justifyContent: 'space-between',
                                                                 alignItems: 'center',
                                                                 cursor: 'pointer',
-                                                                border: currentDemo._id === lecture._id ? '2px solid #6366f1' : undefined
+                                                                border: currentDemo._id === lecture._id ? '2px solid #2563eb' : undefined
                                                             }}
                                                         >
                                                             <div>
@@ -470,13 +470,13 @@ export default function CourseDetails() {
                             {isEnrolled && (
                                 <Card style={{
                                     padding: '24px',
-                                    background: 'linear-gradient(180deg, rgba(14, 116, 144, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%)',
-                                    backdropFilter: 'blur(12px)',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                    background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
+                                    border: '1px solid #bfdbfe',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                                         <div style={{
-                                            background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
+                                            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                                             width: '32px',
                                             height: '32px',
                                             borderRadius: '8px',
@@ -484,14 +484,14 @@ export default function CourseDetails() {
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             fontSize: '1.2rem',
-                                            boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
+                                            boxShadow: '0 0 15px rgba(37, 99, 235, 0.2)'
                                         }}>
                                             ✨
                                         </div>
-                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#ffffff', margin: 0 }}>Request Features</h3>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#0f172a', margin: 0 }}>Request Features</h3>
                                     </div>
 
-                                    <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '20px', lineHeight: '1.5' }}>
+                                    <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
                                         Let us know what you want to see in this batch.
                                     </p>
 
@@ -503,18 +503,18 @@ export default function CourseDetails() {
                                             width: '100%',
                                             minHeight: '100px',
                                             padding: '16px',
-                                            background: 'rgba(2, 6, 23, 0.5)',
-                                            border: '1px solid rgba(6, 182, 212, 0.3)',
+                                            background: '#f8fafc',
+                                            border: '1px solid #e2e8f0',
                                             borderRadius: '12px',
-                                            color: 'white',
+                                            color: '#0f172a',
                                             fontSize: '0.95rem',
                                             marginBottom: '16px',
                                             resize: 'vertical',
                                             outline: 'none',
                                             transition: 'all 0.2s'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
-                                        onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.3)'}
+                                        onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                                     />
 
                                     <Button
@@ -522,7 +522,7 @@ export default function CourseDetails() {
                                         disabled={submittingFeedback || !feedbackText.trim()}
                                         style={{
                                             width: '100%',
-                                            background: 'linear-gradient(to right, #0891b2, #2563eb)',
+                                            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                                             border: 'none',
                                             padding: '12px',
                                             fontSize: '0.95rem',

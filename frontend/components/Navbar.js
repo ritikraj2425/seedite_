@@ -8,15 +8,14 @@ import { useState, useEffect, useRef } from 'react';
 import { User, LogOut, LayoutDashboard, ChevronDown, Menu } from 'lucide-react';
 import Image from 'next/image';
 
-const NavLink = ({ href, children, active }) => (
+const NavLink = ({ href, children, active, className = "" }) => (
     <Link
         href={href}
-        className={active ? 'navbar__link navbar__link--active' : 'navbar__link'}
+        className={`${active ? "navbar__link navbar__link--active" : "navbar__link"} ${className}`}
     >
         {children}
     </Link>
 );
-
 const Navbar = () => {
     const pathname = usePathname();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -88,6 +87,7 @@ const Navbar = () => {
 
     const isSidebarLinkActive = (href) => {
         if (href === '/blogs') return pathname.startsWith('/blogs');
+        if (href === '/iq-tests') return pathname.startsWith('/iq-tests');
         if (href === '/dashboard') return pathname === '/dashboard';
         if (href === '/dashboard/announcements') return pathname.startsWith('/dashboard/announcements');
         return pathname === href;
@@ -128,6 +128,14 @@ const Navbar = () => {
                             </>
                         )}
                         <NavLink href="/blogs" active={pathname.startsWith('/blogs')}>Blogs</NavLink>
+                        <NavLink
+                            className="shimmer-link"
+                            style={{ textDecoration: "underline" }}
+                            href="/iq-tests"
+                            active={pathname.startsWith('/iq-tests')}
+                        >
+                            Test your IQ
+                        </NavLink>
                     </div>
 
                     <div className="navbar__right">
@@ -328,6 +336,7 @@ const Navbar = () => {
                                 </>
                             )}
                             {sidebarLink('/blogs', 'Blogs')}
+                            {sidebarLink('/iq-tests', 'Test your IQ')}
                         </nav>
 
                         <div className="navbar-sidebar__divider" />

@@ -271,10 +271,9 @@ export default function LecturePlayer() {
                                     id="video-player"
                                     src={convertToYouTubeEmbed(currentLecture.videoUrl)}
                                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share; keyboard-map"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share"
                                     allowFullScreen
                                     loading="lazy"
-                                    referrerPolicy="no-referrer"
                                     tabIndex="0"
                                     playsInline
                                     title={currentLecture.title || 'Lecture Video'}

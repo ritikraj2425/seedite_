@@ -18,17 +18,17 @@ export default function Loader() {
                 <Skeleton width="100%" height="200px" borderRadius="12px" />
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                    <div style={{ padding: '20px', border: '1px solid #1e293b', borderRadius: '12px', background: '#0f172a' }}>
+                    <div style={{ padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#ffffff' }}>
                         <Skeleton width="100%" height="160px" borderRadius="8px" style={{ marginBottom: '16px' }} />
                         <Skeleton width="70%" height="24px" style={{ marginBottom: '12px' }} />
                         <Skeleton width="40%" height="20px" />
                     </div>
-                    <div style={{ padding: '20px', border: '1px solid #1e293b', borderRadius: '12px', background: '#0f172a' }}>
+                    <div style={{ padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#ffffff' }}>
                         <Skeleton width="100%" height="160px" borderRadius="8px" style={{ marginBottom: '16px' }} />
                         <Skeleton width="70%" height="24px" style={{ marginBottom: '12px' }} />
                         <Skeleton width="40%" height="20px" />
                     </div>
-                    <div style={{ padding: '20px', border: '1px solid #1e293b', borderRadius: '12px', background: '#0f172a' }}>
+                    <div style={{ padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#ffffff' }}>
                         <Skeleton width="100%" height="160px" borderRadius="8px" style={{ marginBottom: '16px' }} />
                         <Skeleton width="70%" height="24px" style={{ marginBottom: '12px' }} />
                         <Skeleton width="40%" height="20px" />

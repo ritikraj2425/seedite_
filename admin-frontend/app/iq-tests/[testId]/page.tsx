@@ -3,10 +3,9 @@
 import { useParams } from 'next/navigation';
 import MockTestBuilder from '@/components/MockTestBuilder';
 
-export default function EditMockTestPage() {
+export default function EditIQTestPage() {
     const params = useParams();
-    const courseId = params.id as string;
     const testId = params.testId as string;
 
-    return <MockTestBuilder mode="edit" testType="course" courseId={courseId} testId={testId} />;
+    return <MockTestBuilder mode="edit" testType="iq" testId={testId} />;
 }

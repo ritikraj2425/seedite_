@@ -111,10 +111,22 @@ export default function Dashboard() {
                                 <h3 className="font-semibold">Testimonials</h3>
                             </div>
                         </Link>
+                        <Link href="/ai-query">
+                            <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
+                                <div className="text-4xl mb-2">🤖</div>
+                                <h3 className="font-semibold">AI DB Query</h3>
+                            </div>
+                        </Link>
                         <Link href="/settings">
                             <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
                                 <div className="text-4xl mb-2">⚙️</div>
-                                <h3 className="font-semibold">Settings</h3>
+                                <h3 className="font-semibold">Banner</h3>
+                            </div>
+                        </Link>
+                        <Link href="/iq-tests">
+                            <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
+                                <div className="text-4xl mb-2">🧠</div>
+                                <h3 className="font-semibold">IQ Tests</h3>
                             </div>
                         </Link>
                     </div>

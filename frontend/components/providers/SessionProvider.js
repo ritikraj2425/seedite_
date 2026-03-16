@@ -41,7 +41,7 @@ export default function SessionProvider({ children }) {
                                 }, 5000);
 
                                 // Redirect to login
-                                router.push('/login');
+                                router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
                             }
                         }
                     } catch (e) {

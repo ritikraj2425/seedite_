@@ -35,7 +35,7 @@ export default function GoogleLoginButton({
             scope: 'openid email profile',
             access_type: 'offline',
             prompt: 'select_account',
-            state: redirectUrl || '/',
+            state: redirectUrl || '/dashboard', // Default to dashboard like email auth
         });
 
         const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

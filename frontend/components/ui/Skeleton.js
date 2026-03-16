@@ -205,20 +205,20 @@ export const FeatureCardSkeleton = () => (
 // Video Page Skeleton
 export const VideoSkeleton = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
-        <div style={{ width: '100%', aspectRatio: '16/9', background: '#1e293b', borderRadius: '16px', overflow: 'hidden', position: 'relative' }}>
+        <div style={{ width: '100%', aspectRatio: '16/9', background: '#e2e8f0', borderRadius: '16px', overflow: 'hidden', position: 'relative' }}>
             <div style={{
                 position: 'absolute', inset: 0,
-                backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 40%, transparent 80%)',
+                backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 40%, transparent 80%)',
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 2s infinite'
             }} />
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '64px', height: '64px', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '0', height: '0', borderTop: '10px solid transparent', borderBottom: '10px solid transparent', borderLeft: '15px solid rgba(255,255,255,0.2)', marginLeft: '5px' }} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '64px', height: '64px', borderRadius: '50%', border: '4px solid rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '0', height: '0', borderTop: '10px solid transparent', borderBottom: '10px solid transparent', borderLeft: '15px solid rgba(255,255,255,1)', marginLeft: '5px' }} />
             </div>
         </div>
         <div>
-            <Skeleton height="32px" width="60%" style={{ marginBottom: '12px', background: '#334155' }} />
-            <Skeleton height="16px" width="40%" style={{ background: '#1e293b' }} />
+            <Skeleton height="32px" width="60%" style={{ marginBottom: '12px' }} />
+            <Skeleton height="16px" width="40%" />
         </div>
     </div>
 );
