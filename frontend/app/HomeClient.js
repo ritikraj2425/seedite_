@@ -10,6 +10,7 @@ import Loader from '../components/ui/Loader';
 import CourseCardSkeleton from '../components/ui/CourseCardSkeleton';
 import Testimonials from '../components/Testimonials';
 import Chatbot from '../components/ui/Chatbot';
+import LiveSessionBanner from '../components/ui/LiveSessionBanner';
 import { BookOpen, Users, Award, CheckCircle, ArrowRight, Sparkles, Play, Target, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 
 
@@ -168,6 +169,9 @@ export default function HomeClient() {
 
     return (
         <div style={{ paddingBottom: '120px' }}>
+            {/* Live Session Banner */}
+            <LiveSessionBanner />
+            
             {/* Hero Section with Gradient Background */}
             <section className="gradient-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
                 {/* Floating Particles */}

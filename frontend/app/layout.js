@@ -94,9 +94,9 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <ToastProvider />
           <Navbar />
-          <QuickUpdateBanner />
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <main style={{ paddingTop: '80px', flex: 1 }}>
+              <QuickUpdateBanner />
               {children}
             </main>
             <Footer />

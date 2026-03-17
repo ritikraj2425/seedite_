@@ -129,6 +129,12 @@ export default function Dashboard() {
                                 <h3 className="font-semibold">IQ Tests</h3>
                             </div>
                         </Link>
+                        <Link href="/live-sessions">
+                            <div className="border-2 border-white rounded-lg p-6 text-center hover:bg-gray-800 transition cursor-pointer">
+                                <div className="text-4xl mb-2">📅</div>
+                                <h3 className="font-semibold">Live Sessions</h3>
+                            </div>
+                        </Link>
                     </div>
                 </div>
 
