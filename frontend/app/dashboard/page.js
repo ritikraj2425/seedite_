@@ -7,11 +7,13 @@ import Card from '../../components/ui/Card';
 import Loader from '../../components/ui/Loader';
 import CourseCardSkeleton from '../../components/ui/CourseCardSkeleton';
 import { useRouter } from 'next/navigation';
-import { Layout, BookOpen, ArrowRight, Sparkles } from 'lucide-react';
+import { Layout, BookOpen, ArrowRight, Sparkles, GraduationCap } from 'lucide-react';
 
 export default function Dashboard() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [progressMap, setProgressMap] = useState({});
+    const [myColleges, setMyColleges] = useState([]);
     const router = useRouter();
 
     useEffect(() => {
@@ -30,6 +32,23 @@ export default function Dashboard() {
                 }
                 const data = await res.json();
                 setUser(data);
+
+                // Fetch progress for all courses (non-blocking)
+                fetch(`${API_URL}/api/progress`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(r => r.ok ? r.json() : []).then(progressData => {
+                    const map = {};
+                    (progressData || []).forEach(p => { map[p.course?._id || p.course] = p.progressPercentage; });
+                    setProgressMap(map);
+                }).catch(() => { });
+
+                // Fetch college memberships (non-blocking)
+                fetch(`${API_URL}/api/college/my-colleges`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(r => r.ok ? r.json() : []).then(colleges => {
+                    setMyColleges(colleges || []);
+                }).catch(() => { });
+
             } catch (error) {
                 console.error(error);
             } finally {
@@ -128,6 +147,105 @@ export default function Dashboard() {
             </div>
 
             <div className="container" style={{ paddingTop: '40px', paddingBottom: '80px' }}>
+                {/* College Portal Banner */}
+                {myColleges.length > 0 && (
+                    <div style={{ marginBottom: '32px' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                            gap: '14px'
+                        }}>
+                            {myColleges.map((college) => (
+                                <Link key={college.slug} href={`/college/${college.slug}`}>
+                                    <div style={{
+                                        background: '#ffffff',
+                                        border: '0.5px solid #e5e7eb',
+                                        borderRadius: '14px',
+                                        padding: '20px 20px 18px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '10px',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        transition: 'border-color 0.18s, box-shadow 0.18s, transform 0.18s'
+                                    }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.borderColor = '#c7d2fe';
+                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.borderColor = '#e5e7eb';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+
+                                        {/* Badge + icon row */}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{
+                                                fontSize: '11px',
+                                                fontWeight: '500',
+                                                letterSpacing: '0.05em',
+                                                textTransform: 'uppercase',
+                                                color: '#4338ca',
+                                                background: '#eef2ff',
+                                                border: '0.5px solid #c7d2fe',
+                                                padding: '3px 10px',
+                                                borderRadius: '100px'
+                                            }}>
+                                                College Portal
+                                            </span>
+                                            <div style={{
+                                                width: '32px', height: '32px',
+                                                background: '#eef2ff',
+                                                border: '0.5px solid #c7d2fe',
+                                                borderRadius: '8px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <GraduationCap size={16} color="#4338ca" />
+                                            </div>
+                                        </div>
+
+                                        {/* College name */}
+                                        <p style={{
+                                            fontSize: '1rem',
+                                            fontWeight: '600',
+                                            color: '#111827',
+                                            margin: 0,
+                                            lineHeight: 1.35
+                                        }}>
+                                            {college.name}
+                                        </p>
+
+                                        {/* Footer */}
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            paddingTop: '10px',
+                                            borderTop: '0.5px solid #e5e7eb'
+                                        }}>
+                                            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                Access assigned courses
+                                            </span>
+                                            <div style={{
+                                                width: '26px', height: '26px',
+                                                background: '#4338ca',
+                                                borderRadius: '50%',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <ArrowRight size={12} color="white" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Section Header */}
                 <div style={{
                     display: 'flex',
@@ -208,12 +326,41 @@ export default function Dashboard() {
                                     <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                         <h3 style={{
                                             fontSize: '1.15rem',
-                                            marginBottom: '16px',
+                                            marginBottom: '12px',
                                             color: '#0f172a',
                                             fontWeight: '700'
                                         }}>
                                             {course?.title}
                                         </h3>
+
+                                        {/* Progress Bar */}
+                                        {(() => {
+                                            const prog = progressMap[course?._id] || 0;
+                                            return (
+                                                <div style={{ marginBottom: '16px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Progress</span>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: prog >= 70 ? '#16a34a' : '#2563eb' }}>{prog}%</span>
+                                                    </div>
+                                                    <div style={{
+                                                        width: '100%',
+                                                        height: '6px',
+                                                        background: '#e2e8f0',
+                                                        borderRadius: '3px',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <div style={{
+                                                            width: `${prog}%`,
+                                                            height: '100%',
+                                                            background: prog >= 70 ? 'linear-gradient(90deg, #16a34a, #22c55e)' : 'linear-gradient(90deg, #2563eb, #3b82f6)',
+                                                            borderRadius: '3px',
+                                                            transition: 'width 0.5s ease'
+                                                        }} />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
                                         <div style={{ marginTop: 'auto' }}>
                                             <Button style={{
                                                 width: '100%',

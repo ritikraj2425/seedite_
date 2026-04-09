@@ -81,7 +81,7 @@ export default function HomeClient() {
     const [founderVideoUrl, setFounderVideoUrl] = useState('');
     const [isPlaying, setIsPlaying] = useState(false);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-    
+
     // Carousel states
     const [carouselIndex, setCarouselIndex] = useState(0);
     const [isTransitioning, setIsTransitioning] = useState(false);
@@ -171,7 +171,7 @@ export default function HomeClient() {
         <div style={{ paddingBottom: '120px' }}>
             {/* Live Session Banner */}
             <LiveSessionBanner />
-            
+
             {/* Hero Section with Gradient Background */}
             <section className="gradient-hero-bg" style={{ position: 'relative', overflow: 'hidden' }}>
                 {/* Floating Particles */}
@@ -446,7 +446,6 @@ export default function HomeClient() {
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                         zIndex: 1
                                     }}>
-                                        <Loader2 size={40} color="#22d3ee" className="animate-spin" style={{ marginBottom: '16px' }} />
                                         <p style={{ color: '#94a3b8', fontSize: '0.9rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>Loading Video...</p>
                                     </div>
                                 )}
@@ -657,7 +656,7 @@ export default function HomeClient() {
                             </button>
 
                             {/* Scroll Track */}
-                            <div 
+                            <div
                                 className="courses-scroll-track infinite-carousel-track"
                                 style={{
                                     '--carousel-transform': `translateX(calc(-${carouselIndex} * (360px + 28px)))`,

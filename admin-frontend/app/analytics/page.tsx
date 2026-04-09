@@ -216,13 +216,6 @@ export default function Analytics() {
                         <p className="text-gray-400 text-sm">Total Courses</p>
                         <p className="text-2xl font-bold text-white">{stats?.totalCourses || 0}</p>
                     </div>
-                    <Link href="/free-access" className="bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 p-4 rounded-lg border border-emerald-500/30 hover:border-emerald-400/50 transition-all group">
-                        <p className="text-gray-400 text-sm group-hover:text-emerald-300 transition">Free Access Grants</p>
-                        <div className="flex items-center justify-between">
-                            <p className="text-2xl font-bold text-emerald-400">{stats?.freeAccessCount || 0}</p>
-                            <span className="text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
-                        </div>
-                    </Link>
                 </div>
 
                 {/* 2. Charts Section */}

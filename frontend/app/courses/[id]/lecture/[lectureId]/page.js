@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { API_URL } from '@/lib/api';
+import { API_URL, apiFetch } from '@/lib/api';
 import Button from '../../../../../components/ui/Button';
 import Card from '../../../../../components/ui/Card';
 import { VideoSkeleton } from '../../../../../components/ui/Skeleton';
 import VideoPlayer from '../../../../../components/ui/VideoPlayer';
 import BunnyPlayer from '../../../../../components/ui/BunnyPlayer';
-import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowLeft, PlayCircle, ChevronDown, ChevronRight, CheckCircle } from 'lucide-react';
 import { convertToYouTubeEmbed, isIframeVideo, isBunnyVideo } from '../../../../../lib/videoUtils';
 import dynamic from 'next/dynamic';
 
@@ -31,6 +31,7 @@ export default function LecturePlayer() {
     const [isPlaying, setIsPlaying] = useState(false);
     const iframeRef = useRef(null);
     const [userDetails, setUserDetails] = useState(null);
+    const [completedLectures, setCompletedLectures] = useState(new Set());
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -92,37 +93,20 @@ export default function LecturePlayer() {
 
         const fetchCourse = async () => {
             const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const token = savedUser.token;
-
-            if (!token) {
+            if (!savedUser.token) {
                 router.push(`/login?redirect=/courses/${courseId}/lecture/${lectureId}`);
                 return;
             }
 
             try {
-                // Check if session is still valid explicitly, because course API swallows 401s
-                const profileRes = await fetch(`${API_URL}/api/users/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!profileRes.ok) {
-                    // Session is invalid. Global SessionProvider handles the 401 intercept and redirect.
-                    return;
-                }
-
-                const res = await fetch(`${API_URL}/api/courses/${courseId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                // apiFetch auto-handles 401 → logout + redirect
+                const res = await apiFetch(`/api/courses/${courseId}`);
 
                 if (res.ok) {
                     const data = await res.json();
                     setCourse(data);
 
-                    // Flatten lectures: Sections first (ordered), then Ungrouped
-                    // OR: Ungrouped first? Usually sections are the main content.
-                    // Let's do: Sections... then Ungrouped.
                     let flattened = [];
-
                     if (data.sections) {
                         data.sections.forEach(section => {
                             if (section.lectures) flattened.push(...section.lectures);
@@ -134,20 +118,41 @@ export default function LecturePlayer() {
 
                     setAllLectures(flattened);
 
-                    // Find current lecture
                     if (flattened.length > 0) {
                         const found = flattened.find(l => l._id?.toString() === lectureId);
                         setCurrentLecture(found || flattened[0]);
                     }
+
+                    // Fetch progress (also uses apiFetch for auto-401 handling)
+                    apiFetch(`/api/progress/${courseId}`)
+                        .then(r => r.ok ? r.json() : null)
+                        .then(progressData => {
+                            if (progressData?.completedLectures) {
+                                setCompletedLectures(new Set(progressData.completedLectures.map(id => id.toString())));
+                            }
+                        }).catch(() => {});
                 }
             } catch (error) {
-                console.error('Failed to load course', error);
+                // apiFetch throws on 401 → user gets redirected to login
+                if (!error.message.includes('Session expired')) {
+                    console.error('Failed to load course', error);
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchCourse();
+
+        // Listen for completion events from BunnyPlayer (to update sidebar checkmarks in real-time)
+        const handleCompletionMessage = (event) => {
+            // BunnyPlayer fires a custom event when the progress API is called
+            if (event.data?.type === 'lectureCompleted' && event.data?.lectureId) {
+                setCompletedLectures(prev => new Set([...prev, event.data.lectureId.toString()]));
+            }
+        };
+        window.addEventListener('message', handleCompletionMessage);
+        return () => window.removeEventListener('message', handleCompletionMessage);
 
     }, [courseId, lectureId, router]);
 
@@ -322,7 +327,23 @@ export default function LecturePlayer() {
                     {/* Lecture List */}
                     <Card style={{ padding: '0', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', backgroundColor: '#111', border: '1px solid #333' }} className="custom-scrollbar">
                         <div style={{ padding: '16px', borderBottom: '1px solid #333', position: 'sticky', top: 0, background: '#111', zIndex: 1 }}>
-                            <h3 style={{ fontSize: '1.1rem', color: 'white', margin: 0 }}>Course Content</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: completedLectures.size > 0 ? '10px' : '0' }}>
+                                <h3 style={{ fontSize: '1.1rem', color: 'white', margin: 0 }}>Course Content</h3>
+                                {completedLectures.size > 0 && (
+                                    <span style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: 600 }}>
+                                        {completedLectures.size} completed
+                                    </span>
+                                )}
+                            </div>
+                            {completedLectures.size > 0 && (() => {
+                                const bunnyCount = allLectures.filter(l => isBunnyVideo(l.videoUrl)).length || 1;
+                                const pct = Math.min(100, Math.round((completedLectures.size / bunnyCount) * 100));
+                                return (
+                                    <div style={{ width: '100%', height: '4px', background: '#333', borderRadius: '2px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #22c55e, #16a34a)', borderRadius: '2px', transition: 'width 0.5s ease' }} />
+                                    </div>
+                                );
+                            })()}
                         </div>
                         <div style={{ padding: '12px' }}>
                             {/* Sections */}
@@ -379,9 +400,12 @@ export default function LecturePlayer() {
                                                                 gap: '12px',
                                                                 transition: 'all 0.2s',
                                                             }}
-                                                            className={!isActive ? "hover:bg-gray-800" : ""}
                                                         >
-                                                            <PlayCircle size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                                                            {completedLectures.has(lecture._id?.toString()) ? (
+                                                                <CheckCircle size={14} style={{ flexShrink: 0, color: '#22c55e' }} />
+                                                            ) : (
+                                                                <PlayCircle size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                                                            )}
                                                             <span style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.4' }}>
                                                                 {lecture.title}
                                                             </span>
@@ -425,7 +449,11 @@ export default function LecturePlayer() {
                                                 }}
                                                 className={!isActive ? "hover:bg-gray-800" : ""}
                                             >
-                                                <PlayCircle size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                                                {completedLectures.has(lecture._id?.toString()) ? (
+                                                    <CheckCircle size={14} style={{ flexShrink: 0, color: '#22c55e' }} />
+                                                ) : (
+                                                    <PlayCircle size={14} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                                                )}
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: '1.4' }}>
                                                     {lecture.title}
                                                 </span>

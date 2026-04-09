@@ -10,7 +10,8 @@ import { Float, MeshDistortMaterial, Sphere } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import Link from 'next/link';
-
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 // ═══════════════════════════════════════════════════════════════════
 // 3D BRAIN HEMISPHERE — pure auto-animation, NO scroll dependency
 // ═══════════════════════════════════════════════════════════════════
@@ -176,6 +177,7 @@ function BrainScene() {
 // ═══════════════════════════════════════════════════════════════════
 export default function IQTestsIndex() {
     const [iqTests, setIqTests] = useState([]);
+    const [attemptedTestIds, setAttemptedTestIds] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -193,7 +195,30 @@ export default function IQTestsIndex() {
                 setLoading(false);
             }
         };
+
+        const fetchUserProfile = async () => {
+            if (typeof window === 'undefined') return;
+            const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (savedUser.token) {
+                try {
+                    const res = await fetch(`${API_URL}/api/users/profile`, {
+                        headers: { 'Authorization': `Bearer ${savedUser.token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.mockTestResults) {
+                            const ids = new Set(data.mockTestResults.map(r => r.test?._id || r.test));
+                            setAttemptedTestIds(ids);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching profile:', error);
+                }
+            }
+        };
+
         fetchIQTests();
+        fetchUserProfile();
     }, []);
 
     return (
@@ -351,175 +376,219 @@ export default function IQTestsIndex() {
                 padding-top: 80px;
             }
 
+            /* ── Content Section Premium Light Theme ── */
+            .iq-content {
+                position: relative;
+                z-index: 5;
+                background: #f8fafc;
+                color: #0f172a;
+                padding-top: 100px;
+                background-image: 
+                    radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
+                    radial-gradient(circle at 85% 30%, rgba(29, 78, 216, 0.03) 0%, transparent 50%);
+            }
+
             /* ── How It Works ── */
             .iq-how {
-                max-width: 1000px;
-                margin: 0 auto 80px;
+                max-width: 1100px;
+                margin: 0 auto 100px;
                 padding: 0 40px;
             }
             .iq-how-title {
                 text-align: center;
-                font-size: 0.78rem;
-                font-weight: 600;
-                letter-spacing: 0.12em;
+                font-size: 0.85rem;
+                font-weight: 700;
+                letter-spacing: 0.2em;
                 text-transform: uppercase;
-                color: #2563eb;
-                margin-bottom: 12px;
+                background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 20px;
             }
             .iq-how-heading {
                 text-align: center;
-                font-size: 2rem;
+                font-size: 2.5rem;
                 font-weight: 800;
                 color: #0f172a;
-                margin-bottom: 56px;
+                margin-bottom: 70px;
                 letter-spacing: -0.03em;
             }
             .iq-how-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 32px;
-                counter-reset: step;
+                gap: 30px;
             }
             .iq-step {
-                text-align: center;
-                counter-increment: step;
+                position: relative;
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 24px;
+                padding: 40px 30px;
+                text-align: left;
+                box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03);
+                transition: all 0.4s ease;
+            }
+            .iq-step:hover {
+                border-color: rgba(37, 99, 235, 0.2);
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.1);
             }
             .iq-step-num {
-                width: 56px; height: 56px;
-                border-radius: 16px;
-                background: linear-gradient(135deg, #2563eb, #1e40af);
-                color: white;
-                font-size: 1.3rem;
-                font-weight: 800;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 20px;
-                box-shadow: 0 8px 24px -4px rgba(37,99,235,0.3);
+                font-size: 4rem;
+                font-weight: 900;
+                color: transparent;
+                -webkit-text-stroke: 1px #cbd5e1;
+                margin-bottom: 15px;
+                line-height: 1;
+                transition: all 0.4s ease;
+            }
+            .iq-step:hover .iq-step-num {
+                -webkit-text-stroke: 1px #60a5fa;
+                color: rgba(37, 99, 235, 0.05);
             }
             .iq-step h4 {
-                font-size: 1.1rem;
+                font-size: 1.3rem;
                 font-weight: 700;
                 color: #0f172a;
-                margin-bottom: 8px;
+                margin-bottom: 12px;
+                letter-spacing: -0.01em;
             }
             .iq-step p {
                 color: #64748b;
-                font-size: 0.92rem;
-                line-height: 1.6;
+                font-size: 0.95rem;
+                line-height: 1.7;
             }
 
             /* ── Section Header ── */
             .iq-section-hdr {
                 max-width: 1200px;
-                margin: 0 auto 50px;
+                margin: 0 auto 60px;
                 padding: 0 40px;
                 text-align: center;
             }
             .iq-section-label {
-                font-size: 0.78rem;
-                font-weight: 600;
-                letter-spacing: 0.12em;
+                font-size: 0.85rem;
+                font-weight: 700;
+                letter-spacing: 0.2em;
                 text-transform: uppercase;
-                color: #2563eb;
-                margin-bottom: 8px;
+                background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 20px;
             }
             .iq-section-hdr h2 {
-                font-size: 2.2rem;
+                font-size: 2.8rem;
                 font-weight: 800;
                 color: #0f172a;
-                margin-bottom: 10px;
+                margin-bottom: 16px;
                 letter-spacing: -0.03em;
             }
-            .iq-section-hdr p { color: #64748b; font-size: 1.05rem; }
+            .iq-section-hdr p { 
+                color: #64748b; 
+                font-size: 1.15rem; 
+                max-width: 600px;
+                margin: 0 auto;
+            }
 
-            /* ── Test Cards ── */
+            /* ── Premium Test Cards ── */
             .iq-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-                gap: 28px;
-                max-width: 1100px;
+                grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                gap: 30px;
+                max-width: 1150px;
                 margin: 0 auto;
-                padding: 0 40px 60px;
+                padding: 0 40px 80px;
             }
-            .iq-card {
-                background: white;
-                border-radius: 20px;
+            
+            /* Overriding generic Card component */
+            .iq-card-premium {
+                padding: 0 !important;
+                border-radius: 20px !important;
                 border: 1px solid #e2e8f0;
-                padding: 0;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03) !important;
                 cursor: pointer;
-                transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+                transition: all 0.4s cubic-bezier(0.4,0,0.2,1) !important;
                 display: flex;
                 flex-direction: column;
                 position: relative;
                 overflow: hidden;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+                text-decoration: none;
             }
-            .iq-card::before {
-                pointer-events: none;
+            .iq-card-premium::before {
                 content: '';
                 position: absolute;
                 top: 0; left: 0; right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+                height: 3px;
+                background: linear-gradient(90deg, #60a5fa, #2563eb, #1d4ed8);
                 transform: scaleX(0);
                 transform-origin: left;
                 transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
             }
-            .iq-card:hover::before { transform: scaleX(1); }
-            .iq-card:hover {
-                transform: translateY(-8px);
+            .iq-card-premium:hover::before { transform: scaleX(1); }
+            .iq-card-premium:hover {
+                transform: translateY(-8px) !important;
                 border-color: rgba(37,99,235,0.2);
-                box-shadow: 0 24px 48px -12px rgba(37,99,235,0.12), 0 8px 24px rgba(0,0,0,0.06);
+                box-shadow: 0 24px 48px -12px rgba(37,99,235,0.12), 0 8px 24px rgba(0,0,0,0.04) !important;
             }
+
             .iq-card-top {
-                padding: 32px 32px 24px;
+                padding: 35px 35px 25px;
                 flex: 1;
                 display: flex;
                 flex-direction: column;
             }
             .iq-card-number {
-                font-size: 0.72rem;
-                font-weight: 700;
-                letter-spacing: 0.12em;
+                font-size: 0.75rem;
+                font-weight: 800;
+                letter-spacing: 0.15em;
                 text-transform: uppercase;
                 color: #2563eb;
-                margin-bottom: 16px;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .iq-card-number::before {
+                content: '';
+                display: block;
+                width: 6px; height: 6px;
+                border-radius: 50%;
+                background: #2563eb;
+                box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
             }
             .iq-card-title {
-                font-size: 1.35rem;
+                font-size: 1.3rem;
                 font-weight: 800;
                 color: #0f172a;
-                margin-bottom: 12px;
-                line-height: 1.25;
+                margin-bottom: 16px;
+                line-height: 1.3;
                 letter-spacing: -0.02em;
             }
-            .iq-card-desc {
-                color: #64748b;
-                font-size: 0.92rem;
-                line-height: 1.6;
-                margin-bottom: 24px;
-                flex: 1;
-            }
-            .iq-card-details {
+            .iq-card-metrics {
                 display: flex;
-                gap: 20px;
-                padding-top: 16px;
+                gap: 15px;
+                padding-top: 20px;
                 border-top: 1px solid #f1f5f9;
+                margin-top: auto;
             }
-            .iq-card-detail {
-                display: flex;
-                flex-direction: column;
+            .iq-card-metric {
+                background: #f8fafc;
+                border: 1px solid #f1f5f9;
+                border-radius: 12px;
+                padding: 12px 16px;
+                flex: 1;
+                text-align: center;
             }
-            .iq-card-detail-val {
-                font-size: 1.1rem;
-                font-weight: 700;
+            .iq-card-metric-val {
+                font-size: 1.2rem;
+                font-weight: 800;
                 color: #0f172a;
+                margin-bottom: 4px;
             }
-            .iq-card-detail-label {
-                font-size: 0.75rem;
-                color: #94a3b8;
-                font-weight: 500;
+            .iq-card-metric-label {
+                font-size: 0.7rem;
+                color: #64748b;
+                font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
             }
@@ -527,115 +596,73 @@ export default function IQTestsIndex() {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 18px 32px;
-                border-top: 1px solid #f1f5f9;
+                padding: 24px 35px;
                 background: #fafbfc;
-                transition: all 0.3s;
+                border-top: 1px solid #f1f5f9;
+                transition: background 0.3s;
             }
-            .iq-card:hover .iq-card-bottom { background: #f0f7ff; }
+            .iq-card-premium:hover .iq-card-bottom { background: #f0f7ff; }
             .iq-card-btn {
-                font-size: 0.92rem;
+                font-size: 0.95rem;
                 font-weight: 700;
                 color: #2563eb;
                 letter-spacing: -0.01em;
             }
             .iq-card-chevron {
-                width: 32px; height: 32px;
+                width: 36px; height: 36px;
                 border-radius: 50%;
                 background: white;
                 border: 1px solid #e2e8f0;
+                color: #2563eb;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #2563eb;
-                transition: all 0.3s;
+                transition: all 0.4s ease;
             }
-            .iq-card:hover .iq-card-chevron {
+            .iq-card-premium:hover .iq-card-chevron {
                 background: #2563eb;
+                color: #fff;
                 border-color: #2563eb;
-                color: white;
-                transform: translateX(4px);
-            }
-
-            /* ── Why Section ── */
-            .iq-why {
-                max-width: 1100px;
-                margin: 0 auto 100px;
-                padding: 0 40px;
-            }
-            .iq-why-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 24px;
-            }
-            .iq-why-card {
-                background: white;
-                border: 1px solid #e2e8f0;
-                border-radius: 20px;
-                padding: 36px;
-                transition: all 0.35s ease;
-            }
-            .iq-why-card:hover {
-                border-color: rgba(37,99,235,0.15);
-                box-shadow: 0 16px 40px -12px rgba(0,0,0,0.08);
-                transform: translateY(-4px);
-            }
-            .iq-why-card h4 {
-                font-size: 1.15rem;
-                font-weight: 700;
-                color: #0f172a;
-                margin-bottom: 10px;
-                letter-spacing: -0.01em;
-            }
-            .iq-why-card p {
-                color: #64748b;
-                font-size: 0.92rem;
-                line-height: 1.65;
-            }
-            .iq-why-emoji {
-                font-size: 2rem;
-                margin-bottom: 16px;
-                display: block;
+                transform: translateX(6px) scale(1.05);
+                box-shadow: 0 4px 15px rgba(37,99,235,0.3);
             }
 
             /* ── Footer CTA ── */
             .iq-footer-cta {
                 text-align: center;
-                padding: 80px 40px 120px;
-                max-width: 700px;
+                padding: 100px 40px 140px;
+                max-width: 800px;
                 margin: 0 auto;
+                position: relative;
             }
             .iq-footer-cta h3 {
-                font-size: 2rem;
-                font-weight: 800;
+                font-size: 2.6rem;
+                font-weight: 900;
                 color: #0f172a;
-                margin-bottom: 16px;
+                margin-bottom: 20px;
                 letter-spacing: -0.03em;
             }
             .iq-footer-cta p {
                 color: #64748b;
-                font-size: 1.05rem;
-                line-height: 1.7;
-                margin-bottom: 36px;
+                font-size: 1.15rem;
+                line-height: 1.8;
+                margin-bottom: 40px;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
             }
             .iq-footer-btn {
-                display: inline-flex;
-                align-items: center;
+                box-shadow: 0 10px 30px -10px rgba(37,99,235,0.4);
+                padding: 18px 48px !important;
+                border-radius: 100px !important;
+                font-size: 1.1rem !important;
+                font-weight: 700 !important;
                 gap: 12px;
-                padding: 16px 40px;
-                border-radius: 14px;
-                background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-                color: white;
-                font-weight: 600;
-                font-size: 1.05rem;
-                border: none;
-                cursor: pointer;
-                transition: all 0.4s ease;
-                box-shadow: 0 8px 32px -4px rgba(37,99,235,0.4);
+                display: inline-flex;
             }
             .iq-footer-btn:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 12px 40px rgba(37,99,235,0.5);
+                transform: translateY(-3px) scale(1.02);
+                box-shadow: 0 20px 50px -10px rgba(37,99,235,0.4);
             }
 
             /* ── Utilities ── */
@@ -644,7 +671,14 @@ export default function IQTestsIndex() {
                 padding: 100px 40px;
                 max-width: 500px;
                 margin: 0 auto;
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 24px;
+                box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03);
             }
+            .iq-empty h3 { color: #0f172a; font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+            .iq-empty p { color: #64748b; font-size: 1rem; line-height: 1.6; }
+
             .iq-loader {
                 display: flex;
                 justify-content: center;
@@ -653,11 +687,11 @@ export default function IQTestsIndex() {
             .iq-ldot {
                 width: 10px; height: 10px;
                 border-radius: 50%;
-                background: #2563eb;
+                background: #3b82f6;
                 margin: 0 6px;
                 animation: iqDot 1.4s ease-in-out infinite;
-            }
-            .iq-ldot:nth-child(2) { animation-delay: 0.2s; }
+                box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            }            .iq-ldot:nth-child(2) { animation-delay: 0.2s; }
             .iq-ldot:nth-child(3) { animation-delay: 0.4s; }
             @keyframes iqDot {
                 0%, 80%, 100% { transform: scale(0.5); opacity: 0.2; }
@@ -667,7 +701,6 @@ export default function IQTestsIndex() {
             /* ── Responsive ── */
             @media (max-width: 992px) {
                 .iq-how-grid { grid-template-columns: 1fr; gap: 28px; }
-                .iq-why-grid { grid-template-columns: 1fr; }
                 .iq-grid { grid-template-columns: 1fr; padding: 0 20px 60px; gap: 20px; }
             }
             @media (max-width: 768px) {
@@ -677,7 +710,6 @@ export default function IQTestsIndex() {
                 .iq-how-heading { font-size: 1.6rem; }
                 .iq-card-top { padding: 24px 24px 20px; }
                 .iq-card-bottom { padding: 14px 24px; }
-                .iq-why-card { padding: 28px; }
                 .iq-footer-cta h3 { font-size: 1.6rem; }
             }
         `}</style>
@@ -713,11 +745,11 @@ export default function IQTestsIndex() {
                         </p>
 
                         {iqTests.length > 0 && (
-                            <button className="iq-cta" onClick={() => {
+                            <Button variant="primary" className="iq-cta" onClick={() => {
                                 document.getElementById('iq-tests-grid')?.scrollIntoView({ behavior: 'smooth' });
                             }}>
                                 Begin Assessment <ArrowRight size={18} />
-                            </button>
+                            </Button>
                         )}
                     </div>
 
@@ -734,22 +766,22 @@ export default function IQTestsIndex() {
                     {/* How It Works */}
                     <div className="iq-how">
                         <div className="iq-how-title">How It Works</div>
-                        <h3 className="iq-how-heading">Three simple steps to test your mind</h3>
+                        <h3 className="iq-how-heading">Three steps to test your mind</h3>
                         <div className="iq-how-grid">
                             <div className="iq-step">
-                                <div className="iq-step-num">1</div>
+                                <div className="iq-step-num">01</div>
                                 <h4>Choose a Test</h4>
                                 <p>Select from our curated assessments designed by cognitive science experts.</p>
                             </div>
                             <div className="iq-step">
-                                <div className="iq-step-num">2</div>
+                                <div className="iq-step-num">02</div>
                                 <h4>Solve Under Time</h4>
-                                <p>Answer MCQ-based questions within the time limit speed and accuracy both matter.</p>
+                                <p>Answer MCQ-based questions within the time limit. Speed and accuracy both matter.</p>
                             </div>
                             <div className="iq-step">
-                                <div className="iq-step-num">3</div>
+                                <div className="iq-step-num">03</div>
                                 <h4>Get Your Score</h4>
-                                <p>Receive detailed analytics with your performance breakdown and rank.</p>
+                                <p>Receive detailed analytics with your performance breakdown and comparative rank.</p>
                             </div>
                         </div>
                     </div>
@@ -771,37 +803,38 @@ export default function IQTestsIndex() {
                             <div className="iq-section-hdr">
                                 <div className="iq-section-label">Assessments</div>
                                 <h2>Select Your Assessment</h2>
-                                <p>Premium cognitive test suite — timed, scored, ranked</p>
+                                <p>Premium cognitive test suite timed, scored, ranked</p>
                             </div>
                             <div className="iq-grid">
-                                {iqTests.map((test, idx) => (
-                                    <Link href={`/iq-tests/${test._id}`} key={test._id} className='iq-card' style={{ cursor: 'pointer' }}>
-                                        <div className="iq-card-top">
-                                            <div className="iq-card-number">Assessment {String(idx + 1).padStart(2, '0')}</div>
-                                            <div className="iq-card-title">{test.title}</div>
-                                            <div className="iq-card-details">
-                                                <div className="iq-card-detail">
-                                                    <div className="iq-card-detail-val">{test.duration} min</div>
-                                                    <div className="iq-card-detail-label">Duration</div>
+                                {iqTests.map((test, idx) => {
+                                    const hasAttempted = attemptedTestIds.has(test._id);
+                                    return (
+                                        <Link href={`/iq-tests/${test._id}`} key={test._id} style={{ textDecoration: 'none' }}>
+                                            <Card className="iq-card-premium">
+                                                <div className="iq-card-top">
+                                                    <div className="iq-card-number">Assessment {String(idx + 1).padStart(2, '0')}</div>
+                                                    <div className="iq-card-title">{test.title}</div>
+                                                    <div className="iq-card-metrics">
+                                                        <div className="iq-card-metric">
+                                                            <div className="iq-card-metric-val">{test.duration}m</div>
+                                                            <div className="iq-card-metric-label">Duration</div>
+                                                        </div>
+                                                        <div className="iq-card-metric">
+                                                            <div className="iq-card-metric-val">{test.totalQuestions || test.questions?.length || '—'}</div>
+                                                            <div className="iq-card-metric-label">Questions</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="iq-card-detail">
-                                                    <div className="iq-card-detail-val">{test.totalQuestions || test.questions?.length || '—'}</div>
-                                                    <div className="iq-card-detail-label">Questions</div>
+                                                <div className="iq-card-bottom">
+                                                    <span className="iq-card-btn">{hasAttempted ? 'View Result' : 'Start Assessment'}</span>
+                                                    <div className="iq-card-chevron">
+                                                        <ArrowRight size={18} />
+                                                    </div>
                                                 </div>
-                                                <div className="iq-card-detail">
-                                                    <div className="iq-card-detail-val">MCQ</div>
-                                                    <div className="iq-card-detail-label">Format</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="iq-card-bottom">
-                                            <span className="iq-card-btn">Start Assessment</span>
-                                            <div className="iq-card-chevron">
-                                                <ArrowRight size={15} />
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
+                                            </Card>
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
@@ -810,12 +843,12 @@ export default function IQTestsIndex() {
                     {iqTests.length > 0 && (
                         <div className="iq-footer-cta">
                             <h3>Ready to Challenge Yourself?</h3>
-                            <p>Take 15 minutes to discover your cognitive profile. No registration required — just start and get your score instantly.</p>
-                            <button className="iq-footer-btn" onClick={() => {
+                            <p>Just start and get your score instantly.</p>
+                            <Button className="iq-footer-btn" variant="primary" onClick={() => {
                                 document.getElementById('iq-tests-grid')?.scrollIntoView({ behavior: 'smooth' });
                             }}>
                                 Start an Assessment <ArrowRight size={18} />
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>

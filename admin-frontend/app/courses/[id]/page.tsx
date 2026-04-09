@@ -24,7 +24,9 @@ export default function EditCoursePage() {
 
         courseDetails: '',
         launchLater: false,
-        launchDateText: ''
+        launchDateText: '',
+        communityLink: '',
+        communityType: ''
     });
     const [lectures, setLectures] = useState<any[]>([]);
     const [sections, setSections] = useState<any[]>([]); // New state for sections
@@ -80,7 +82,9 @@ export default function EditCoursePage() {
 
                     courseDetails: data.courseDetails ? data.courseDetails.join('\n') : '',
                     launchLater: data.launchLater || false,
-                    launchDateText: data.launchDateText || ''
+                    launchDateText: data.launchDateText || '',
+                    communityLink: data.communityLink || '',
+                    communityType: data.communityType || ''
                 });
                 setLectures(data.lectures || []);
                 setSections(data.sections || []); // Set sections
@@ -534,6 +538,48 @@ export default function EditCoursePage() {
                                         />
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Community Group Link */}
+                            <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 space-y-4">
+                                <h3 className="text-sm font-semibold text-gray-300">Community Group</h3>
+                                <div>
+                                    <label className="block text-xs text-gray-400 mb-1">Platform</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="communityType"
+                                                value="telegram"
+                                                checked={formData.communityType === 'telegram'}
+                                                onChange={(e) => setFormData({ ...formData, communityType: e.target.value })}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <span className="text-sm text-gray-300">Telegram</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="communityType"
+                                                value="whatsapp"
+                                                checked={formData.communityType === 'whatsapp'}
+                                                onChange={(e) => setFormData({ ...formData, communityType: e.target.value })}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <span className="text-sm text-gray-300">WhatsApp</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gray-400 mb-1">Group Invite Link</label>
+                                    <input
+                                        type="url"
+                                        value={formData.communityLink}
+                                        onChange={(e) => setFormData({ ...formData, communityLink: e.target.value })}
+                                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white"
+                                        placeholder={formData.communityType === 'whatsapp' ? 'https://chat.whatsapp.com/...' : 'https://t.me/...'}
+                                    />
+                                </div>
                             </div>
 
                             <div>

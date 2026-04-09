@@ -108,7 +108,7 @@ export default function IQTestTakingPage() {
                         setTimeRemaining(0);
                         timeRemainingRef.current = 0;
                         if (restoredProgress.timeSpent) timeSpentOnQuestionsRef.current = restoredProgress.timeSpent;
-                        
+
                         setViewMode('test');
                         setIsRestoringProgress(false);
                         setLoading(false);
@@ -124,7 +124,7 @@ export default function IQTestTakingPage() {
                     setMarkedForReview(restoredProgress.markedForReview);
                     setViewedQuestions(restoredProgress.viewedQuestions);
                     if (restoredProgress.timeSpent) timeSpentOnQuestionsRef.current = restoredProgress.timeSpent;
-                    
+
                     setViewMode('test');
                     setIsRestoringProgress(false);
                     setLoading(false);
@@ -170,7 +170,7 @@ export default function IQTestTakingPage() {
                     await testContainerRef.current.requestFullscreen();
                 }
             } catch (err) {
-                console.log("Full screen request failed:", err);
+                console.error("Full screen request failed:", err);
             }
         };
         enterFullScreen();
@@ -184,7 +184,7 @@ export default function IQTestTakingPage() {
             setTimeRemaining(prev => {
                 const newTime = prev - 1;
                 timeRemainingRef.current = newTime;
-                
+
                 // Track time spent on current question
                 timeSpentOnQuestionsRef.current[currentQuestion] = (timeSpentOnQuestionsRef.current[currentQuestion] || 0) + 1;
 

@@ -150,8 +150,8 @@ export default function FreeAccessPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center gap-4">
-                            <Link href="/analytics" className="text-gray-400 hover:text-white transition">
-                                ← Back to Analytics
+                            <Link href="/dashboard" className="text-gray-400 hover:text-white transition">
+                                ← Back to Dashboard
                             </Link>
                             <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
                                 Free Access Management
@@ -279,8 +279,8 @@ export default function FreeAccessPage() {
                                 type="submit"
                                 disabled={granting || !selectedUser || !selectedCourse}
                                 className={`w-full py-3 rounded-lg font-bold transition ${granting || !selectedUser || !selectedCourse
-                                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-black hover:opacity-90'
+                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-black hover:opacity-90'
                                     }`}
                             >
                                 {granting ? 'Granting...' : 'Grant Free Access'}

@@ -30,6 +30,12 @@ export default function AnnouncementsPage() {
                 if (res.ok) {
                     const data = await res.json();
                     setAnnouncements(data);
+
+                    // Mark announcements as seen to clear the unread badge
+                    fetch(`${API_URL}/api/announcements/mark-seen`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(() => {});
                 }
             } catch (error) {
                 console.error(error);

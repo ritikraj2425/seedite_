@@ -57,7 +57,6 @@ function GoogleCallbackContent() {
                 router.refresh();
 
             } catch (err) {
-                console.error('Google auth error:', err);
                 setError(err.message || 'Authentication failed. Please try again.');
                 setLoading(false);
             }

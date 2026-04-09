@@ -176,7 +176,7 @@ export default function MockTestPage() {
                     await testContainerRef.current.requestFullscreen();
                 }
             } catch (err) {
-                console.log("Full screen request failed:", err);
+                console.error("Full screen request failed:", err);
             }
         };
         enterFullScreen();

@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import Button from './ui/Button';
 import { useState, useEffect, useRef } from 'react';
-import { User, LogOut, LayoutDashboard, ChevronDown, Menu } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, ChevronDown, Menu, Bell } from 'lucide-react';
 import Image from 'next/image';
+import { API_URL } from '@/lib/api';
 
 const NavLink = ({ href, children, active, className = "" }) => (
     <Link
@@ -23,11 +24,31 @@ const Navbar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Fetch unread announcement count for logged-in users
+    useEffect(() => {
+        if (!isLoggedIn) { setUnreadCount(0); return; }
+        const fetchUnread = async () => {
+            try {
+                const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!savedUser.token) return;
+                const res = await fetch(`${API_URL}/api/announcements/unread-count`, {
+                    headers: { 'Authorization': `Bearer ${savedUser.token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setUnreadCount(data.count || 0);
+                }
+            } catch { }
+        };
+        fetchUnread();
+    }, [isLoggedIn, pathname]);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -124,7 +145,29 @@ const Navbar = () => {
                         {isLoggedIn && (
                             <>
                                 <NavLink href="/dashboard" active={pathname === '/dashboard'}>Dashboard</NavLink>
-                                <NavLink href="/dashboard/announcements" active={pathname === '/dashboard/announcements'}>Announcements</NavLink>
+                                <NavLink href="/dashboard/announcements" active={pathname === '/dashboard/announcements'}>
+                                    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        Announcements
+                                        {unreadCount > 0 && (
+                                            <span style={{
+                                                background: '#ef4444',
+                                                color: 'white',
+                                                fontSize: '0.65rem',
+                                                fontWeight: 700,
+                                                minWidth: '18px',
+                                                height: '18px',
+                                                borderRadius: '9px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                padding: '0 5px',
+                                                lineHeight: 1,
+                                            }}>
+                                                {unreadCount > 9 ? '9+' : unreadCount}
+                                            </span>
+                                        )}
+                                    </span>
+                                </NavLink>
                             </>
                         )}
                         <NavLink href="/blogs" active={pathname.startsWith('/blogs')}>Blogs</NavLink>
@@ -332,7 +375,33 @@ const Navbar = () => {
                             {isLoggedIn && (
                                 <>
                                     {sidebarLink('/dashboard', 'Dashboard')}
-                                    {sidebarLink('/dashboard/announcements', 'Announcements')}
+                                    <Link
+                                        href="/dashboard/announcements"
+                                        onClick={closeSidebar}
+                                        className={`navbar-sidebar__link ${isSidebarLinkActive('/dashboard/announcements') ? 'navbar-sidebar__link--active' : ''}`}
+                                    >
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                            Announcements
+                                            {unreadCount > 0 && (
+                                                <span style={{
+                                                    background: '#ef4444',
+                                                    color: 'white',
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: 700,
+                                                    minWidth: '18px',
+                                                    height: '18px',
+                                                    borderRadius: '9px',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    padding: '0 5px',
+                                                    lineHeight: 1,
+                                                }}>
+                                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </Link>
                                 </>
                             )}
                             {sidebarLink('/blogs', 'Blogs')}
