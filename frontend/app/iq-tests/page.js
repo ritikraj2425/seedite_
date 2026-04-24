@@ -45,7 +45,7 @@ function BrainHemisphere({ side, color1, color2 }) {
 // ═══════════════════════════════════════════════════════════════════
 // NEURAL NETWORK — nodes connected by dendrites with traveling pulses
 // ═══════════════════════════════════════════════════════════════════
-function NeuralNetwork({ nodeCount = 15 }) {
+function NeuralNetwork({ nodeCount = 25 }) {
     const groupRef = useRef();
     const linesRef = useRef();
     const pulsesRef = useRef();
@@ -65,7 +65,7 @@ function NeuralNetwork({ nodeCount = 15 }) {
         const e = [];
         for (let i = 0; i < n.length; i++) {
             for (let j = i + 1; j < n.length; j++) {
-                if (n[i].distanceTo(n[j]) < 1.6) e.push([i, j]);
+                if (n[i].distanceTo(n[j]) < 2.8) e.push([i, j]);
             }
         }
         const lp = new Float32Array(e.length * 6);
