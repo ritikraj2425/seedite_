@@ -45,7 +45,7 @@ function BrainHemisphere({ side, color1, color2 }) {
 // ═══════════════════════════════════════════════════════════════════
 // NEURAL NETWORK — nodes connected by dendrites with traveling pulses
 // ═══════════════════════════════════════════════════════════════════
-function NeuralNetwork({ nodeCount = 25 }) {
+function NeuralNetwork({ nodeCount = 15 }) {
     const groupRef = useRef();
     const linesRef = useRef();
     const pulsesRef = useRef();

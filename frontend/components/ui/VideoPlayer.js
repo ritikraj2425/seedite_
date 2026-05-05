@@ -211,7 +211,7 @@ export default function VideoPlayer({ src, poster }) {
                 left: isFullscreen ? 0 : 'auto',
                 width: isFullscreen ? '100vw' : '100%',
                 height: isFullscreen ? '100vh' : '100%',
-                backgroundColor: 'black',
+                backgroundColor: isFullscreen ? 'black' : (isLoading && !isPlaying ? '#e2e8f0' : 'black'),
                 overflow: 'hidden',
                 borderRadius: isFullscreen ? '0' : '8px',
                 userSelect: 'none',
@@ -222,11 +222,13 @@ export default function VideoPlayer({ src, poster }) {
                 ref={videoRef}
                 src={src}
                 poster={poster}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', opacity: (isLoading && !isPlaying) ? 0 : 1, transition: 'opacity 0.3s ease' }}
                 onContextMenu={(e) => e.preventDefault()}
                 playsInline
+                onLoadStart={() => setIsLoading(true)}
                 onWaiting={() => setIsLoading(true)}
                 onCanPlay={() => setIsLoading(false)}
+                onPlaying={() => setIsLoading(false)}
             />
 
             {/* Click/Tap Overlay */}
@@ -251,7 +253,7 @@ export default function VideoPlayer({ src, poster }) {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    zIndex: 10,
+                    zIndex: 20,
                     pointerEvents: 'none'
                 }}>
                     <div className="video-loader"></div>
@@ -259,7 +261,7 @@ export default function VideoPlayer({ src, poster }) {
                         .video-loader {
                             width: 48px;
                             height: 48px;
-                            border: 5px solid rgba(255, 255, 255, 0.3);
+                            border: 5px solid rgba(0, 0, 0, 0.1);
                             border-radius: 50%;
                             border-top-color: #6366f1;
                             animation: spin 1s ease-in-out infinite;
@@ -444,8 +446,8 @@ export default function VideoPlayer({ src, poster }) {
                 </div>
             </div>
 
-            {/* Play Button Overlay (when paused) */}
-            {!isPlaying && (
+            {/* Play Button Overlay (when paused and not loading) */}
+            {!isPlaying && !isLoading && (
                 <div
                     onClick={togglePlay}
                     style={{

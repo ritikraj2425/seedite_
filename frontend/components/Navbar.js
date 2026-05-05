@@ -54,8 +54,32 @@ const Navbar = () => {
         const checkAuth = () => {
             const savedUser = localStorage.getItem('user');
             if (savedUser) {
+                const parsed = JSON.parse(savedUser);
+                // Check if the JWT token is expired
+                if (parsed.token) {
+                    try {
+                        const payload = JSON.parse(atob(parsed.token.split('.')[1]));
+                        if (payload.exp && payload.exp * 1000 < Date.now()) {
+                            // Token expired — auto logout
+                            localStorage.removeItem('user');
+                            localStorage.removeItem('token');
+                            document.cookie = 'token=; Max-Age=0; path=/;';
+                            setIsLoggedIn(false);
+                            setUser(null);
+                            return;
+                        }
+                    } catch {
+                        // If token can't be decoded, clear it
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('token');
+                        document.cookie = 'token=; Max-Age=0; path=/;';
+                        setIsLoggedIn(false);
+                        setUser(null);
+                        return;
+                    }
+                }
                 setIsLoggedIn(true);
-                setUser(JSON.parse(savedUser));
+                setUser(parsed);
             } else {
                 setIsLoggedIn(false);
                 setUser(null);

@@ -11,7 +11,7 @@ import CourseCardSkeleton from '../components/ui/CourseCardSkeleton';
 import Testimonials from '../components/Testimonials';
 import Chatbot from '../components/ui/Chatbot';
 import LiveSessionBanner from '../components/ui/LiveSessionBanner';
-import { BookOpen, Users, Award, CheckCircle, ArrowRight, Sparkles, Play, Target, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { BookOpen, Users, Award, CheckCircle, ArrowRight, Sparkles, Play, Target, ChevronLeft, ChevronRight, Loader2, Brain, Lightbulb, Clock, ListChecks } from 'lucide-react';
 
 
 // StatCard component with counting animation
@@ -72,7 +72,27 @@ function StatCard({ number, suffix, label }) {
             <div className="stat-label">{label}</div>
         </div>
     );
-}
+};
+const cards = [
+    {
+        icon: <Lightbulb size={20} color="#1a1714" strokeWidth={1.6} />,
+        title: "Think, Don't Memorize",
+        body: "We focus on problem-solving, logic building, and structured thinking skills that actually matter in college and beyond.",
+        tag: "Critical thinking",
+    },
+    {
+        icon: <Clock size={20} color="#1a1714" strokeWidth={1.6} />,
+        title: "Start Before Others",
+        body: "Most students wait for college to begin. We help you use this time to build a strong foundation so you're ahead from day one.",
+        tag: "Early advantage",
+    },
+    {
+        icon: <ListChecks size={20} color="#1a1714" strokeWidth={1.6} />,
+        title: "Learn With Structure",
+        body: "No random tutorials or guesswork. A clear path to build logical thinking and real understanding step by step.",
+        tag: "Structured path",
+    },
+];
 
 export default function HomeClient() {
     const [courses, setCourses] = useState([]);
@@ -200,7 +220,7 @@ export default function HomeClient() {
                             marginBottom: '24px',
                             border: '1px solid #bfdbfe'
                         }}>
-                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e40af' }}>NSAT Preparation Platform</span>
+                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e40af' }}>Be Thinkers, Not Memorizers</span>
                         </div>
 
                         <h1 className="hero-title hero-title-shimmer" style={{
@@ -209,7 +229,7 @@ export default function HomeClient() {
                             letterSpacing: '-0.03em',
                             fontWeight: 800,
                         }}>
-                            NSAT, Interviews & Pre-College Foundations               </h1>
+                            Build Your Foundation and Get Ahead of Your Peers              </h1>
 
                         <p className="hero-subtitle" style={{
                             fontSize: '1.2rem',
@@ -218,7 +238,7 @@ export default function HomeClient() {
                             margin: '0 auto 40px',
                             lineHeight: '1.7'
                         }}>
-                            Prepare for NST with structured NSAT mocks, interview guidance, and pre-college foundations built from real student experience.                            </p>
+                            Master coding, problem-solving, and logical thinking before and during college while also preparing for opportunities like NSAT through a structured path.                           </p>
 
                         <div className="hero-cta" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '60px' }}>
                             <Link href="/courses">
@@ -232,7 +252,7 @@ export default function HomeClient() {
                                     alignItems: 'center',
                                     gap: '8px'
                                 }}>
-                                    Start NSAT Preparation
+                                    Start Your Head Start
                                     <ArrowRight size={20} />
                                 </Button>
                             </Link>
@@ -267,7 +287,7 @@ export default function HomeClient() {
                             border: '1px solid #e2e8f0',
                             boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)'
                         }}>
-                            <div style={{
+                            {/* <div style={{
                                 width: '40px',
                                 height: '40px',
                                 borderRadius: '10px',
@@ -286,14 +306,14 @@ export default function HomeClient() {
                                     height={32}
                                     style={{ objectFit: 'contain' }}
                                 />
-                            </div>
+                            </div> */}
                             <span style={{
                                 fontSize: '0.95rem',
                                 fontWeight: '500',
                                 color: '#475569',
                                 lineHeight: '1.4'
                             }}>
-                                Course content developed with guidance from the <strong style={{ color: '#0f172a' }}>NSAT team of NST</strong>
+                                Most students start after college begins. The ones who stay ahead start now.
                             </span>
                         </div>
                     </div>
@@ -361,8 +381,8 @@ export default function HomeClient() {
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
-                        <StatCard number={200} suffix="+" label="NSAT-Style Questions Explained" />
-                        <StatCard number={30} suffix="+" label="Hours of Content" />
+                        <StatCard number={200} suffix="+" label="Questions Explained" />
+                        <StatCard number={50} suffix="+" label="Hours of Content" />
                         <StatCard number={10} suffix="+" label="Mock Tests" />
                         <StatCard number={95} suffix="%" label="Success Rate" />
                     </div>
@@ -565,57 +585,65 @@ export default function HomeClient() {
                 </section>
 
                 {/* Features Section */}
-                <section style={{ marginBottom: '120px' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                <section style={{ background: '#f8fafc', padding: '72px 40px', marginBottom: '40px' }}>
+
+                    {/* Header */}
+                    <div style={{ marginBottom: 56, textAlign: 'center' }}>
                         <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            background: '#f1f5f9',
-                            padding: '6px 14px',
-                            borderRadius: '100px',
-                            marginBottom: '16px'
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            background: '#f1f5f9', border: '1px solid #e2e8f0',
+                            padding: '4px 12px', borderRadius: 100, marginBottom: 20,
                         }}>
-                            <Target size={14} color="#64748b" />
-                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', letterSpacing: '0.05em' }}>Why Seedite for NSAT?</span>
+                            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb' }} />
+                            <span style={{ fontSize: '0.7rem', fontWeight: 500, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                Not just preparation. Real advantage.
+                            </span>
                         </div>
-                        <h2 className="section-title" style={{ marginBottom: '16px' }}>Why Choose Seedite?</h2>
-                        <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
-                            One place for all your NSAT preparation needs.
+
+                        <h2 className="section-title" style={{ marginBottom: '10px' }}>
+                            Why choose <em style={{ fontStyle: 'italic', color: '#2563eb' }}>Seedite?</em>
+                        </h2>
+                        <p style={{ fontSize: '1.05rem', color: '#64748b', fontWeight: 400, lineHeight: 1.6 }}>
+                            Build the advantage most students miss
                         </p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
-                        <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-                            <div className="icon-box">
-                                <BookOpen size={26} color="#0f172a" strokeWidth={1.5} />
-                            </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>NSAT-Focused Mock Practice</h3>
-                            <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                                Topic-wise and full-length mocks designed to match NSAT difficulty, pattern, and thinking style not generic aptitude tests.
-                            </p>
-                        </div>
-
-                        <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-                            <div className="icon-box">
-                                <Award size={26} color="#0f172a" strokeWidth={1.5} />
-                            </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Built from Real NST Experience</h3>
-                            <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                                Preparation strategy shaped by NST students who've cleared NSAT, faced the interview, and know where one can usually go wrong.
-                            </p>
-                        </div>
-
-                        <div className="modern-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-                            <div className="icon-box">
-                                <CheckCircle size={26} color="#0f172a" strokeWidth={1.5} />
-                            </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '12px', fontWeight: '700', color: '#0f172a' }}>Concepts Clarity</h3>
-                            <p style={{ color: '#64748b', lineHeight: '1.7', fontSize: '1rem' }}>
-                                Step-by-step video explanations that help you think like NSAT expects not just memorize answers.
-                            </p>
+                    {/* Cards */}
+                    <div style={{ border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 0 }}>
+                            {cards.map((card, i) => (
+                                <div key={i} style={{
+                                    padding: '36px 32px',
+                                    borderTop: '1px solid #e2e8f0',
+                                    borderRight: '1px solid #e2e8f0',
+                                    borderBottom: '1px solid #e2e8f0',
+                                    borderLeft: i === 0 ? '1px solid #e2e8f0' : 'none',
+                                    background: '#ffffff',
+                                }}>
+                                    <div style={{
+                                        width: 44, height: 44, borderRadius: 10,
+                                        background: '#f1f5f9', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center', marginBottom: 20,
+                                    }}>
+                                        {card.icon}
+                                    </div>
+                                    <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#0f172a', marginBottom: 10, letterSpacing: '-0.01em' }}>
+                                        {card.title}
+                                    </h3>
+                                    <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.8, fontWeight: 400 }}>
+                                        {card.body}
+                                    </p>
+                                    <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#94a3b8', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                                            {card.tag}
+                                        </span>
+                                        <span style={{ fontSize: 10, color: '#2563eb' }}>→</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
+
                 </section>
 
                 {/* Featured Courses Section — Manual Arrow Scroll */}
@@ -641,10 +669,66 @@ export default function HomeClient() {
                     </div>
 
                     {loading ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '28px' }}>
-                            {Array(3).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '28px', maxWidth: courses?.length <= 2 ? '800px' : 'none', margin: '0 auto' }}>
+                            {Array(2).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)}
                         </div>
-                    ) : courses?.length > 0 ? (
+                    ) : courses?.length > 0 && courses.length <= 2 ? (
+                        /* Static centered grid for ≤2 courses */
+                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${courses.length}, minmax(0, 380px))`, gap: '28px', justifyContent: 'center' }}>
+                            {[...courses].reverse().map((course, index) => (
+                                <div key={`static-${course?._id}`} className="modern-card" style={{
+                                    padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                                    border: '1px solid #e2e8f0', position: 'relative',
+                                }}>
+                                    {index === 0 && (
+                                        <div style={{
+                                            position: 'absolute', top: '16px', left: '16px', zIndex: 2,
+                                            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                            color: '#b45309', padding: '4px 12px', borderRadius: '100px',
+                                            fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.02em'
+                                        }}>Popular</div>
+                                    )}
+                                    <div style={{ height: '200px', background: '#f8fafc', position: 'relative', borderBottom: '1px solid #f1f5f9', overflow: 'hidden' }}>
+                                        <img src={course?.thumbnail} alt={course?.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }}
+                                            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                                            onMouseOut={(e) => e.target.style.transform = 'scale(1)'} />
+                                    </div>
+                                    <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                        <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', fontWeight: '700', color: '#0f172a' }}>{course?.title}</h3>
+                                        <p style={{ color: '#64748b', fontSize: '0.95rem', flex: 1, marginBottom: '20px', lineHeight: '1.6' }}>
+                                            {course?.description?.substring(0, 90)}...
+                                        </p>
+                                        {course?.launchLater ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                                                <span style={{ fontSize: '1.1rem', fontWeight: '700', color: '#eab308', background: '#fefce8', padding: '8px 16px', borderRadius: '100px', border: '1px solid #fef08a' }}>
+                                                    {course?.launchDateText || "Coming Soon"}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontSize: '0.9rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                                                        ₹{course?.originalPrice || Math.round(course?.price * 1.5)}
+                                                    </span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <span style={{ fontSize: '1.35rem', fontWeight: '700', color: '#0f172a' }}>₹{course.price}</span>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#16a34a', background: '#dcfce7', padding: '2px 6px', borderRadius: '4px' }}>
+                                                            {Math.round(((course?.originalPrice || Math.round(course?.price * 1.5)) - course?.price) / (course?.originalPrice || Math.round(course?.price * 1.5)) * 100)}% OFF
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <Link href={`/courses/${course?._id}`}>
+                                                    <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#2563eb', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        View Details <ArrowRight size={16} />
+                                                    </span>
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : courses?.length > 2 ? (
                         <div className="courses-carousel-wrapper">
                             {/* Left Arrow */}
                             <button
@@ -1060,11 +1144,9 @@ export default function HomeClient() {
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text'
                         }}>
-                            Ready to Prepare for NSAT the Right Way?
-                        </h2>
+                            Ready to Prepare the Right Way and Stay Ahead?                        </h2>
                         <p style={{ color: '#94a3b8', marginBottom: '32px', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 32px' }}>
-                            Stop guessing. Start preparing with structure, clarity, and real NST guidance.
-                        </p>
+                            Most students prepare only to clear the exam. A few prepare in a way that helps them even after it.                        </p>
                         <Link href={isLoggedIn ? "/dashboard" : "/signup"}>
                             <Button style={{
                                 padding: '16px 40px',

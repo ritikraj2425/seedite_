@@ -71,7 +71,7 @@ export default function Courses() {
                                 Explore All Courses
                             </h1>
                             <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: '1.6' }}>
-                                Find the perfect course to accelerate your NSAT preparation journey
+                                Find the perfect course to accelerate your preparation journey
                             </p>
                         </div>
                     </div>

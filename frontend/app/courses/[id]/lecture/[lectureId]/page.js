@@ -257,8 +257,8 @@ export default function LecturePlayer() {
                         </Link>
                     </div>
 
-                    <Card style={{ padding: '0', overflow: 'hidden', background: '#000', border: '1px solid #333' }}>
-                        <div className="video-container">
+                    <Card style={{ padding: '0', overflow: 'hidden', background: '#0f172a', border: '1px solid #333' }}>
+                        <div className="video-container" style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
                             {!currentLecture.videoUrl ? (
                                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                                     Video Unavailable
@@ -271,18 +271,20 @@ export default function LecturePlayer() {
                                     />
                                 </div>
                             ) : isIframeVideo(currentLecture.videoUrl) ? (
-                                <iframe
-                                    ref={iframeRef}
-                                    id="video-player"
-                                    src={convertToYouTubeEmbed(currentLecture.videoUrl)}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share"
-                                    allowFullScreen
-                                    loading="lazy"
-                                    tabIndex="0"
-                                    playsInline
-                                    title={currentLecture.title || 'Lecture Video'}
-                                />
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                    <iframe
+                                        ref={iframeRef}
+                                        id="video-player"
+                                        src={convertToYouTubeEmbed(currentLecture.videoUrl)}
+                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share"
+                                        allowFullScreen
+                                        loading="lazy"
+                                        tabIndex="0"
+                                        playsInline
+                                        title={currentLecture.title || 'Lecture Video'}
+                                    />
+                                </div>
                             ) : (
                                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                                     <VideoPlayer

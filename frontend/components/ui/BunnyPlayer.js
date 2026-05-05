@@ -285,15 +285,50 @@ export default function BunnyPlayer({ src, poster, lectureId }) {
         };
     }, []);
 
+    const [iframeLoaded, setIframeLoaded] = useState(false);
+
     if (!mounted) return null;
     const embedUrl = buildEmbedUrl(src, resumeTime);
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: '#000', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: '#0f172a', overflow: 'hidden' }}>
+            {!iframeLoaded && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 20,
+                    pointerEvents: 'none'
+                }}>
+                    <div className="video-loader"></div>
+                    <style jsx>{`
+                        .video-loader {
+                            width: 48px;
+                            height: 48px;
+                            border: 5px solid rgba(255, 255, 255, 0.1);
+                            border-radius: 50%;
+                            border-top-color: #6366f1;
+                            animation: spin 1s ease-in-out infinite;
+                        }
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            )}
             <iframe
                 ref={iframeRef}
                 src={embedUrl}
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                onLoad={() => setIframeLoaded(true)}
+                style={{ 
+                    position: 'absolute', 
+                    top: 0, left: 0, 
+                    width: '100%', height: '100%', 
+                    border: 'none',
+                    opacity: iframeLoaded ? 1 : 0,
+                    transition: 'opacity 0.4s ease'
+                }}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share"
                 allowFullScreen
                 loading="eager"
