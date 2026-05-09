@@ -669,12 +669,12 @@ export default function HomeClient() {
                     </div>
 
                     {loading ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '28px', maxWidth: courses?.length <= 2 ? '800px' : 'none', margin: '0 auto' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: '28px', maxWidth: courses?.length <= 2 ? '800px' : 'none', margin: '0 auto' }}>
                             {Array(2).fill(0).map((_, i) => <CourseCardSkeleton key={i} />)}
                         </div>
                     ) : courses?.length > 0 && courses.length <= 2 ? (
                         /* Static centered grid for ≤2 courses */
-                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${courses.length}, minmax(0, 380px))`, gap: '28px', justifyContent: 'center' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, 340px), 1fr))`, gap: '28px', maxWidth: '800px', margin: '0 auto' }}>
                             {[...courses].reverse().map((course, index) => (
                                 <div key={`static-${course?._id}`} className="modern-card" style={{
                                     padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column',
