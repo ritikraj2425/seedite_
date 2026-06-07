@@ -1042,7 +1042,7 @@ export default function HomeClient() {
                                 display: 'inline-block'
                             }}>Ex-SDE Intern @Physics Wallah</p>
                             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                Third year BTech student at a top engineering college
+                                Fourth year BTech student
                             </p>
                         </div>
 
@@ -1076,7 +1076,7 @@ export default function HomeClient() {
                                 display: 'inline-block'
                             }}>2x ICPC Regionalist | 1x ICPC Asia-West</p>
                             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                Third year BTech student at a top engineering college
+                                Fourth year BTech student
                             </p>
                         </div>
 
@@ -1110,7 +1110,7 @@ export default function HomeClient() {
                                 display: 'inline-block'
                             }}>1x ICPC Asia-West</p>
                             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                Second year BTech student at a top engineering college
+                                Third year BTech student
                             </p>
                         </div>
                     </div>
