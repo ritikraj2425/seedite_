@@ -10,11 +10,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   metadataBase: new URL('https://www.seedite.in'),
   title: {
-    default: 'Seedite | Master Your NSAT Preparation',
+    default: 'Seedite | Pre-College Learning Platform for Future Tech Leaders',
     template: '%s | Seedite',
   },
-  description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success. Join thousands of students achieving their dreams with Seedite.',
-  keywords: ['NSAT', 'Newton School of Technology', 'NSAT Preparation', 'NSAT Mock Test', 'NSAT Syllabus', 'Tech Career', 'Seedite'],
+  description: 'Access premium courses, mock tests, and video solutions designed to build your tech foundation before college. Join thousands of students getting a head start with Seedite.',
+  keywords: ['NSAT', 'Newton School of Technology', 'NSAT Preparation', 'NSAT Mock Test', 'NSAT Syllabus', 'Tech Career', 'Seedite', 'Pre-College Courses', 'Pre-College Learning', 'Learn Coding Before College', 'College Preparation', 'Problem Solving', 'Logical Thinking', 'Computer Science Foundation', 'Pre-University Tech Course'],
   authors: [{ name: 'Seedite Team' }],
   creator: 'Seedite',
   publisher: 'Seedite',
@@ -33,8 +33,8 @@ export const metadata = {
     canonical: './',
   },
   openGraph: {
-    title: 'Seedite | Master Your NSAT Preparation',
-    description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
+    title: 'Seedite | Pre-College Learning Platform for Future Tech Leaders',
+    description: 'Access premium courses, mock tests, and video solutions designed to build your tech foundation before college.',
     url: 'https://www.seedite.in',
     siteName: 'Seedite',
     images: [
@@ -42,7 +42,7 @@ export const metadata = {
         url: '/logo.png', // Ensure this file exists in public/ folder or update path
         width: 1200,
         height: 630,
-        alt: 'Seedite - NSAT Preparation Platform',
+        alt: 'Seedite - Pre-College Learning Platform',
       },
     ],
     locale: 'en_US',
@@ -50,8 +50,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Seedite | Master Your NSAT Preparation',
-    description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
+    title: 'Seedite | Pre-College Learning Platform for Future Tech Leaders',
+    description: 'Access premium courses, mock tests, and video solutions designed to build your tech foundation before college.',
     creator: '@seedite_edu', // Update if specific handle exists
   },
   icons: {

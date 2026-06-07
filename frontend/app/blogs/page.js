@@ -2,18 +2,18 @@ import { API_URL } from '@/lib/api';
 import BlogListingClient from './BlogListingClient';
 
 export const metadata = {
-    title: 'Seedite Blog | NSAT Preparation & Tech Career Insights',
-    description: 'Get expert insights on NSAT exam preparation, coding tips, and tech career guidance. Stay updated with the latest trends in technology education.',
+    title: 'Seedite Blog | Pre-College Learning & Tech Career Insights',
+    description: 'Get expert insights on pre-college learning, coding tips, and tech career guidance. Stay updated with the latest trends in technology education.',
     openGraph: {
-        title: 'Seedite Blog | NSAT Preparation & Tech Career Insights',
-        description: 'Expert insights on NSAT exam preparation, coding tips, and tech career guidance',
+        title: 'Seedite Blog | Pre-College Learning & Tech Career Insights',
+        description: 'Expert insights on pre-college learning, coding tips, and tech career guidance',
         type: 'website',
         url: 'https://www.seedite.in/blogs',
     },
     twitter: {
         card: 'summary_large_image',
         title: 'Seedite Blog',
-        description: 'NSAT Preparation & Tech Career Insights',
+        description: 'Pre-College Learning & Tech Career Insights',
     },
 };
 
@@ -40,7 +40,7 @@ export default async function BlogListing() {
         "@context": "https://schema.org",
         "@type": "Blog",
         "name": "Seedite Blog",
-        "description": "Insights, strategies, and updates to help you crack NSAT and master your tech career.",
+        "description": "Insights, strategies, and updates to help you build a strong tech foundation and master your career.",
         "url": "https://www.seedite.in/blogs",
         "publisher": {
             "@type": "Organization",
@@ -73,8 +73,8 @@ export default async function BlogListing() {
             {/* Server-rendered SEO content for Google crawlers */}
             <noscript>
                 <div className="container" style={{ paddingTop: '60px', paddingBottom: '100px' }}>
-                    <h1>Seedite Blog - NSAT Preparation & Tech Career Insights</h1>
-                    <p>Expert insights on NSAT exam preparation, coding tips, and tech career guidance.</p>
+                    <h1>Seedite Blog - Pre-College Learning & Tech Career Insights</h1>
+                    <p>Expert insights on pre-college learning, coding tips, and tech career guidance.</p>
                     <nav aria-label="Blog posts">
                         <ul style={{ listStyle: 'none', padding: 0 }}>
                             {blogs?.map(blog => (
@@ -114,7 +114,7 @@ export default async function BlogListing() {
                     border: 0
                 }}
             >
-                <h1>Seedite Blog - NSAT Preparation & Tech Career Insights</h1>
+                <h1>Seedite Blog - Pre-College Learning & Tech Career Insights</h1>
                 <nav aria-label="All blog posts">
                     {blogs?.map(blog => (
                         <article key={blog?._id} itemScope itemType="https://schema.org/BlogPosting">

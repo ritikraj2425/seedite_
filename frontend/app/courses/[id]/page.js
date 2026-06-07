@@ -85,6 +85,7 @@ export default function CourseDetails() {
 
                 const data = await res.json();
                 setCourse(data);
+                document.title = `${data.title} | Seedite`;
 
                 // Set enrollment status based on actual user profile OR college access
                 // Backend sends hasCollegeAccess: true if student has B2B college entitlement

@@ -83,7 +83,7 @@ export default function BlogListingClient({ initialBlogs }) {
                     Seedite Blog
                 </h1>
                 <p style={{ color: '#64748b', fontSize: '1.2rem', lineHeight: '1.7', marginBottom: '40px' }}>
-                    Insights, strategies, and updates to help you crack NSAT and master your tech career.
+                    Insights, strategies, and updates to help you build a strong tech foundation and accelerate your career.
                 </p>
 
                 {/* Search and Filter */}
@@ -267,12 +267,12 @@ export default function BlogListingClient({ initialBlogs }) {
                             About Seedite Blog
                         </h3>
                         <p style={{ color: '#64748b', lineHeight: '1.7', marginBottom: '16px' }}>
-                            Welcome to the Seedite Blog, your ultimate resource for NSAT preparation, coding tutorials,
+                            Welcome to the Seedite Blog, your ultimate resource for pre-college learning, coding tutorials,
                             and tech career guidance. Our expert articles cover everything from exam strategies to
                             the latest trends in technology education.
                         </p>
                         <p style={{ color: '#64748b', lineHeight: '1.7' }}>
-                            Explore our comprehensive guides on NSAT syllabus, coding interview preparation, algorithm
+                            Explore our comprehensive guides on problem-solving, coding interview preparation, algorithm
                             building, and more. Whether you're a beginner or an experienced developer, you'll find
                             valuable insights to accelerate your learning journey.
                         </p>

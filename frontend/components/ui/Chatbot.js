@@ -14,9 +14,9 @@ export default function Chatbot() {
     const chatScrollRef = useRef(null);
 
     const suggestQuestions = [
-        "What is the NSAT exam?",
+        "What courses do you offer?",
         "Tell me about Bridge course",
-        "How should I prepare for NSAT?",
+        "How can Seedite help me before college?",
     ];
 
     const scrollToBottom = () => {
@@ -204,7 +204,7 @@ export default function Chatbot() {
                                                 Welcome to Seedite AI
                                             </h3>
                                             <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: '1.6', maxWidth: '280px' }}>
-                                                Ask about NSAT, courses, or NST campus life.
+                                                Ask about courses, pre-college prep, or how to get started.
                                             </p>
                                         </div>
                                     ) : (

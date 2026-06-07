@@ -31,9 +31,9 @@ export default function Courses() {
         <>
             <Head>
                 <title>Explore Premium Courses | Seedite</title>
-                <meta name="description" content="Find the perfect course to accelerate your NSAT preparation journey. Browse our collection of expert-led courses." />
+                <meta name="description" content="Find the perfect course to accelerate your pre-college learning journey. Browse our collection of expert-led courses." />
                 <meta property="og:title" content="Explore Premium Courses | Seedite" />
-                <meta property="og:description" content="Find the perfect course to accelerate your NSAT preparation journey." />
+                <meta property="og:description" content="Find the perfect course to accelerate your pre-college learning journey." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://seedite.com/courses" />
             </Head>

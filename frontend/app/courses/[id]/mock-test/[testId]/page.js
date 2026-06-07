@@ -591,7 +591,7 @@ export default function MockTestPage() {
                         />
 
                         <InstructionItem
-                            title="Invigilation Instructions (This is just to give you actual NSAT feel)"
+                            title="Invigilation Instructions (This is just to give you an actual exam feel)"
                             items={[
                                 "Test the proctoring environment before starting the exam to ensure smooth functioning.",
                                 "Stay in full-screen mode throughout the test. Close all other tabs and refrain from switching tabs.",

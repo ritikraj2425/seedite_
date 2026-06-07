@@ -116,7 +116,7 @@ function SignupContent() {
                         Create Account
                     </h2>
                     <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-                        Start your NSAT preparation journey today
+                        Start your pre-college learning journey today
                     </p>
                 </div>
 

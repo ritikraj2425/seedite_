@@ -301,7 +301,7 @@ export default function HomeClient() {
                             }}>
                                 <Image
                                     src="/nstlogo.png"
-                                    alt="NST Logo"
+                                    alt="Top Engineering College Logo"
                                     width={32}
                                     height={32}
                                     style={{ objectFit: 'contain' }}
@@ -579,7 +579,7 @@ export default function HomeClient() {
                             </div>
                         </div>
                         <span style={{ fontSize: '0.88rem', color: '#64748b', fontWeight: '500' }}>
-                            <strong style={{ color: '#0f172a' }}>Ritik & Amod</strong> · Co-founders, NST students
+                            <strong style={{ color: '#0f172a' }}>Ritik & Amod</strong> · Co-founders, Engineering students
                         </span>
                     </div>
                 </section>
@@ -1007,7 +1007,7 @@ export default function HomeClient() {
                     <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                         <h2 className="section-title" style={{ marginBottom: '16px' }}>Meet Our Experts</h2>
                         <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto', fontSize: '1.05rem' }}>
-                            Learn from the best - our instructors bring real NSAT experience
+                            Learn from the best - our instructors bring real industry and competitive programming experience
                         </p>
                     </div>
 
@@ -1042,7 +1042,7 @@ export default function HomeClient() {
                                 display: 'inline-block'
                             }}>Ex-SDE Intern @Physics Wallah</p>
                             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                Third year BTech student at NST
+                                Third year BTech student at a top engineering college
                             </p>
                         </div>
 
@@ -1076,7 +1076,7 @@ export default function HomeClient() {
                                 display: 'inline-block'
                             }}>2x ICPC Regionalist | 1x ICPC Asia-West</p>
                             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                Third year BTech student at NST
+                                Third year BTech student at a top engineering college
                             </p>
                         </div>
 
@@ -1110,7 +1110,7 @@ export default function HomeClient() {
                                 display: 'inline-block'
                             }}>1x ICPC Asia-West</p>
                             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                Second year BTech student at NST
+                                Second year BTech student at a top engineering college
                             </p>
                         </div>
                     </div>

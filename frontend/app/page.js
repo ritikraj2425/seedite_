@@ -1,19 +1,19 @@
 import HomeClient from './HomeClient';
 
 export const metadata = {
-  title: 'Seedite | Master Your NSAT Preparation',
-  description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success. Join thousands of students achieving their dreams with Seedite.',
+  title: 'Seedite | Pre-College Learning Platform for Future Tech Leaders',
+  description: 'Access premium courses, mock tests, and video solutions designed to build your tech foundation before college. Join thousands of students getting a head start with Seedite.',
   openGraph: {
-    title: 'Seedite | Master Your NSAT Preparation',
-    description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
+    title: 'Seedite | Pre-College Learning Platform for Future Tech Leaders',
+    description: 'Access premium courses, mock tests, and video solutions designed to build your tech foundation before college.',
     type: 'website',
     url: 'https://www.seedite.in',
     siteName: 'Seedite',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Seedite | Master Your NSAT Preparation',
-    description: 'Access premium courses, mock tests, and video solutions tailored for NSAT success.',
+    title: 'Seedite | Pre-College Learning Platform for Future Tech Leaders',
+    description: 'Access premium courses, mock tests, and video solutions designed to build your tech foundation before college.',
   },
 };
 
